@@ -82,20 +82,20 @@ proc1(const char *str, size_t len)
 			best = x;
 			chkr = chkrs[i];
 		}
-		fwrite(str, sizeof(*str), len, stdout);
-		if (LIKELY(chkr != NULL)) {
-			fputc('\t', stdout);
-			if (LIKELY(chkr->prntf != NULL)) {
-				chkr->prntf(str, len, best);
-			} else if (LIKELY(chkr->name != NULL)) {
-				fputs(chkr->name, stdout);
-			} else {
-				fprintf(stdout, "%p", chkr);
-			}
-			fputc('\n', stdout);
+	}
+	fwrite(str, sizeof(*str), len, stdout);
+	if (LIKELY(chkr != NULL)) {
+		fputc('\t', stdout);
+		if (LIKELY(chkr->prntf != NULL)) {
+			chkr->prntf(str, len, best);
+		} else if (LIKELY(chkr->name != NULL)) {
+			fputs(chkr->name, stdout);
 		} else {
-			fputs("\tunknown\n", stdout);
+			fprintf(stdout, "%p", chkr);
 		}
+		fputc('\n', stdout);
+	} else {
+		fputs("\tunknown\n", stdout);
 	}
 	return 0;
 }
@@ -109,8 +109,10 @@ static int
 init_nmck(void)
 {
 	extern const struct nmck_chkr_s *init_isin(void);
+	extern const struct nmck_chkr_s *init_figi(void);
 
 	chkrs[nchkrs++] = init_isin();
+	chkrs[nchkrs++] = init_figi();
 	return 0;
 }
 
@@ -118,8 +120,10 @@ static int
 fini_nmck(void)
 {
 	extern int fini_isin(void);
+	extern int fini_figi(void);
 
 	fini_isin();
+	fini_figi();
 	return 0;
 }
 
