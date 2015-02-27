@@ -112,11 +112,13 @@ init_nmck(void)
 	extern const struct nmck_chkr_s *init_figi(void);
 	extern const struct nmck_chkr_s *init_cusip(void);
 	extern const struct nmck_chkr_s *init_sedol(void);
+	extern const struct nmck_chkr_s *init_iban(void);
 
 	chkrs[nchkrs++] = init_isin();
 	chkrs[nchkrs++] = init_figi();
 	chkrs[nchkrs++] = init_cusip();
 	chkrs[nchkrs++] = init_sedol();
+	chkrs[nchkrs++] = init_iban();
 	return 0;
 }
 
@@ -126,6 +128,8 @@ fini_nmck(void)
 	extern int fini_isin(void);
 	extern int fini_figi(void);
 	extern int fini_cusip(void);
+	extern int fini_sedol(void);
+	extern int fini_iban(void);
 
 	fini_isin();
 	fini_figi();
