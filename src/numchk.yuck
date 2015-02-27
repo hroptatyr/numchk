@@ -1,0 +1,4 @@
+Usage: numchk [NUMBER]...
+
+Determine tpe of NUMBERs and check their consistency.
+If NUMBERs are omitted read from stdin.

@@ -20,6 +20,10 @@ SUFFIXES =
 CLEANFILES += version.c
 EXTRA_DIST += version.c.in
 
+bin_PROGRAMS += numchk
+numchk_SOURCES = numchk.c numchk.yuck
+BUILT_SOURCES += numchk.yucc
+
 
 ## version rules
 version.c: version.c.in $(top_builddir)/.version
