@@ -37,6 +37,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
+#include <assert.h>
 #include "numchk.h"
 #include "nifty.h"
 #include "isin.h"
@@ -100,12 +101,27 @@ isin_bid(const char *str, size_t len)
 	return (nmck_bid_t){255U};
 }
 
+static int
+isin_prnt(const char *str, size_t len, nmck_bid_t b)
+{
+	if (LIKELY(!b.state)) {
+		fputs("ISIN, conformant with ISO 6166:2013", stdout);
+	} else {
+		assert(len == 12U);
+		fputs("ISIN, not ISO 6166 conformant, should be ", stdout);
+		fwrite(str, sizeof(*str), 11U, stdout);
+		fputc((char)b.state, stdout);
+	}
+	return 0;
+}
+
 const struct nmck_chkr_s*
 init_isin(void)
 {
 	static const struct nmck_chkr_s this = {
 		.name = "ISIN",
 		.bidf = isin_bid,
+		.prntf = isin_prnt,
 	};
 	return &this;
 }
