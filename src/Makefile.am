@@ -3,12 +3,12 @@ include $(top_builddir)/version.mk
 
 AM_CFLAGS = $(EXTRA_CFLAGS)
 AM_CPPFLAGS = -D_POSIX_C_SOURCE=201001L -D_XOPEN_SOURCE=700 -D_BSD_SOURCE
-AM_CPPFLAGS += -D_HAVE_VERSION_H
 AM_LDFLAGS = $(XCCLDFLAGS)
 
 bin_PROGRAMS =
 noinst_PROGRAMS =
 lib_LTLIBRARIES =
+noinst_LIBRARIES =
 noinst_LTLIBRARIES =
 pkglib_LTLIBRARIES =
 noinst_HEADERS =
@@ -20,9 +20,13 @@ SUFFIXES =
 CLEANFILES += version.c
 EXTRA_DIST += version.c.in
 
+noinst_LIBRARIES += libnumchk.a
+libnumchk_a_SOURCES = version.c version.h
+
 bin_PROGRAMS += numchk
 numchk_SOURCES = numchk.c numchk.h numchk.yuck
 numchk_SOURCES += nifty.h
+numchk_LDADD = libnumchk.a
 BUILT_SOURCES += numchk.yucc
 
 
