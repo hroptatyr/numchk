@@ -82,20 +82,20 @@ proc1(const char *str, size_t len)
 			best = x;
 			chkr = chkrs[i];
 		}
-		fwrite(str, sizeof(*str), len, stdout);
-		if (LIKELY(chkr != NULL)) {
-			fputc('\t', stdout);
-			if (LIKELY(chkr->prntf != NULL)) {
-				chkr->prntf(str, len, best);
-			} else if (LIKELY(chkr->name != NULL)) {
-				fputs(chkr->name, stdout);
-			} else {
-				fprintf(stdout, "%p", chkr);
-			}
-			fputc('\n', stdout);
+	}
+	fwrite(str, sizeof(*str), len, stdout);
+	if (LIKELY(chkr != NULL)) {
+		fputc('\t', stdout);
+		if (LIKELY(chkr->prntf != NULL)) {
+			chkr->prntf(str, len, best);
+		} else if (LIKELY(chkr->name != NULL)) {
+			fputs(chkr->name, stdout);
 		} else {
-			fputs("\tunknown\n", stdout);
+			fprintf(stdout, "%p", chkr);
 		}
+		fputc('\n', stdout);
+	} else {
+		fputs("\tunknown\n", stdout);
 	}
 	return 0;
 }
