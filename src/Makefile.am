@@ -21,7 +21,8 @@ CLEANFILES += version.c
 EXTRA_DIST += version.c.in
 
 bin_PROGRAMS += numchk
-numchk_SOURCES = numchk.c numchk.yuck
+numchk_SOURCES = numchk.c numchk.h numchk.yuck
+numchk_SOURCES += nifty.h
 BUILT_SOURCES += numchk.yucc
 
 

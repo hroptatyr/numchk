@@ -40,6 +40,86 @@
 #if defined HAVE_VERSION_H
 # include "version.h"
 #endif	/* HAVE_VERSION_H */
+#include <stdlib.h>
+#include <stdarg.h>
+#include <stdio.h>
+#include <errno.h>
+#include <string.h>
+#include "numchk.h"
+#include "nifty.h"
+
+static const struct nmck_chkr_s *chkrs[16U];
+static size_t nchkrs;
+
+
+static __attribute__((format(printf, 1, 2))) void
+error(const char *fmt, ...)
+{
+	va_list vap;
+	va_start(vap, fmt);
+	vfprintf(stderr, fmt, vap);
+	va_end(vap);
+	if (errno) {
+		fputs(": ", stderr);
+		fputs(strerror(errno), stderr);
+	}
+	fputc('\n', stderr);
+	return;
+}
+
+
+static int
+proc1(const char *str, size_t len)
+{
+	nmck_bid_t best = {0U};
+	const struct nmck_chkr_s *chkr = NULL;
+
+	/* start the bidding */
+	for (size_t i = 0U; i < nchkrs; i++) {
+		nmck_bid_t x = chkrs[i]->bidf(str, len);
+
+		if (x.bid > best.bid) {
+			best = x;
+			chkr = chkrs[i];
+		}
+		fwrite(str, sizeof(*str), len, stdout);
+		if (LIKELY(chkr != NULL)) {
+			fputc('\t', stdout);
+			if (LIKELY(chkr->prntf != NULL)) {
+				chkr->prntf(str, len, best);
+			} else if (LIKELY(chkr->name != NULL)) {
+				fputs(chkr->name, stdout);
+			} else {
+				fprintf(stdout, "%p", chkr);
+			}
+			fputc('\n', stdout);
+		} else {
+			fputs("\tunknown\n", stdout);
+		}
+	}
+	return 0;
+}
+
+
+#if defined __INTEL_COMPILER
+# pragma warning (disable:1419)
+#endif	/* __INTEL_COMPILER */
+
+static int
+init_nmck(void)
+{
+	return 0;
+}
+
+static int
+fini_nmck(void)
+{
+	return 0;
+}
+
+#if defined __INTEL_COMPILER
+# pragma warning (default:1419)
+#endif	/* __INTEL_COMPILER */
 
 
 #include "numchk.yucc"
@@ -55,7 +135,51 @@ main(int argc, char *argv[])
 		goto out;
 	}
 
+	/* right then, let's get going */
+	init_nmck();
+
+	if (!argi->nargs) {
+		char *line = NULL;
+		size_t llen = 0U;
+
+#if defined HAVE_GETLINE
+		for (ssize_t nrd; (nrd = getline(&line, &llen, stdin)) > 0;) {
+			if (LIKELY(line[nrd - 1] == '\n')) {
+				line[--nrd] = '\0';
+				if (UNLIKELY(line[nrd - 1] == '\r')) {
+					line[--nrd] = '\0';
+				}
+			}
+			proc1(line, nrd);
+		}
+		free(line);
+#elif defined HAVE_FGETLN
+		while ((line = fgetln(stdin, &llen)) != NULL) {
+			if (LIKELY(line[llen - 1] == '\n')) {
+				line[--llen] = '\0';
+			}
+			proc1(line, llen);
+		}
+#else
+		errno = 0, error("\
+error: cannot read from stdin\n\
+getline() or fgetln() support missing.");
+#endif	/* GETLINE/FGETLN */
+		if (ferror(stdin)) {
+			error("\
+error: reading from stdin disrupted");
+		}
+	} else {
+		for (size_t i = 0U; i < argi->nargs; i++) {
+			const char *str = argi->args[i];
+			size_t len = strlen(str);
+
+			proc1(str, len);
+		}
+	}
+
 out:
+	fini_nmck();
 	yuck_free(argi);
 	return rc;
 }
