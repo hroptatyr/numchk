@@ -110,9 +110,11 @@ init_nmck(void)
 {
 	extern const struct nmck_chkr_s *init_isin(void);
 	extern const struct nmck_chkr_s *init_figi(void);
+	extern const struct nmck_chkr_s *init_cusip(void);
 
 	chkrs[nchkrs++] = init_isin();
 	chkrs[nchkrs++] = init_figi();
+	chkrs[nchkrs++] = init_cusip();
 	return 0;
 }
 
@@ -121,9 +123,11 @@ fini_nmck(void)
 {
 	extern int fini_isin(void);
 	extern int fini_figi(void);
+	extern int fini_cusip(void);
 
 	fini_isin();
 	fini_figi();
+	fini_cusip();
 	return 0;
 }
 
