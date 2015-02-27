@@ -26,6 +26,7 @@ libnumchk_a_SOURCES += isin.c isin.h
 libnumchk_a_SOURCES += figi.c figi.h
 libnumchk_a_SOURCES += cusip.c cusip.h
 libnumchk_a_SOURCES += sedol.c sedol.h
+libnumchk_a_SOURCES += iban.c iban.h
 
 bin_PROGRAMS += numchk
 numchk_SOURCES = numchk.c numchk.h numchk.yuck

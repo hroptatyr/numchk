@@ -1,4 +1,4 @@
-/*** isin.c -- checker for ISO 6166 security idenfitication numbers
+/*** iban.c -- checker for ISO 13616 international bank account numbers
  *
  * Copyright (C) 2014-2015 Sebastian Freundt
  *
@@ -40,43 +40,20 @@
 #include <assert.h>
 #include "numchk.h"
 #include "nifty.h"
-#include "isin.h"
+#include "iban.h"
 
 static const nmck_bid_t nul_bid;
 
-static char
-calc_chk(const char *str, size_t len)
+static unsigned int
+calc_st(const char *str, size_t len)
 {
 /* calculate the check digit for an expanded ISIN */
+	char buf[78U];
+	size_t bsz = 0U;
 	unsigned int sum = 0U;
 
-	for (size_t i = !(len % 2U); i < len; i += 2U) {
-		int code = (str[i] ^ '0') * 2;
-		sum += (code / 10) + (code % 10);
-	}
-	for (size_t i = (len % 2U); i < len; i += 2U) {
-		int code = (str[i] ^ '0');
-		sum += code;
-	}
-	/* sum can be at most 198, so check digit is */
-	return (char)(((200U - sum) % 10U) ^ '0');
-}
-
-
-/* class implementation */
-static nmck_bid_t
-isin_bid(const char *str, size_t len)
-{
-	char buf[24U];
-	size_t bsz = 0U;
-
-	/* common cases first */
-	if (len != 12) {
-		return nul_bid;
-	}
-
-	/* expand the left 11 digits */
-	for (size_t i = 0U; i < 11; i++) {
+	/* expand string first */
+	for (size_t i = 4U; i < len; i++) {
 		switch (str[i]) {
 		case '0' ... '9':
 			buf[bsz++] = str[i];
@@ -94,48 +71,113 @@ isin_bid(const char *str, size_t len)
 			buf[bsz++] = (char)((str[i] - 'U') ^ '0');
 			break;
 		default:
+			return 0U;
+		}
+	}
+	/* append the country code */
+	switch (str[0U]) {
+	case 'A' ... 'J':
+		buf[bsz++] = '1';
+		buf[bsz++] = (char)((str[0U] - 'A') ^ '0');
+		break;
+	case 'K' ... 'T':
+		buf[bsz++] = '2';
+		buf[bsz++] = (char)((str[0U] - 'K') ^ '0');
+		break;
+	case 'U' ... 'Z':
+		buf[bsz++] = '3';
+		buf[bsz++] = (char)((str[0U] - 'U') ^ '0');
+		break;
+	default:
+		return 0U;
+	}
+	switch (str[1U]) {
+	case 'A' ... 'J':
+		buf[bsz++] = '1';
+		buf[bsz++] = (char)((str[1U] - 'A') ^ '0');
+		break;
+	case 'K' ... 'T':
+		buf[bsz++] = '2';
+		buf[bsz++] = (char)((str[1U] - 'K') ^ '0');
+		break;
+	case 'U' ... 'Z':
+		buf[bsz++] = '3';
+		buf[bsz++] = (char)((str[1U] - 'U') ^ '0');
+		break;
+	default:
+		return 0U;
+	}
+	/* and 00 */
+	buf[bsz++] = '0';
+	buf[bsz++] = '0';
+
+	/* now calc first sum */
+	sum = (buf[0U] ^ '0') * 10U + (buf[1U] ^ '0');
+	for (size_t i = 2U; i < bsz; sum %= 97U) {
+		for (const size_t n = i + 7U < bsz ? i + 7U : bsz; i < n; i++) {
+			sum *= 10U;
+			sum += (buf[i] ^ '0');
+		}
+	}
+	/* this is the actual checksum */
+	sum = 98U - sum;
+	return (((sum / 10U) ^ '0') << 8U) ^ (((sum % 10U) ^ '0') << 0U);
+}
+
+
+/* class implementation */
+static nmck_bid_t
+iban_bid(const char *str, size_t len)
+{
+	/* common cases first */
+	if (len < 15U || len > 34U) {
+		return nul_bid;
+	}
+
+	with (unsigned int st = calc_st(str, len)) {
+		if (!st) {
 			return nul_bid;
+		} else if (str[2U] != (char)((st >> 8U) & 0xffU) ||
+			   str[3U] != (char)((st >> 0U) & 0xffU)) {
+			/* record state */
+			return (nmck_bid_t){31U, st};
 		}
 	}
-	with (char chk = calc_chk(buf, bsz)) {
-		if (chk != str[11U]) {
-			/* record state but submit a bid */
-			return (nmck_bid_t){63U, chk};
-		}
-	}
-	/* bid bid bid */
-	return (nmck_bid_t){255U};
+	/* bid just any number really */
+	return (nmck_bid_t){63U};
 }
 
 static int
-isin_prnt(const char *str, size_t len, nmck_bid_t b)
+iban_prnt(const char *str, size_t len, nmck_bid_t b)
 {
 	if (LIKELY(!b.state)) {
-		fputs("ISIN, conformant with ISO 6166:2013", stdout);
+		fputs("IBAN, conformant with ISO 13616-1:2007", stdout);
 	} else {
-		assert(len == 12U);
-		fputs("ISIN, not ISO 6166 conformant, should be ", stdout);
-		fwrite(str, sizeof(*str), 11U, stdout);
-		fputc((char)b.state, stdout);
+		fputs("IBAN, not ISO 13616-1 conformant, should be ", stdout);
+		fputc(str[0U], stdout);
+		fputc(str[1U], stdout);
+		fputc(b.state >> 8U & 0xffU, stdout);
+		fputc(b.state >> 0U & 0xffU, stdout);
+		fwrite(str + 4U, sizeof(*str), len - 4U, stdout);
 	}
 	return 0;
 }
 
 const struct nmck_chkr_s*
-init_isin(void)
+init_iban(void)
 {
 	static const struct nmck_chkr_s this = {
-		.name = "ISIN",
-		.bidf = isin_bid,
-		.prntf = isin_prnt,
+		.name = "IBAN",
+		.bidf = iban_bid,
+		.prntf = iban_prnt,
 	};
 	return &this;
 }
 
 int
-fini_isin(void)
+fini_iban(void)
 {
 	return 0;
 }
 
-/* isin.c ends here */
+/* iban.c ends here */
