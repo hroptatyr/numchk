@@ -50,8 +50,8 @@ calc_chk(const char *str, size_t UNUSED(len))
 /* calculate the check digit for an expanded ISIN */
 	unsigned int sum = 0U;
 
-	/* expand the left 11 digits */
-	for (size_t i = 0U; i < 11; i++) {
+	/* use the left 11 digits */
+	for (size_t i = 0U; i < 11U; i++) {
 		unsigned int d;
 
 		switch (str[i]) {
@@ -65,7 +65,7 @@ calc_chk(const char *str, size_t UNUSED(len))
 		case 'G':
 		case 'H':
 		case 'J':
-			d = 10 + (str[i] ^ 'A');
+			d = 10 + (str[i] - 'A');
 			break;
 		case 'K':
 		case 'L':
@@ -76,23 +76,23 @@ calc_chk(const char *str, size_t UNUSED(len))
 		case 'R':
 		case 'S':
 		case 'T':
-			d = 20 + (str[i] ^ 'K');
+			d = 20 + (str[i] - 'K');
 			break;
 		case 'V':
 		case 'W':
 		case 'X':
 		case 'Y':
 		case 'Z':
-			d = 30 + (str[i] ^ 'U');
+			d = 30 + (str[i] - 'U');
 			break;
 		default:
 			return '\0';
 		}
 
-		sum += d;
 		if (i % 2U) {
-			sum += d;
+			d *= 2U;
 		}
+		sum += (d / 10U) + (d % 10U);
 	}
 	/* sum can be at most 665, so check digit is */
 	return (char)(((700U - sum) % 10U) ^ '0');
