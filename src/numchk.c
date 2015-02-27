@@ -108,12 +108,18 @@ proc1(const char *str, size_t len)
 static int
 init_nmck(void)
 {
+	extern const struct nmck_chkr_s *init_isin(void);
+
+	chkrs[nchkrs++] = init_isin();
 	return 0;
 }
 
 static int
 fini_nmck(void)
 {
+	extern int fini_isin(void);
+
+	fini_isin();
 	return 0;
 }
 
