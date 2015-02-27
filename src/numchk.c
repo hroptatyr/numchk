@@ -111,10 +111,12 @@ init_nmck(void)
 	extern const struct nmck_chkr_s *init_isin(void);
 	extern const struct nmck_chkr_s *init_figi(void);
 	extern const struct nmck_chkr_s *init_cusip(void);
+	extern const struct nmck_chkr_s *init_sedol(void);
 
 	chkrs[nchkrs++] = init_isin();
 	chkrs[nchkrs++] = init_figi();
 	chkrs[nchkrs++] = init_cusip();
+	chkrs[nchkrs++] = init_sedol();
 	return 0;
 }
 
