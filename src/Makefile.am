@@ -24,6 +24,7 @@ noinst_LIBRARIES += libnumchk.a
 libnumchk_a_SOURCES = version.c version.h
 libnumchk_a_SOURCES += isin.c isin.h
 libnumchk_a_SOURCES += figi.c figi.h
+libnumchk_a_SOURCES += cusip.c cusip.h
 
 bin_PROGRAMS += numchk
 numchk_SOURCES = numchk.c numchk.h numchk.yuck
