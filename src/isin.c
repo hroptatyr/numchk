@@ -37,12 +37,146 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
+#include <stdint.h>
 #include <assert.h>
 #include "numchk.h"
 #include "nifty.h"
 #include "isin.h"
 
 static const nmck_bid_t nul_bid;
+
+#define C2I(x)			((x) - 'A')
+#define BEGINNING_WITH(x)	[C2I(x)] =
+#define ALLOW(x)		(1U << C2I(x))
+#define AND			|
+
+/* here we register all allowed country codes, as per
+ * http://www.isin.net/country-codes */
+static const uint_fast32_t cc[] = {
+	BEGINNING_WITH('A')
+	ALLOW('D') AND ALLOW('E') AND ALLOW('G') AND ALLOW('I') AND
+	ALLOW('L') AND ALLOW('M') AND ALLOW('O') AND ALLOW('Q') AND
+	ALLOW('R') AND ALLOW('S') AND ALLOW('T') AND ALLOW('U') AND
+	ALLOW('W') AND ALLOW('X') AND ALLOW('Z'),
+
+	BEGINNING_WITH('B')
+	ALLOW('A') AND ALLOW('B') AND ALLOW('D') AND ALLOW('E') AND
+	ALLOW('F') AND ALLOW('G') AND ALLOW('H') AND ALLOW('I') AND
+	ALLOW('J') AND ALLOW('L') AND ALLOW('M') AND ALLOW('N') AND
+	ALLOW('O') AND ALLOW('Q') AND ALLOW('R') AND ALLOW('S') AND
+	ALLOW('T') AND ALLOW('V') AND ALLOW('W') AND ALLOW('Y') AND
+	ALLOW('Z'),
+
+	BEGINNING_WITH('C')
+	ALLOW('A') AND ALLOW('C') AND ALLOW('D') AND ALLOW('F') AND
+	ALLOW('G') AND ALLOW('H') AND ALLOW('I') AND ALLOW('K') AND
+	ALLOW('L') AND ALLOW('M') AND ALLOW('N') AND ALLOW('O') AND
+	ALLOW('R') AND ALLOW('U') AND ALLOW('V') AND ALLOW('W') AND
+	ALLOW('X') AND ALLOW('Y') AND ALLOW('Z'),
+
+	BEGINNING_WITH('D')
+	ALLOW('E') AND ALLOW('J') AND ALLOW('K') AND ALLOW('M') AND
+	ALLOW('O') AND ALLOW('Z'),
+
+	BEGINNING_WITH('E')
+	ALLOW('C') AND ALLOW('E') AND ALLOW('G') AND ALLOW('H') AND
+	ALLOW('R') AND ALLOW('S') AND ALLOW('T'),
+
+	BEGINNING_WITH('F')
+	ALLOW('I') AND ALLOW('J') AND ALLOW('K') AND ALLOW('M') AND
+	ALLOW('O') AND ALLOW('R'),
+
+	BEGINNING_WITH('G')
+	ALLOW('A') AND ALLOW('B') AND ALLOW('D') AND ALLOW('E') AND
+	ALLOW('F') AND ALLOW('G') AND ALLOW('H') AND ALLOW('I') AND
+	ALLOW('L') AND ALLOW('M') AND ALLOW('N') AND ALLOW('P') AND
+	ALLOW('Q') AND ALLOW('R') AND ALLOW('S') AND ALLOW('T') AND
+	ALLOW('U') AND ALLOW('W') AND ALLOW('Y'),
+
+	BEGINNING_WITH('H')
+	ALLOW('K') AND ALLOW('M') AND ALLOW('N') AND ALLOW('R') AND
+	ALLOW('T') AND ALLOW('U'),
+
+	BEGINNING_WITH('I')
+	ALLOW('D') AND ALLOW('E') AND ALLOW('L') AND ALLOW('M') AND
+	ALLOW('N') AND ALLOW('O') AND ALLOW('Q') AND ALLOW('R') AND
+	ALLOW('S') AND	ALLOW('T'),
+
+	BEGINNING_WITH('J')
+	ALLOW('E') AND ALLOW('M') AND ALLOW('O') AND ALLOW('P'),
+
+	BEGINNING_WITH('K')
+	ALLOW('E') AND ALLOW('G') AND ALLOW('H') AND ALLOW('I') AND
+	ALLOW('M') AND ALLOW('N') AND ALLOW('P') AND ALLOW('R') AND
+	ALLOW('W') AND ALLOW('Y') AND ALLOW('Z'),
+
+	BEGINNING_WITH('L')
+	ALLOW('A') AND ALLOW('B') AND ALLOW('C') AND ALLOW('I') AND
+	ALLOW('K') AND ALLOW('R') AND ALLOW('S') AND ALLOW('T') AND
+	ALLOW('U') AND ALLOW('V') AND ALLOW('Y'),
+
+	BEGINNING_WITH('M')
+	ALLOW('A') AND ALLOW('C') AND ALLOW('D') AND ALLOW('E') AND
+	ALLOW('F') AND ALLOW('G') AND ALLOW('H') AND ALLOW('K') AND
+	ALLOW('L') AND ALLOW('M') AND ALLOW('N') AND ALLOW('O') AND
+	ALLOW('P') AND ALLOW('Q') AND ALLOW('R') AND ALLOW('S') AND
+	ALLOW('T') AND ALLOW('U') AND ALLOW('V') AND ALLOW('W') AND
+	ALLOW('X') AND ALLOW('Y') AND ALLOW('Z'),
+
+	BEGINNING_WITH('N')
+	ALLOW('A') AND ALLOW('C') AND ALLOW('E') AND ALLOW('F') AND
+	ALLOW('G') AND ALLOW('I') AND ALLOW('L') AND ALLOW('O') AND
+	ALLOW('P') AND ALLOW('R') AND ALLOW('U') AND ALLOW('Z'),
+
+	BEGINNING_WITH('O')
+	ALLOW('M'),
+
+	BEGINNING_WITH('P')
+	ALLOW('A') AND ALLOW('E') AND ALLOW('F') AND ALLOW('G') AND
+	ALLOW('H') AND ALLOW('K') AND ALLOW('L') AND ALLOW('M') AND
+	ALLOW('N') AND ALLOW('R') AND ALLOW('S') AND ALLOW('T') AND
+	ALLOW('W') AND ALLOW('Y'),
+
+	BEGINNING_WITH('Q')
+	ALLOW('A'),
+
+	BEGINNING_WITH('R')
+	ALLOW('E') AND ALLOW('O') AND ALLOW('S') AND ALLOW('U') AND
+	ALLOW('W'),
+
+	BEGINNING_WITH('S')
+	ALLOW('A') AND ALLOW('B') AND ALLOW('C') AND ALLOW('D') AND
+	ALLOW('E') AND ALLOW('G') AND ALLOW('H') AND ALLOW('I') AND
+	ALLOW('J') AND ALLOW('K') AND ALLOW('L') AND ALLOW('M') AND
+	ALLOW('N') AND ALLOW('O') AND ALLOW('R') AND ALLOW('S') AND
+	ALLOW('T') AND ALLOW('V') AND ALLOW('X') AND ALLOW('Y') AND
+	ALLOW('Z'),
+
+	BEGINNING_WITH('T')
+	ALLOW('C') AND ALLOW('D') AND ALLOW('F') AND ALLOW('G') AND
+	ALLOW('H') AND ALLOW('J') AND ALLOW('K') AND ALLOW('L') AND
+	ALLOW('M') AND ALLOW('N') AND ALLOW('O') AND ALLOW('R') AND
+	ALLOW('T') AND ALLOW('V') AND ALLOW('W') AND ALLOW('Z'),
+
+	BEGINNING_WITH('U')
+	ALLOW('A') AND ALLOW('G') AND ALLOW('M') AND ALLOW('S') AND
+	ALLOW('Y') AND ALLOW('Z'),
+
+	BEGINNING_WITH('V')
+	ALLOW('A') AND ALLOW('C') AND ALLOW('E') AND ALLOW('G') AND
+	ALLOW('I') AND ALLOW('N') AND ALLOW('U'),
+
+	BEGINNING_WITH('W')
+	ALLOW('F') AND ALLOW('S'),
+
+	BEGINNING_WITH('X')
+	ALLOW('S'),
+	BEGINNING_WITH('Y')
+	ALLOW('E') AND ALLOW('T'),
+
+	BEGINNING_WITH('Z')
+	ALLOW('A') AND ALLOW('M') AND ALLOW('W'),
+};
 
 static char
 calc_chk(const char *str, size_t len)
@@ -72,6 +206,12 @@ isin_bid(const char *str, size_t len)
 
 	/* common cases first */
 	if (len != 12) {
+		return nul_bid;
+	} else if (str[0U] < 'A' || str[0U] > 'Z') {
+		return nul_bid;
+	} else if (str[1U] < 'A' || str[1U] > 'Z') {
+		return nul_bid;
+	} else if (!(cc[C2I(str[0U])] & ALLOW(str[1U]))) {
 		return nul_bid;
 	}
 
