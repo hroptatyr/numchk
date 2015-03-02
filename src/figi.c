@@ -115,12 +115,13 @@ figi_bid(const char *str, size_t len)
 		if (!chk) {
 			return nul_bid;
 		} else if (chk != str[11U]) {
-			/* record state but submit a bid, higher than isin */
-			return (nmck_bid_t){511U, chk};
+			/* record state and
+			 * submit a bid higher than a borked isin */
+			return (nmck_bid_t){127U, chk};
 		}
 	}
-	/* bid higher than isin */
-	return (nmck_bid_t){1023U};
+	/* bid high */
+	return (nmck_bid_t){255U};
 }
 
 static int
