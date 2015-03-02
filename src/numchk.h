@@ -42,7 +42,10 @@
 /**
  * We'll do anonymous bidding.  Every registered checker is asked in
  * turns to submit a tender.  The highest BID value will win.
- * The STATE value can be used by the bidder to record some state. */
+ * The STATE value can be used by the bidder to record some state.
+ *
+ * For further optimisation, any bid >= 128U will end the bidding
+ * process immediately. */
 typedef struct {
 	unsigned int bid;
 	unsigned int state;

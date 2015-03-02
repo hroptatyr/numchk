@@ -81,6 +81,9 @@ proc1(const char *str, size_t len)
 		if (x.bid > best.bid) {
 			best = x;
 			chkr = chkrs[i];
+			if (x.bid > 127U) {
+				break;
+			}
 		}
 	}
 	fwrite(str, sizeof(*str), len, stdout);
