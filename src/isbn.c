@@ -184,12 +184,12 @@ isbn_prnt(const char *str, size_t UNUSED(len), nmck_bid_t b)
 	if (LIKELY(!st.chk && st.std == 3)) {
 		fputs("ISBN, conformant with ISO 2108:2005", stdout);
 	} else if (LIKELY(!st.chk)) {
-		fputs("ISBN, conformant with ISO 2108", stdout);
+		fputs("ISBN, conformant with ISO 2108:1992", stdout);
 	} else {
 		if (st.std == 3) {
 			fputs("ISBN, not ISO 2108:2005 conformant, should be ", stdout);
 		} else {
-			fputs("ISBN, not ISO 2108 conformant, should be ", stdout);
+			fputs("ISBN, not ISO 2108:1992 conformant, should be ", stdout);
 		}
 		fwrite(str, sizeof(*str), st.pos, stdout);
 		fputc(st.chk, stdout);
