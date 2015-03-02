@@ -107,6 +107,8 @@ cusip_bid(const char *str, size_t len)
 
 		if (!cc) {
 			return nul_bid;
+		} else if (consumed != len - 1U) {
+			return nul_bid;
 		} else if (chk != str[consumed]) {
 			/* record state */
 			return (nmck_bid_t){31U, cc};

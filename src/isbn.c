@@ -164,6 +164,8 @@ isbn_bid(const char *str, size_t len)
 	st = calc_chk(str, len);
 	if (!st.s) {
 		return nul_bid;
+	} else if (st.pos != len - 1U) {
+		return nul_bid;
 	} else if (st.chk != str[st.pos]) {
 		/* record state */
 		return (nmck_bid_t){31U, st.s};
