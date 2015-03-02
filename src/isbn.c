@@ -168,12 +168,12 @@ isbn_bid(const char *str, size_t len)
 		return nul_bid;
 	} else if (st.chk != str[st.pos]) {
 		/* record state */
-		return (nmck_bid_t){31U, st.s};
+		return (nmck_bid_t){65U, st.s};
 	}
 	/* nul out the check digit because it passed */
 	st.chk = 0;
 	/* bid higher than gtin */
-	return (nmck_bid_t){255U, st.s};
+	return (nmck_bid_t){66U, st.s};
 }
 
 static int
