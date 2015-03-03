@@ -1,0 +1,9 @@
+#!/usr/bin/clitoris  ## -*- shell-script -*-
+
+$ numchk '3782 82246 310005' '3714 49635 398431' '4111 1111 1111 1111' '4012 8888 8888 1881' '4222 2222 22222'
+3782 82246 310005	American Express, conformant account number
+3714 49635 398431	American Express, conformant account number
+4111 1111 1111 1111	Visa, conformant account number
+4012 8888 8888 1881	Visa, conformant account number
+4222 2222 22222	Visa, conformant account number
+$
