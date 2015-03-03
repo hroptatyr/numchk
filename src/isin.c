@@ -171,6 +171,7 @@ static const uint_fast32_t cc[] = {
 
 	BEGINNING_WITH('X')
 	ALLOW('S'),
+
 	BEGINNING_WITH('Y')
 	ALLOW('E') AND ALLOW('T'),
 
