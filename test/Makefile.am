@@ -28,6 +28,8 @@ TESTS += credcard_01.clit
 TESTS += credcard_02.clit
 
 TESTS += iban_01.clit
+TESTS += iban_02.clit
+TESTS += iban_03.clit
 EXTRA_DIST += nordea.xmpl
 
 ## Makefile.am ends here
