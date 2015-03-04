@@ -1,0 +1,11 @@
+#!/usr/bin/clitoris  ## -*- shell-script -*-
+
+## just some example figis
+$ numchk < "${srcdir}/bsym.xmpl"
+BBG000CLKVQ0	FIGI, conformant with http://www.omg.org/spec/FIGI/1.0
+BBG000CLKWZ8	FIGI, conformant with http://www.omg.org/spec/FIGI/1.0
+BBG000CLKW42	FIGI, conformant with http://www.omg.org/spec/FIGI/1.0
+BBG000H4S5W5	FIGI, conformant with http://www.omg.org/spec/FIGI/1.0
+BBG000H4TB06	FIGI, conformant with http://www.omg.org/spec/FIGI/1.0
+BBG000H4S6Z0	FIGI, conformant with http://www.omg.org/spec/FIGI/1.0
+$

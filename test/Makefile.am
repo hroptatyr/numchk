@@ -40,4 +40,8 @@ TESTS += isin_02.clit
 TESTS += isin_03.clit
 EXTRA_DIST += isin.xmpl
 
+TESTS += figi_01.clit
+TESTS += figi_02.clit
+EXTRA_DIST += bsym.xmpl
+
 ## Makefile.am ends here
