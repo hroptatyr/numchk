@@ -22,14 +22,17 @@ EXTRA_DIST += version.c.in
 
 noinst_LIBRARIES += libnumchk.a
 libnumchk_a_SOURCES = version.c version.h
+EXTRA_libnumchk_a_SOURCES =
 libnumchk_a_SOURCES += isin.c isin.h
 libnumchk_a_SOURCES += figi.c figi.h
 libnumchk_a_SOURCES += cusip.c cusip.h
 libnumchk_a_SOURCES += sedol.c sedol.h
 libnumchk_a_SOURCES += iban.c iban.h
+EXTRA_libnumchk_a_SOURCES += iban-cc.ccl
 libnumchk_a_SOURCES += gtin.c gtin.h
 libnumchk_a_SOURCES += isbn.c isbn.h
 libnumchk_a_SOURCES += credcard.c credcard.h
+BUILT_SOURCES += iban-cc.c
 
 bin_PROGRAMS += numchk
 numchk_SOURCES = numchk.c numchk.h numchk.yuck
@@ -37,6 +40,10 @@ numchk_SOURCES += nifty.h
 numchk_LDADD = libnumchk.a
 BUILT_SOURCES += numchk.yucc
 
+## ccl->c
+SUFFIXES += .ccl
+.ccl.c:
+	$(AM_V_GEN) $(top_builddir)/build-aux/cccc < $< > $@ || $(RM) -- $@
 
 ## version rules
 version.c: version.c.in $(top_builddir)/.version

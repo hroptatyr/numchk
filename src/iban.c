@@ -53,89 +53,10 @@ typedef union {
 static const nmck_bid_t nul_bid;
 static const iban_state_t nul_state;
 
-#define C2I(x)			((x) - 'A')
-#define BEGINNING_WITH(x)	[C2I(x)] =
-#define ALLOW(x)		(1U << C2I(x))
-#define AND			|
 
 /* here we register all allowed country codes, as per
  * http://www.nordea.com/Our+services/Cash+Management/Products+and+services/IBAN+countries/908462.html */
-static const uint_fast32_t cc[] = {
-	BEGINNING_WITH('A')
-	ALLOW('D') AND ALLOW('E') AND ALLOW('L') AND ALLOW('O') AND
-	ALLOW('T') AND ALLOW('Z'),
-
-	BEGINNING_WITH('B')
-	ALLOW('A') AND ALLOW('E') AND ALLOW('F') AND ALLOW('G') AND
-	ALLOW('H') AND ALLOW('I') AND ALLOW('J') AND ALLOW('R'),
-
-	BEGINNING_WITH('C')
-	ALLOW('G') AND ALLOW('H') AND ALLOW('I') AND ALLOW('M') AND
-	ALLOW('R') AND ALLOW('V') AND ALLOW('Y') AND ALLOW('Z'),
-
-	BEGINNING_WITH('D')
-	ALLOW('E') AND ALLOW('K') AND ALLOW('O') AND ALLOW('Z'),
-
-	BEGINNING_WITH('E')
-	ALLOW('E') AND ALLOW('G') AND ALLOW('S'),
-
-	BEGINNING_WITH('F')
-	ALLOW('I') AND ALLOW('O') AND ALLOW('R'),
-
-	BEGINNING_WITH('G')
-	ALLOW('A') AND ALLOW('B') AND ALLOW('E') AND ALLOW('I') AND
-	ALLOW('L') AND ALLOW('R') AND ALLOW('T'),
-
-	BEGINNING_WITH('H')
-	ALLOW('R') AND ALLOW('U'),
-
-	BEGINNING_WITH('I')
-	ALLOW('E') AND ALLOW('L') AND ALLOW('R') AND ALLOW('S') AND
-	ALLOW('T'),
-
-	BEGINNING_WITH('J')
-	ALLOW('O'),
-
-	BEGINNING_WITH('K')
-	ALLOW('W') AND ALLOW('Z'),
-
-	BEGINNING_WITH('L')
-	ALLOW('B') AND ALLOW('I') AND ALLOW('T') AND ALLOW('U') AND
-	ALLOW('V'),
-
-	BEGINNING_WITH('M')
-	ALLOW('C') AND ALLOW('D') AND ALLOW('E') AND ALLOW('G') AND
-	ALLOW('K') AND ALLOW('L') AND ALLOW('R') AND ALLOW('T') AND
-	ALLOW('U') AND ALLOW('Z'),
-
-	BEGINNING_WITH('N')
-	ALLOW('L') AND ALLOW('O'),
-
-	BEGINNING_WITH('P')
-	ALLOW('K') AND ALLOW('L') AND ALLOW('S') AND ALLOW('T'),
-
-	BEGINNING_WITH('Q')
-	ALLOW('A'),
-
-	BEGINNING_WITH('R')
-	ALLOW('O') AND ALLOW('S'),
-
-	BEGINNING_WITH('S')
-	ALLOW('A') AND ALLOW('E') AND ALLOW('I') AND ALLOW('K') AND
-	ALLOW('M') AND ALLOW('N'),
-
-	BEGINNING_WITH('T')
-	ALLOW('L') AND ALLOW('N') AND ALLOW('R'),
-
-	BEGINNING_WITH('U')
-	ALLOW('A'),
-
-	BEGINNING_WITH('V')
-	ALLOW('G'),
-
-	BEGINNING_WITH('X')
-	ALLOW('K'),
-};
+#include "iban-cc.c"
 
 static iban_state_t
 calc_st(const char *str, size_t len)
@@ -236,11 +157,7 @@ iban_bid(const char *str, size_t len)
 	/* common cases first */
 	if (len < 15U || len > 34U) {
 		return nul_bid;
-	} else if (str[0U] < 'A' || str[0U] > 'Z') {
-		return nul_bid;
-	} else if (str[1U] < 'A' || str[1U] > 'Z') {
-		return nul_bid;
-	} else if (!(cc[C2I(str[0U])] & ALLOW(str[1U]))) {
+	} else if (!valid_cc_p(str)) {
 		return nul_bid;
 	}
 
