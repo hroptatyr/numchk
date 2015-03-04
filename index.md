@@ -2,6 +2,7 @@
 title: numchk
 project: numchk
 layout: project
+latest: https://github.com/hroptatyr/numchk/releases/download/v0.1.0/cattle-0.1.0.tar.xz
 description: numchk, like file(1) for numbers
 ---
 
