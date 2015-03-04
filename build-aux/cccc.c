@@ -54,7 +54,7 @@
  * any of the lines in the input contains a length, the following
  * routine will also be emitted:
  *
- *   static unsigned int cc_length(const char *str);
+ *   static unsigned int cc_len(const char *str);
  *
  * that maps a valid country code to its length argument.  It won't
  * check for invalid country codes though. */
@@ -63,6 +63,7 @@
 #endif	/* HAVE_CONFIG_H */
 #include <stdint.h>
 #include <stdlib.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <string.h>
 
@@ -74,6 +75,7 @@ struct cclen_s {
 static struct cclen_s *lst;
 static size_t lnt;
 static size_t lzt;
+static bool has_lens;
 
 static int
 ccl_add(const char ln[static 2U], size_t len)
@@ -94,7 +96,9 @@ fatal: insufficient memory to compile the input\n", stderr);
 	}
 
 	/* read the length argument */
-	l = strtoul(ln + 2, NULL, 10);
+	if ((l = strtoul(ln + 2, NULL, 10))) {
+		has_lens = true;
+	}
 
 	/* check it's not there already */
 	for (i = 0U; i < lnt; i++) {
@@ -171,6 +175,70 @@ valid_cc_p(const char cc[static 2U])\n\
 #undef ALLOW\n\
 #undef AND\n\
 }");
+
+	if (has_lens) {
+		unsigned off = 0U;
+
+		puts("\
+static unsigned int\n\
+cc_len(const char cc[static 2U])\n\
+{\n\
+#define C2I(x)			((x) - 'A')\n\
+#define COUNTRIES_WITH(x)	[C2I(x) * 2U] =\n\
+#define THERE_ARE(x)		x\n\
+#define AT(x)			, x\n\
+	static uint_fast16_t _offs[] = {");
+
+		for (char c = 'A'; c <= 'Z'; c++) {
+			unsigned cnt = 0U;
+			for (size_t i = 0U; i < lnt; i++) {
+				if (lst[i].cc[0U] == c) {
+					cnt++;
+				}
+			}
+			printf("\
+		COUNTRIES_WITH('%c') THERE_ARE(%u) AT(%u),\n", c, cnt, off);
+			off += cnt;
+		}
+
+		puts("\
+	};\n\
+	static uint_fast8_t _cc[] = {");
+
+		/* the most idiotic sorting ever */
+		for (char c1 = 'A'; c1 <= 'Z'; c1++) {
+			printf("\
+		/* %c */\n\
+		", c1);
+			for (char c2 = 'A'; c2 <= 'Z'; c2++) {
+				for (size_t i = 0U; i < lnt; i++) {
+					if (lst[i].cc[0U] == c1 &&
+					    lst[i].cc[1U] == c2) {
+						printf("\
+'%c', %hhuU, ", c2, lst[i].len);
+					}
+				}
+			}
+			putchar('\n');
+		}
+		puts("\
+	};\n\
+	const unsigned int off = _offs[C2I(cc[0U]) * 2U + 1U] * 2U;\n\
+	const unsigned int len = _offs[C2I(cc[0U]) * 2U + 0U] * 2U;\n\
+	unsigned i;\n\
+\n\
+	for (i = off; i < off + len; i++) {\n\
+		if (_cc[i++] == cc[1U]) {\n\
+			return _cc[i];\n\
+		}\n\
+	}\n\
+	return 0;\n\
+#undef C2I\n\
+#undef COUNTRIES_WITH\n\
+#undef THERE_ARE\n\
+#undef AT\n\
+}");
+	}
 
 	if (lst) {
 		free(lst);
