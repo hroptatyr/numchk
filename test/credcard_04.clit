@@ -1,0 +1,23 @@
+#!/usr/bin/clitoris  ## -*- shell-script -*-
+
+## test card numbers prolonged by 1 digit
+$ awk '{$0 = substr($0, 1, length($0) - 1); print;}' "${srcdir}/paypalobjects.xmpl" | numchk
+37828224631000	GTIN, not conformant, should be 37828224631008
+37144963539843	GTIN, not conformant, should be 37144963539840
+37873449367100	GTIN, not conformant, should be 37873449367102
+561059108101825	Maestro, non-conformant account number, should be 561059108101822
+3056930902590	GTIN, not conformant, should be 3056930902591
+3852000002323	GTIN, not conformant, should be 3852000002327
+601111111111111	unknown
+601100099013942	unknown
+353011133330000	unknown
+356600202036050	unknown
+555555555555444	unknown
+510510510510510	unknown
+411111111111111	unknown
+401288888888188	unknown
+422222222222	GTIN, not conformant, should be 422222222228
+7600924456	ISBN, not ISO 2108:1992 conformant, should be 7600924455
+501971701010374	unknown
+633110199999001	Maestro, non-conformant account number, should be 633110199999006
+$

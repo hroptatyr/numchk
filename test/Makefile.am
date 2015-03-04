@@ -27,6 +27,7 @@ AM_CLIT_LOG_FLAGS = --builddir $(top_builddir)/src --verbose --keep-going
 TESTS += credcard_01.clit
 TESTS += credcard_02.clit
 TESTS += credcard_03.clit
+TESTS += credcard_04.clit
 EXTRA_DIST += paypalobjects.xmpl
 
 TESTS += iban_01.clit
