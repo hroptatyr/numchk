@@ -111,14 +111,14 @@ proc1(const char *str, size_t len)
 static int
 init_nmck(void)
 {
-	extern const struct nmck_chkr_s *init_isin(void);
-	extern const struct nmck_chkr_s *init_figi(void);
-	extern const struct nmck_chkr_s *init_cusip(void);
-	extern const struct nmck_chkr_s *init_sedol(void);
-	extern const struct nmck_chkr_s *init_iban(void);
-	extern const struct nmck_chkr_s *init_gtin(void);
-	extern const struct nmck_chkr_s *init_isbn(void);
 	extern const struct nmck_chkr_s *init_credcard(void);
+	extern const struct nmck_chkr_s *init_cusip(void);
+	extern const struct nmck_chkr_s *init_figi(void);
+	extern const struct nmck_chkr_s *init_gtin(void);
+	extern const struct nmck_chkr_s *init_iban(void);
+	extern const struct nmck_chkr_s *init_isbn(void);
+	extern const struct nmck_chkr_s *init_isin(void);
+	extern const struct nmck_chkr_s *init_sedol(void);
 
 	chkrs[nchkrs++] = init_isin();
 	chkrs[nchkrs++] = init_figi();
@@ -134,14 +134,14 @@ init_nmck(void)
 static int
 fini_nmck(void)
 {
-	extern int fini_isin(void);
-	extern int fini_figi(void);
-	extern int fini_cusip(void);
-	extern int fini_sedol(void);
-	extern int fini_iban(void);
-	extern int fini_gtin(void);
-	extern int fini_isbn(void);
 	extern int fini_credcard(void);
+	extern int fini_cusip(void);
+	extern int fini_figi(void);
+	extern int fini_gtin(void);
+	extern int fini_iban(void);
+	extern int fini_isbn(void);
+	extern int fini_isin(void);
+	extern int fini_sedol(void);
 
 	fini_isin();
 	fini_figi();
