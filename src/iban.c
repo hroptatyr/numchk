@@ -164,6 +164,8 @@ iban_bid(const char *str, size_t len)
 	with (iban_state_t st = calc_st(str, len)) {
 		if (!st.s) {
 			return nul_bid;
+		} else if (cc_len(str) != st.len) {
+			return nul_bid;
 		} else if (str[2U] != st.chk[0U] || str[3U] != st.chk[1U]) {
 			/* record state */
 			return (nmck_bid_t){31U, st.s};
