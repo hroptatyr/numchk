@@ -116,8 +116,10 @@ figi_bid(const char *str, size_t len)
 			return nul_bid;
 		} else if (chk != str[11U]) {
 			/* record state and
-			 * submit a bid higher than a borked isin */
-			return (nmck_bid_t){127U, chk};
+			 * submit a bid higher than a borked isin
+			 * and because bbgids are so distinctive
+			 * we can even hnad out borked ones as definite */
+			return (nmck_bid_t){191U, chk};
 		}
 	}
 	/* bid high */
