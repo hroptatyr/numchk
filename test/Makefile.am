@@ -32,4 +32,9 @@ TESTS += iban_02.clit
 TESTS += iban_03.clit
 EXTRA_DIST += nordea.xmpl
 
+TESTS += isin_01.clit
+TESTS += isin_02.clit
+TESTS += isin_03.clit
+EXTRA_DIST += isin.xmpl
+
 ## Makefile.am ends here

@@ -1,0 +1,15 @@
+#!/usr/bin/clitoris  ## -*- shell-script -*-
+
+## illegal prefixes
+$ awk '{$0 = "Z" substr($0, 2); print;}' "${srcdir}/isin.xmpl" | numchk
+ZS5949181045	unknown
+ZS38259P5089	unknown
+ZS0378331005	unknown
+ZL0000729408	unknown
+ZP3946600008	unknown
+ZE000DZ21632	unknown
+ZE000DB7HWY7	unknown
+ZE000CM7VX13	unknown
+ZH0031240127	unknown
+ZA9861913023	ISIN, not ISO 6166 conformant, should be ZA9861913026
+$

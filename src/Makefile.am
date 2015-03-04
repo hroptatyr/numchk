@@ -24,15 +24,15 @@ noinst_LIBRARIES += libnumchk.a
 libnumchk_a_SOURCES = version.c version.h
 EXTRA_libnumchk_a_SOURCES =
 libnumchk_a_SOURCES += isin.c isin.h
+BUILT_SOURCES += isin-cc.c
 libnumchk_a_SOURCES += figi.c figi.h
 libnumchk_a_SOURCES += cusip.c cusip.h
 libnumchk_a_SOURCES += sedol.c sedol.h
 libnumchk_a_SOURCES += iban.c iban.h
-EXTRA_libnumchk_a_SOURCES += iban-cc.ccl
+BUILT_SOURCES += iban-cc.c
 libnumchk_a_SOURCES += gtin.c gtin.h
 libnumchk_a_SOURCES += isbn.c isbn.h
 libnumchk_a_SOURCES += credcard.c credcard.h
-BUILT_SOURCES += iban-cc.c
 
 bin_PROGRAMS += numchk
 numchk_SOURCES = numchk.c numchk.h numchk.yuck

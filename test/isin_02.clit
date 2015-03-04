@@ -1,0 +1,15 @@
+#!/usr/bin/clitoris  ## -*- shell-script -*-
+
+## isins as found on isin.org
+$ awk '{$0 = substr($0, 1, length($0) - 1) "0"; print}' "${srcdir}/isin.xmpl" | numchk
+US5949181040	ISIN, not ISO 6166 conformant, should be US5949181045
+US38259P5080	ISIN, not ISO 6166 conformant, should be US38259P5089
+US0378331000	ISIN, not ISO 6166 conformant, should be US0378331005
+NL0000729400	ISIN, not ISO 6166 conformant, should be NL0000729408
+JP3946600000	ISIN, not ISO 6166 conformant, should be JP3946600008
+DE000DZ21630	ISIN, not ISO 6166 conformant, should be DE000DZ21632
+DE000DB7HWY0	ISIN, not ISO 6166 conformant, should be DE000DB7HWY7
+DE000CM7VX10	ISIN, not ISO 6166 conformant, should be DE000CM7VX13
+CH0031240120	ISIN, not ISO 6166 conformant, should be CH0031240127
+CA9861913020	ISIN, not ISO 6166 conformant, should be CA9861913023
+$

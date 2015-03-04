@@ -1,0 +1,15 @@
+#!/usr/bin/clitoris  ## -*- shell-script -*-
+
+## isins as found on isin.org
+$ numchk < "${srcdir}/isin.xmpl"
+US5949181045	ISIN, conformant with ISO 6166:2013
+US38259P5089	ISIN, conformant with ISO 6166:2013
+US0378331005	ISIN, conformant with ISO 6166:2013
+NL0000729408	ISIN, conformant with ISO 6166:2013
+JP3946600008	ISIN, conformant with ISO 6166:2013
+DE000DZ21632	ISIN, conformant with ISO 6166:2013
+DE000DB7HWY7	ISIN, conformant with ISO 6166:2013
+DE000CM7VX13	ISIN, conformant with ISO 6166:2013
+CH0031240127	ISIN, conformant with ISO 6166:2013
+CA9861913023	ISIN, conformant with ISO 6166:2013
+$
