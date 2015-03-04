@@ -186,7 +186,7 @@ cc_len(const char cc[static 2U])\n\
 #define C2I(x)			((x) - 'A')\n\
 #define COUNTRIES_WITH(x)	[C2I(x) * 2U] =\n\
 #define THERE_ARE(x)		x\n\
-#define AT(x)			, x\n\
+#define AT(x)			, 2U * x\n\
 	static uint_fast16_t _offs[] = {");
 
 		for (char c = 'A'; c <= 'Z'; c++) {
@@ -215,7 +215,16 @@ cc_len(const char cc[static 2U])\n\
 					if (lst[i].cc[0U] == c1 &&
 					    lst[i].cc[1U] == c2) {
 						printf("\
-'%c', %hhuU, ", c2, lst[i].len);
+'%c', ", c2);
+					}
+				}
+			}
+			for (char c2 = 'A'; c2 <= 'Z'; c2++) {
+				for (size_t i = 0U; i < lnt; i++) {
+					if (lst[i].cc[0U] == c1 &&
+					    lst[i].cc[1U] == c2) {
+						printf("\
+%hhu, ", lst[i].len);
 					}
 				}
 			}
@@ -223,13 +232,13 @@ cc_len(const char cc[static 2U])\n\
 		}
 		puts("\
 	};\n\
-	const unsigned int off = _offs[C2I(cc[0U]) * 2U + 1U] * 2U;\n\
-	const unsigned int len = _offs[C2I(cc[0U]) * 2U + 0U] * 2U;\n\
+	const unsigned int off = _offs[C2I(cc[0U]) * 2U + 1U];\n\
+	const unsigned int len = _offs[C2I(cc[0U]) * 2U + 0U];\n\
 	unsigned i;\n\
 \n\
 	for (i = off; i < off + len; i++) {\n\
-		if (_cc[i++] == cc[1U]) {\n\
-			return _cc[i];\n\
+		if (_cc[i] == cc[1U]) {\n\
+			return _cc[i + len];\n\
 		}\n\
 	}\n\
 	return 0;\n\
