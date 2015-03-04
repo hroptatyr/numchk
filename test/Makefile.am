@@ -27,4 +27,9 @@ AM_CLIT_LOG_FLAGS = --builddir $(top_builddir)/src --verbose --keep-going
 TESTS += credcard_01.clit
 TESTS += credcard_02.clit
 
+TESTS += iban_01.clit
+TESTS += iban_02.clit
+TESTS += iban_03.clit
+EXTRA_DIST += nordea.xmpl
+
 ## Makefile.am ends here
