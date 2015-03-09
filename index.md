@@ -72,6 +72,11 @@ Input from stdin is of course allowed:
     $
 
 
+Further Reading
+---------------
++ [Wikipedia on check digits](https://en.wikipedia.org/wiki/Check_digit)
+
+
   [1]: http://libarchive.org/
 
 <!--
