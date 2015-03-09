@@ -11,7 +11,7 @@ numchk
 
 The numchk tool is a command-line tool that identifies self-consistent
 numbers and checks their correctness.  In short, it is like `file(1)`
-for numbers.
+for numbers with check digits.
 
 The focus is on fast bulk processing of identifiers arising primarily in
 the financial sector.  The design, inspired by [libarchive][1], allows for
