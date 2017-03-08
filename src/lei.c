@@ -54,7 +54,7 @@ static const nmck_bid_t nul_bid;
 static const lei_state_t nul_state;
 
 static lei_state_t
-calc_st(const char *str, size_t len)
+calc_st(const char *str, size_t UNUSED(len))
 {
 	char buf[40U];
 	size_t bsz = 0U;
