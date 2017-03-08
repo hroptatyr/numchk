@@ -44,4 +44,8 @@ TESTS += figi_01.clit
 TESTS += figi_02.clit
 EXTRA_DIST += bsym.xmpl
 
+TESTS += lei_01.clit
+TESTS += lei_02.clit
+EXTRA_DIST += glei.xmpl
+
 ## Makefile.am ends here
