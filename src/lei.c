@@ -92,9 +92,6 @@ calc_st(const char *str, size_t UNUSED(len))
 	buf[bsz++] = '0';
 	buf[bsz++] = '0';
 
-	fwrite(buf, 1, bsz, stderr);
-	fputc('\n', stderr);
-
 	/* now calc first sum */
 	sum = (buf[0U] ^ '0') * 10U + (buf[1U] ^ '0');
 	for (size_t i = 2U; i < bsz; sum %= 97U) {
