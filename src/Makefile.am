@@ -30,6 +30,7 @@ libnumchk_a_SOURCES += cusip.c cusip.h
 libnumchk_a_SOURCES += sedol.c sedol.h
 libnumchk_a_SOURCES += iban.c iban.h
 BUILT_SOURCES += iban-cc.c
+libnumchk_a_SOURCES += lei.c lei.h
 libnumchk_a_SOURCES += gtin.c gtin.h
 libnumchk_a_SOURCES += isbn.c isbn.h
 libnumchk_a_SOURCES += credcard.c credcard.h

@@ -1,0 +1,8 @@
+#!/usr/bin/clitoris  ## -*- shell-script -*-
+
+## replace second check digit with 7
+$ awk '{$0 = substr($0, 1, length($0) - 1) "7"; print}' "${srcdir}/glei.xmpl" | numchk
+95980020140005837927	LEI, not ISO 17442 conformant, should be 95980020140005837928
+8156001065780F373987	LEI, not ISO 17442 conformant, should be 8156001065780F373980
+RNX0P444Z9TZ64QXQQ47	LEI, not ISO 17442 conformant, should be RNX0P444Z9TZ64QXQQ42
+$

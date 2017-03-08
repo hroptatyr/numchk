@@ -1,0 +1,8 @@
+#!/usr/bin/clitoris  ## -*- shell-script -*-
+
+## just some example figis
+$ numchk < "${srcdir}/glei.xmpl"
+95980020140005837928	LEI, conformant with ISO 17442:2012
+8156001065780F373980	LEI, conformant with ISO 17442:2012
+RNX0P444Z9TZ64QXQQ42	LEI, conformant with ISO 17442:2012
+$
