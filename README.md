@@ -18,7 +18,7 @@ Resources
 ---------
 + homepage: <http://www.fresse.org/numchk/>
 + github:   <https://github.com/hroptatyr/numchk>
-+ issues:   <https://github com/hroptatyr/numchk/issues>
++ issues:   <https://github.com/hroptatyr/numchk/issues>
 + download: <https://github.com/hroptatyr/numchk/releases>
 
 
