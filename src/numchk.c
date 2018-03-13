@@ -120,6 +120,7 @@ init_nmck(void)
 	extern const struct nmck_chkr_s *init_isin(void);
 	extern const struct nmck_chkr_s *init_sedol(void);
 	extern const struct nmck_chkr_s *init_lei(void);
+	extern const struct nmck_chkr_s *init_tfn(void);
 
 	/* in this one order is relevant owing to the fact
 	 * that bids >= 128U abort the bidding process immediately */
@@ -132,6 +133,7 @@ init_nmck(void)
 	chkrs[nchkrs++] = init_isbn();
 	chkrs[nchkrs++] = init_lei();
 	chkrs[nchkrs++] = init_credcard();
+	chkrs[nchkrs++] = init_tfn();
 	return 0;
 }
 
@@ -147,6 +149,7 @@ fini_nmck(void)
 	extern int fini_isin(void);
 	extern int fini_sedol(void);
 	extern int fini_lei(void);
+	extern int fini_tfn(void);
 
 	fini_credcard();
 	fini_cusip();
@@ -157,6 +160,7 @@ fini_nmck(void)
 	fini_isin();
 	fini_sedol();
 	fini_lei();
+	fini_tfn();
 	return 0;
 }
 
