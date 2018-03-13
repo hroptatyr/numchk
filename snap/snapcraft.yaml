@@ -1,0 +1,17 @@
+name: numchk
+version: '0.1.0'
+summary: number checking library
+description: |
+    Command-line tool to detect and check all kinds
+    of numbers secured by check digits.
+grade: stable
+confinement: strict
+
+apps:
+    finner:
+        command: bin/numchk
+
+parts:
+    finner:
+        plugin: autotools
+        source: https://github.com/hroptatyr/numchk.git
