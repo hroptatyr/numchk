@@ -1,6 +1,6 @@
 /*** isin.h -- checker for ISO 6166 security idenfitication numbers
  *
- * Copyright (C) 2014-2015 Sebastian Freundt
+ * Copyright (C) 2014-2018 Sebastian Freundt
  *
  * Author:  Sebastian Freundt <freundt@ga-group.nl>
  *
