@@ -36,6 +36,7 @@ libnumchk_a_SOURCES += isbn.c isbn.h
 libnumchk_a_SOURCES += credcard.c credcard.h
 libnumchk_a_SOURCES += tfn.c tfn.h
 libnumchk_a_SOURCES += cas.c cas.h
+libnumchk_a_SOURCES += istc.c istc.h
 
 bin_PROGRAMS += numchk
 numchk_SOURCES = numchk.c numchk.h numchk.yuck
