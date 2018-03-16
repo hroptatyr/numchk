@@ -39,9 +39,6 @@
 #include <stdio.h>
 #include "numchk.h"
 #include "nifty.h"
-#include "gtin.h"
-
-static const nmck_bid_t nul_bid;
 
 static char
 calc_chk(const char *str, size_t len)
@@ -69,55 +66,38 @@ calc_chk(const char *str, size_t len)
 }
 
 
-/* class implementation */
-static nmck_bid_t
-gtin_bid(const char *str, size_t len)
+nmck_t
+nmck_gtin(const char *str, size_t len)
 {
 	/* common cases first */
 	if (len < 8U || len > 14U) {
-		return nul_bid;
+		return -1;
 	}
 
 	with (char chk = calc_chk(str, len)) {
 		if (!chk) {
-			return nul_bid;
+			return -1;
 		} else if (chk != str[len - 1U]) {
 			/* record state */
-			return (nmck_bid_t){31U, chk};
+			return chk;
 		}
 	}
-	/* bid higher than isin */
-	return (nmck_bid_t){63U};
+	return 0;
 }
 
-static int
-gtin_prnt(const char *str, size_t len, nmck_bid_t b)
+void
+nmpr_gtin(nmck_t s, const char *str, size_t len)
 {
-	if (LIKELY(!b.state)) {
+	if (LIKELY(!s)) {
 		fputs("GTIN, conformant", stdout);
-	} else {
+	} else if (s > 0 && len > 0) {
 		fputs("GTIN, not conformant, should be ", stdout);
 		fwrite(str, sizeof(*str), len - 1U, stdout);
-		fputc((char)b.state, stdout);
+		fputc((char)s, stdout);
+	} else {
+		fputs("unknown", stdout);
 	}
-	return 0;
-}
-
-const struct nmck_chkr_s*
-init_gtin(void)
-{
-	static const struct nmck_chkr_s this = {
-		.name = "GTIN",
-		.bidf = gtin_bid,
-		.prntf = gtin_prnt,
-	};
-	return &this;
-}
-
-int
-fini_gtin(void)
-{
-	return 0;
+	return;
 }
 
 /* gtin.c ends here */

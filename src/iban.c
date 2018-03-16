@@ -40,19 +40,14 @@
 #include <assert.h>
 #include "numchk.h"
 #include "nifty.h"
-#include "iban.h"
 
 typedef union {
-	unsigned int s;
+	intptr_t s;
 	struct {
 		short unsigned int len;
 		char chk[2U];
 	};
 } iban_state_t;
-
-static const nmck_bid_t nul_bid;
-static const iban_state_t nul_state;
-
 
 /* here we register all allowed country codes, as per
  * http://www.nordea.com/Our+services/Cash+Management/Products+and+services/IBAN+countries/908462.html */
@@ -93,7 +88,7 @@ calc_st(const char *str, size_t len)
 			j++;
 			break;
 		default:
-			return nul_state;
+			return (iban_state_t){};
 		}
 	}
 	/* append the country code */
@@ -111,7 +106,7 @@ calc_st(const char *str, size_t len)
 		buf[bsz++] = (char)((str[0U] - 'U') ^ '0');
 		break;
 	default:
-		return nul_state;
+		return (iban_state_t){};
 	}
 	switch (str[1U]) {
 	case 'A' ... 'J':
@@ -127,7 +122,7 @@ calc_st(const char *str, size_t len)
 		buf[bsz++] = (char)((str[1U] - 'U') ^ '0');
 		break;
 	default:
-		return nul_state;
+		return (iban_state_t){};
 	}
 	/* and 00 */
 	buf[bsz++] = '0';
@@ -143,7 +138,7 @@ calc_st(const char *str, size_t len)
 	}
 	/* this is the actual checksum */
 	sum = 98U - sum;
-	res.len = j + 4U;
+	res.len = (unsigned short)(j + 4U);
 	res.chk[0U] = (char)((sum / 10U) ^ '0');
 	res.chk[1U] = (char)((sum % 10U) ^ '0');
 	return res;
@@ -151,63 +146,47 @@ calc_st(const char *str, size_t len)
 
 
 /* class implementation */
-static nmck_bid_t
-iban_bid(const char *str, size_t len)
+nmck_t
+nmck_iban(const char *str, size_t len)
 {
 	/* common cases first */
 	if (len < 15U || len > 34U) {
-		return nul_bid;
+		return -1;
 	} else if (!valid_cc_p(str)) {
-		return nul_bid;
+		return -1;
 	}
 
 	with (iban_state_t st = calc_st(str, len)) {
 		if (!st.s) {
-			return nul_bid;
+			return -1;
 		} else if (cc_len(str) != st.len) {
-			return nul_bid;
+			return -1;
 		} else if (str[2U] != st.chk[0U] || str[3U] != st.chk[1U]) {
 			/* record state */
-			return (nmck_bid_t){31U, st.s};
+			return st.s;
 		}
 	}
-	/* bid just any number really */
-	return (nmck_bid_t){63U};
+	/* all is tickety-boo */
+	return 0;
 }
 
-static int
-iban_prnt(const char *str, size_t len, nmck_bid_t b)
+void
+nmpr_iban(nmck_t st, const char *str, size_t len)
 {
-	iban_state_t st = {b.state};
-
-	if (LIKELY(!b.state)) {
+	if (LIKELY(!st)) {
 		fputs("IBAN, conformant with ISO 13616-1:2007", stdout);
-	} else {
+	} else if (st > 0) {
+		iban_state_t ibst = {st};
 		fputs("IBAN, not ISO 13616-1 conformant, should be ", stdout);
 		fputc(str[0U], stdout);
 		fputc(str[1U], stdout);
-		fputc(st.chk[0U], stdout);
-		fputc(st.chk[1U], stdout);
+		fputc(ibst.chk[0U], stdout);
+		fputc(ibst.chk[1U], stdout);
 		fwrite(str + 4U, sizeof(*str), len - 4U, stdout);
+	} else {
+		fputs("unknown", stdout);
 	}
-	return 0;
-}
-
-const struct nmck_chkr_s*
-init_iban(void)
-{
-	static const struct nmck_chkr_s this = {
-		.name = "IBAN",
-		.bidf = iban_bid,
-		.prntf = iban_prnt,
-	};
-	return &this;
-}
-
-int
-fini_iban(void)
-{
-	return 0;
+	return;
 }
 
 /* iban.c ends here */

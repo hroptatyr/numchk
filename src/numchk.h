@@ -59,4 +59,49 @@ struct nmck_chkr_s {
 	int(*prntf)(const char *str, size_t len, nmck_bid_t);
 };
 
+/**
+ * Return type for checkers, 0 for perfect conformance,
+ * <0 for error, and >0 for non-conformant strings. */
+typedef intptr_t nmck_t;
+
+extern nmck_t nmck_isin(const char*, size_t);
+extern void nmpr_isin(nmck_t, const char*, size_t);
+
+extern nmck_t nmck_figi(const char*, size_t);
+extern void nmpr_figi(nmck_t, const char*, size_t);
+
+extern nmck_t nmck_cusip(const char*, size_t);
+extern void nmpr_cusip(nmck_t, const char*, size_t);
+
+extern nmck_t nmck_sedol(const char*, size_t);
+extern void nmpr_sedol(nmck_t, const char*, size_t);
+
+extern nmck_t nmck_iban(const char*, size_t);
+extern void nmpr_iban(nmck_t, const char*, size_t);
+
+extern nmck_t nmck_lei(const char*, size_t);
+extern void nmpr_lei(nmck_t, const char*, size_t);
+
+extern nmck_t nmck_gtin(const char*, size_t);
+extern void nmpr_gtin(nmck_t, const char*, size_t);
+
+extern nmck_t nmck_isbn(const char*, size_t);
+extern void nmpr_isbn(nmck_t, const char*, size_t);
+extern nmck_t nmck_isbn10(const char*, size_t);
+extern void nmpr_isbn10(nmck_t, const char*, size_t);
+extern nmck_t nmck_isbn13(const char*, size_t);
+extern void nmpr_isbn13(nmck_t, const char*, size_t);
+
+extern nmck_t nmck_credcard(const char*, size_t);
+extern void nmpr_credcard(nmck_t, const char*, size_t);
+
+extern nmck_t nmck_tfn(const char*, size_t);
+extern void nmpr_tfn(nmck_t, const char*, size_t);
+
+extern nmck_t nmck_cas(const char*, size_t);
+extern void nmpr_cas(nmck_t, const char*, size_t);
+
+extern nmck_t nmck_istc(const char*, size_t);
+extern void nmpr_istc(nmck_t, const char*, size_t);
+
 #endif	/* INCLUDED_numchk_h_ */

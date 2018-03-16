@@ -48,9 +48,6 @@
 #include "numchk.h"
 #include "nifty.h"
 
-static const struct nmck_chkr_s *chkrs[16U];
-static size_t nchkrs;
-
 
 static __attribute__((format(printf, 1, 2))) void
 error(const char *fmt, ...)
@@ -67,114 +64,7 @@ error(const char *fmt, ...)
 	return;
 }
 
-
-static int
-proc1(const char *str, size_t len)
-{
-	nmck_bid_t best = {0U};
-	const struct nmck_chkr_s *chkr = NULL;
-
-	/* start the bidding */
-	for (size_t i = 0U; i < nchkrs; i++) {
-		nmck_bid_t x = chkrs[i]->bidf(str, len);
-
-		if (x.bid > best.bid) {
-			best = x;
-			chkr = chkrs[i];
-			if (x.bid > 127U) {
-				break;
-			}
-		}
-	}
-	fwrite(str, sizeof(*str), len, stdout);
-	if (LIKELY(chkr != NULL)) {
-		fputc('\t', stdout);
-		if (LIKELY(chkr->prntf != NULL)) {
-			chkr->prntf(str, len, best);
-		} else if (LIKELY(chkr->name != NULL)) {
-			fputs(chkr->name, stdout);
-		} else {
-			fprintf(stdout, "%p", chkr);
-		}
-		fputc('\n', stdout);
-	} else {
-		fputs("\tunknown\n", stdout);
-	}
-	return 0;
-}
-
-
-#if defined __INTEL_COMPILER
-# pragma warning (disable:1419)
-#endif	/* __INTEL_COMPILER */
-
-static int
-init_nmck(void)
-{
-	extern const struct nmck_chkr_s *init_credcard(void);
-	extern const struct nmck_chkr_s *init_cusip(void);
-	extern const struct nmck_chkr_s *init_figi(void);
-	extern const struct nmck_chkr_s *init_gtin(void);
-	extern const struct nmck_chkr_s *init_iban(void);
-	extern const struct nmck_chkr_s *init_isbn(void);
-	extern const struct nmck_chkr_s *init_isin(void);
-	extern const struct nmck_chkr_s *init_sedol(void);
-	extern const struct nmck_chkr_s *init_lei(void);
-	extern const struct nmck_chkr_s *init_tfn(void);
-	extern const struct nmck_chkr_s *init_cas(void);
-	extern const struct nmck_chkr_s *init_istc(void);
-
-	/* in this one order is relevant owing to the fact
-	 * that bids >= 128U abort the bidding process immediately */
-	chkrs[nchkrs++] = init_figi();
-	chkrs[nchkrs++] = init_isin();
-	chkrs[nchkrs++] = init_cusip();
-	chkrs[nchkrs++] = init_sedol();
-	chkrs[nchkrs++] = init_iban();
-	chkrs[nchkrs++] = init_gtin();
-	chkrs[nchkrs++] = init_isbn();
-	chkrs[nchkrs++] = init_lei();
-	chkrs[nchkrs++] = init_credcard();
-	chkrs[nchkrs++] = init_tfn();
-	chkrs[nchkrs++] = init_cas();
-	chkrs[nchkrs++] = init_istc();
-	return 0;
-}
-
-static int
-fini_nmck(void)
-{
-	extern int fini_credcard(void);
-	extern int fini_cusip(void);
-	extern int fini_figi(void);
-	extern int fini_gtin(void);
-	extern int fini_iban(void);
-	extern int fini_isbn(void);
-	extern int fini_isin(void);
-	extern int fini_sedol(void);
-	extern int fini_lei(void);
-	extern int fini_tfn(void);
-	extern int fini_cas(void);
-	extern int fini_istc(void);
-
-	fini_credcard();
-	fini_cusip();
-	fini_figi();
-	fini_gtin();
-	fini_iban();
-	fini_isbn();
-	fini_isin();
-	fini_sedol();
-	fini_lei();
-	fini_tfn();
-	fini_cas();
-	fini_istc();
-	return 0;
-}
-
-#if defined __INTEL_COMPILER
-# pragma warning (default:1419)
-#endif	/* __INTEL_COMPILER */
+#include "numchk.rlc"
 
 
 #include "numchk.yucc"
@@ -190,29 +80,23 @@ main(int argc, char *argv[])
 		goto out;
 	}
 
-	/* right then, let's get going */
-	init_nmck();
-
 	if (!argi->nargs) {
 		char *line = NULL;
 		size_t llen = 0U;
 
 #if defined HAVE_GETLINE
 		for (ssize_t nrd; (nrd = getline(&line, &llen, stdin)) > 0;) {
-			if (LIKELY(line[nrd - 1] == '\n')) {
-				line[--nrd] = '\0';
-				if (UNLIKELY(line[nrd - 1] == '\r')) {
-					line[--nrd] = '\0';
-				}
-			}
+			nrd -= nrd > 0 && line[nrd - 1] == '\n';
+			nrd -= nrd > 0 && line[nrd - 1] == '\r';
+			line[nrd] = '\0';
 			proc1(line, nrd);
 		}
 		free(line);
 #elif defined HAVE_FGETLN
 		while ((line = fgetln(stdin, &llen)) != NULL) {
-			if (LIKELY(line[llen - 1] == '\n')) {
-				line[--llen] = '\0';
-			}
+			llen -= llen && line[llen - 1] == '\n';
+			llen -= llen && line[llen - 1] == '\r';
+			line[llen] = '\0';
 			proc1(line, llen);
 		}
 #else
@@ -227,14 +111,12 @@ error: reading from stdin disrupted");
 	} else {
 		for (size_t i = 0U; i < argi->nargs; i++) {
 			const char *str = argi->args[i];
-			size_t len = strlen(str);
 
-			proc1(str, len);
+			proc1(str, strlen(str));
 		}
 	}
 
 out:
-	fini_nmck();
 	yuck_free(argi);
 	return rc;
 }

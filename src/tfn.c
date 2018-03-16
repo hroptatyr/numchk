@@ -40,7 +40,6 @@
 #include <assert.h>
 #include "numchk.h"
 #include "nifty.h"
-#include "tfn.h"
 
 typedef union {
 	unsigned int s;
@@ -49,9 +48,6 @@ typedef union {
 		unsigned char chk;
 	};
 } tfn_state_t;
-
-static const nmck_bid_t nul_bid;
-static const tfn_state_t nul_state;
 
 static tfn_state_t
 calc_tfn(const char *str, size_t len)
@@ -67,16 +63,16 @@ calc_tfn(const char *str, size_t len)
 		if ((unsigned char)str[i] <= ' ') {
 			continue;
 		} else if (UNLIKELY((unsigned char)(str[i] ^ '0') >= 10)) {
-			return nul_state;
+			return (tfn_state_t){0};
 		}
 		sum += (unsigned char)(str[i] ^ '0') * wgt[j++];
 	}
 	if (i < len) {
 		/* more? */
-		return nul_state;
+		return (tfn_state_t){0};
 	} else if (j < 8U) {
 		/* um, need at least 8 digits, no? */
-		return nul_state;
+		return (tfn_state_t){0};
 	}
 
 	if (sum %= 11U) {
@@ -95,59 +91,42 @@ calc_tfn(const char *str, size_t len)
 }
 
 
-/* class implementation */
-static nmck_bid_t
-tfn_bid(const char *str, size_t len)
+nmck_t
+nmck_tfn(const char *str, size_t len)
 {
 	/* common cases first */
 	if (len < 8U || len > 11U) {
-		return nul_bid;
+		return -1;
 	}
 
 	with (tfn_state_t st = calc_tfn(str, len)) {
 		if (!st.s) {
-			return nul_bid;
+			return -1;
 		} else if (st.chk >= 10U) {
-			return nul_bid;
+			return -1;
 		} else if (st.chk) {
 			/* record state */
-			return (nmck_bid_t){31U, st.s};
+			return st.s;
 		}
 	}
-	/* bid just any number really */
-	return (nmck_bid_t){63U};
+	return 0;
 }
 
-static int
-tfn_prnt(const char *str, size_t len, nmck_bid_t b)
+void
+nmpr_tfn(nmck_t s, const char *str, size_t len)
 {
-	tfn_state_t st = {b.state};
+	tfn_state_t st = {s};
 
-	if (LIKELY(!st.chk)) {
+	if (LIKELY(!s)) {
 		fputs("TFN, conformant", stdout);
-	} else {
+	} else if (s > 0 && len > 0) {
 		fputs("TFN, not conformant, should be ", stdout);
 		fwrite(str, sizeof(*str), len - 1U, stdout);
 		fputc(st.chk ^ '0', stdout);
+	} else {
+		fputs("unknown", stdout);
 	}
-	return 0;
-}
-
-const struct nmck_chkr_s*
-init_tfn(void)
-{
-	static const struct nmck_chkr_s this = {
-		.name = "TFN",
-		.bidf = tfn_bid,
-		.prntf = tfn_prnt,
-	};
-	return &this;
-}
-
-int
-fini_tfn(void)
-{
-	return 0;
+	return;
 }
 
 /* tfn.c ends here */
