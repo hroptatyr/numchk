@@ -76,6 +76,12 @@ static nmck_t sureck[NNMCK];
 	action istc {
 		is(istc);
 	}
+	action issn8 {
+		is(issn8);
+	}
+	action issn13 {
+		is(issn13);
+	}
 
 	main :=
 		upper{2} digit{2} (upnum | ' '){11,42} %iban |
@@ -88,8 +94,10 @@ static nmck_t sureck[NNMCK];
 		digit{6} (digit | check) %sedol |
 		upnum{18} (digit{2} | check{2}) %lei |
 		digit{7,13} (digit | check) %gtin |
-		digit{3} "-"? digit "-"? digit{4} "-"? digit{4} "-"? (digit | check) %isbn13 |
+		/97[89]/ "-"? digit "-"? digit{4} "-"? digit{4} "-"? (digit | check) %isbn13 |
 		digit "-"? digit{4} "-"? digit{4} "-"? (digit | "X" | check) %isbn10 |
+		digit{4} "-"? digit{3} (digit | "X" | check) %issn8 |
+		"977" digit{4} digit{3} "00" (digit | check) %issn13 |
 		(digit | " "){12,22} %credcard |
 		digit{2,3} " "? digit{3} " "? digit{3} %tfn |
 		digit+ "-" digit{2} "-" (digit | check) %cas |
