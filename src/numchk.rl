@@ -1,11 +1,29 @@
 #include <string.h>
 #include <stdio.h>
+#include "numchk.h"
+#include "nifty.h"
 
-#define is(x)	nmpr_##x(nmck_##x(str, len), str, len)
+#define NNMCK	(64U)
+#define is(x)	\
+	with (nmck_t y = nmck_##x(str, len)) { \
+		if (y > 0) { \
+			candpr[ncand] = nmpr_##x; \
+			candck[ncand] = y; \
+			ncand++; \
+		} else if (!y) { \
+			surepr[nsure++] = nmpr_##x; \
+		} \
+	}
 
 #ifdef __INTEL_COMPILER
 # pragma warning (disable:2415)
 #endif  /* __INTEL_COMPILER */
+
+static size_t ncand;
+static void(*candpr[NNMCK])(nmck_t, const char*, size_t);
+static nmck_t candck[NNMCK];
+static size_t nsure;
+static void(*surepr[NNMCK])(nmck_t, const char*, size_t);
 
 %%{
 	machine numchk;
@@ -53,9 +71,6 @@
 	action istc {
 		is(istc);
 	}
-	action unk {
-		//fputs("unknown", stdout);
-	}
 
 	main :=
 		upper{2} digit{2} (upnum | ' '){11,42} %iban |
@@ -73,7 +88,7 @@
 		(digit | " "){12,22} %credcard |
 		digit{2,3} " "? digit{3} " "? digit{2} (digit | check) %tfn |
 		digit+ "-" digit{2} "-" (digit | check) %cas |
-		any* %unk ;
+		any*;
 
 	write data;
 }%%
@@ -87,9 +102,25 @@ proc1(const char *str, size_t len)
 	int cs;
 
 	%% write init;
-	fputs(str, stdout);
-	fputc('\t', stdout);
+	ncand = nsure = 0U;
+
 	%% write exec;
-	fputc('\n', stdout);
+
+	fputs(str, stdout);
+	if (ncand || nsure) {
+		for (size_t i = 0U; i < nsure; i++) {
+			fputc('\t', stdout);
+			surepr[i](0, str, len);
+		}
+		if (!nsure) {
+			for (size_t i = 0U; i < ncand; i++) {
+				fputc('\t', stdout);
+				candpr[i](candck[i], str, len);
+			}
+		}
+		fputc('\n', stdout);
+	} else {
+		fputs("\tunknown\n", stdout);
+	}
 	return 0;
 }
