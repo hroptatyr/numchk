@@ -86,4 +86,11 @@ extern void nmpr_cas(nmck_t, const char*, size_t);
 extern nmck_t nmck_istc(const char*, size_t);
 extern void nmpr_istc(nmck_t, const char*, size_t);
 
+
+/* utils */
+static inline int ischeck(int c)
+{
+	return ((c + 0x10) | 0x20) - 0x10 == '_';
+}
+
 #endif	/* INCLUDED_numchk_h_ */
