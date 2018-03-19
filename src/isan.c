@@ -87,7 +87,7 @@ calc_isan(const char *str, size_t len)
 		if (str[i] == '-') {
 			continue;
 		} else if ((c = _chex(str[i])) >= 16U) {
-			return (isan_state_t){-1};
+			return (isan_state_t){0};
 		}
 		if ((sum += c) > 36U) {
 			sum -= 36U;
@@ -109,7 +109,7 @@ calc_isan(const char *str, size_t len)
 		if (str[i] == '-') {
 			continue;
 		} else if ((c = _chex(str[i])) >= 16U) {
-			return (isan_state_t){-1};
+			return (isan_state_t){0};
 		}
 		if ((sum += c) > 36U) {
 			sum -= 36U;
@@ -128,7 +128,7 @@ calc_isan(const char *str, size_t len)
 		chk[1U] = stc[1U] = '\0';
 	}
 	if (i < len) {
-		return (isan_state_t){-1};
+		return (isan_state_t){0};
 	}
 
 	return (isan_state_t){
@@ -154,7 +154,7 @@ nmck_isan(const char *str, size_t len)
 	}
 
 	with (isan_state_t st = calc_isan(str + of, len - of)) {
-		if (st.s < 0) {
+		if (!st.s) {
 			break;
 		}
 		return st.s;
