@@ -43,11 +43,17 @@
 typedef union {
 	nmck_t s;
 	struct {
-		short unsigned int pos;
-		char std;
+		unsigned char pos;
+		unsigned char std;
 		char chk;
 	};
 } isbn_state_t;
+
+enum {
+	ISBN_UNK,
+	ISBN13,
+	ISBN10,
+};
 
 static isbn_state_t
 calc_isbn10(const char *str, size_t len)
@@ -83,7 +89,7 @@ calc_isbn10(const char *str, size_t len)
 	}
 
 	/* return both, position of check digit and check digit */
-	return (isbn_state_t){.pos = (unsigned short int)i, .chk = chk};
+	return (isbn_state_t){.pos = i, .std = ISBN10, .chk = chk};
 }
 
 static isbn_state_t
@@ -122,7 +128,7 @@ calc_isbn13(const char *str, size_t len)
 	chk = (char)(((400U - sum) % 10U) ^ '0');
 
 	/* return both, position of check digit and check digit */
-	return (isbn_state_t){.pos = (unsigned short int)i, .std = 3, .chk = chk};
+	return (isbn_state_t){.pos = i, .std = ISBN13, .chk = chk};
 }
 
 static int
@@ -139,7 +145,7 @@ calc_chk(const char *str, size_t len)
 	if (isbn13p(str, len)) {
 		isbn_state_t res = calc_isbn13(str, len);
 
-		if (LIKELY(res.s)) {
+		if (LIKELY(res.std == ISBN13)) {
 			return res;
 		}
 		/* otherwise make sure to try ISBN-10 again */
@@ -166,9 +172,12 @@ nmck_isbn10(const char *str, size_t len)
 		return -1;
 	} else if (st.chk != str[st.pos]) {
 		/* hand out state */
-		return st.s;
+		st.pos = 1U;
+	} else {
+		/* we're conformant */
+		st.pos = 0U;
 	}
-	return 0;
+	return st.s;
 }
 
 void
@@ -195,6 +204,8 @@ nmck_isbn13(const char *str, size_t len)
 
 	if (len < 13U || len > 18U) {
 		return -1;
+	} else if (!isbn13p(str, len)) {
+		return -1;
 	}
 
 	st = calc_isbn13(str, len);
@@ -204,9 +215,11 @@ nmck_isbn13(const char *str, size_t len)
 		return -1;
 	} else if (st.chk != str[st.pos]) {
 		/* hand out state */
-		return st.s;
+		st.pos = 1U;
+	} else {
+		st.pos = 0U;
 	}
-	return 0;
+	return st.s;
 }
 
 void
@@ -243,13 +256,11 @@ nmck_isbn(const char *str, size_t len)
 		return -1;
 	} else if (st.chk != str[st.pos]) {
 		/* record state */
-		return st.s;
-	} else if (!st.std) {
-		/* nul out the check digit because it passed */
-		st.chk = '\0';
-		return st.s;
+		st.pos = 1U;
+	} else {
+		st.pos = 0U;
 	}
-	return 0;
+	return st.s;
 }
 
 void
@@ -257,20 +268,36 @@ nmpr_isbn(nmck_t s, const char *str, size_t len)
 {
 	isbn_state_t st = {s};
 
-	if (LIKELY(!s)) {
-		fputs("ISBN, conformant with ISO 2108:2005", stdout);
-	} else if (s > 0 && !st.chk) {
-		fputs("ISBN, conformant with ISO 2108:1992", stdout);
-	} else if (s > 0 && len > 0) {
-		if (st.std == 3) {
-			fputs("ISBN, not ISO 2108:2005 conformant, should be ", stdout);
-		} else {
-			fputs("ISBN, not ISO 2108:1992 conformant, should be ", stdout);
+	if (UNLIKELY(s < 0)) {
+	unk:
+		fputs("unknown", stdout);
+	} else if (LIKELY(!st.pos)) {
+		fputs("ISBN, conformant with ", stdout);
+		switch (st.std) {
+		case ISBN13:
+			fputs("ISO 2108:2005", stdout);
+			break;
+		case ISBN10:
+			fputs("ISO 2108:1992", stdout);
+			break;
+		default:
+			goto unk;
 		}
+	} else if (len > 0) {
+		fputs("ISBN, not ", stdout);
+		switch (st.std) {
+		case ISBN13:
+			fputs("ISO 2108:2005", stdout);
+			break;
+		case ISBN10:
+			fputs("ISO 2108:1992", stdout);
+			break;
+		default:
+			break;
+		}
+		fputs(" conformant, should be ", stdout);
 		fwrite(str, sizeof(*str), len - 1, stdout);
 		fputc(st.chk, stdout);
-	} else {
-		fputs("unknown", stdout);
 	}
 	return;
 }

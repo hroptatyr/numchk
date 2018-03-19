@@ -42,7 +42,7 @@
 #include "nifty.h"
 
 typedef union {
-	unsigned int s;
+	nmck_t s;
 	struct {
 		unsigned char len;
 		unsigned char chk;
@@ -106,7 +106,7 @@ nmck_tfn(const char *str, size_t len)
 			return -1;
 		} else if (st.chk) {
 			/* record state */
-			return st.s;
+			return st.s | 1;
 		}
 	}
 	return 0;

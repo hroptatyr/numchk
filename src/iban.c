@@ -42,7 +42,7 @@
 #include "nifty.h"
 
 typedef union {
-	intptr_t s;
+	nmck_t s;
 	struct {
 		short unsigned int len;
 		char chk[2U];
@@ -138,7 +138,7 @@ calc_st(const char *str, size_t len)
 	}
 	/* this is the actual checksum */
 	sum = 98U - sum;
-	res.len = (unsigned short)(j + 4U);
+	res.len = (unsigned short)((j + 4U) * 2U);
 	res.chk[0U] = (char)((sum / 10U) ^ '0');
 	res.chk[1U] = (char)((sum % 10U) ^ '0');
 	return res;
@@ -159,10 +159,11 @@ nmck_iban(const char *str, size_t len)
 	with (iban_state_t st = calc_st(str, len)) {
 		if (!st.s) {
 			return -1;
-		} else if (cc_len(str) != st.len) {
+		} else if (cc_len(str) != st.len / 2U) {
 			return -1;
 		} else if (str[2U] != st.chk[0U] || str[3U] != st.chk[1U]) {
-			/* record state */
+			/* make it non-conformant */
+			st.s |= 1;
 			return st.s;
 		}
 	}
@@ -173,7 +174,7 @@ nmck_iban(const char *str, size_t len)
 void
 nmpr_iban(nmck_t st, const char *str, size_t len)
 {
-	if (LIKELY(!st)) {
+	if (LIKELY(!(st & 0b1U))) {
 		fputs("IBAN, conformant with ISO 13616-1:2007", stdout);
 	} else if (st > 0) {
 		iban_state_t ibst = {st};

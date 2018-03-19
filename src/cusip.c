@@ -107,18 +107,19 @@ nmck_cusip(const char *str, size_t len)
 			return -1;
 		} else if (chk != str[consumed]) {
 			/* record state */
-			return cc;
+			return cc << 1U | 1U;
 		}
 	}
 	return 0;
 }
 
 void
-nmpr_cusip(nmck_t st, const char *str, size_t UNUSED(len))
+nmpr_cusip(nmck_t s, const char *str, size_t UNUSED(len))
 {
-	if (LIKELY(!st)) {
+	if (LIKELY(!s)) {
 		fputs("CUSIP, conformant", stdout);
-	} else if (st > 0) {
+	} else if (s > 0) {
+		unsigned int st = s >> 1;
 		unsigned int consumed = (unsigned int)st >> 8U;
 		char chk = (char)(st & 0xff);
 

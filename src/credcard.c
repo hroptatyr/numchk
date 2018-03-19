@@ -43,7 +43,8 @@
 typedef union {
 	nmck_t s;
 	struct {
-		short unsigned int pos;
+		char pad;
+		unsigned char pos;
 		unsigned char issuer;
 		char chk;
 	};
@@ -137,7 +138,7 @@ calc_st(const char *str, size_t len)
 		}
 	}
 	if (UNLIKELY(j < 12U || j > 19U)) {
-		return nul_state;
+		return (cc_state_t){0};
 	}
 
 	/* return both, position of check digit and check digit */
@@ -324,9 +325,9 @@ final:
 		return -1;
 	} else if (st.pos != len - 1U) {
 		return -1;
-	} else if (st.chk == str[st.pos]) {
-		/* nul out the check digit because it passed */
-		st.chk = 0;
+	} else if (st.chk != str[st.pos]) {
+		/* this is non-conformant, let the guesser know */
+		st.s |= 1U;
 	}
 	/* bid higher than gtin? */
 	return st.s;
@@ -342,7 +343,7 @@ nmpr_credcard(nmck_t s, const char *str, size_t len)
 		fputs("unknown", stdout);
 	} else {
 		fputs(issuers[st.issuer], stdout);
-		if (LIKELY(!st.chk)) {
+		if (LIKELY(!st.pad)) {
 			fputs(", conformant account number", stdout);
 		} else if (len > st.pos) {
 			fputs(", non-conformant account number, should be ", stdout);

@@ -42,7 +42,7 @@
 #include "nifty.h"
 
 typedef union {
-	unsigned int s;
+	nmck_t s;
 	struct {
 		unsigned char len;
 		unsigned char chk;
@@ -105,7 +105,7 @@ nmck_cas(const char *str, size_t len)
 			sum += (unsigned int)(str[len - 1U] ^ '0');
 			sum %= 10U;
 		}
-		return (cas_state_t){.len = j, .chk = (unsigned char)sum}.s;
+		return (cas_state_t){.len = 1U, .chk = (unsigned char)sum}.s;
 	}
 	return 0;
 }

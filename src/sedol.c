@@ -84,7 +84,7 @@ nmck_sedol(const char *str, size_t len)
 			return -1;
 		} else if (chk != str[6U]) {
 			/* record state */
-			return (unsigned char)chk;
+			return (unsigned char)chk << 1 | 1;
 		}
 	}
 	return 0;
@@ -99,7 +99,7 @@ nmpr_sedol(nmck_t st, const char *str, size_t len)
 		assert(len == 7U);
 		fputs("SEDOL, not conformant, should be ", stdout);
 		fwrite(str, sizeof(*str), 6U, stdout);
-		fputc((char)st, stdout);
+		fputc((char)(st >> 1), stdout);
 	} else {
 		fputs("unknown", stdout);
 	}

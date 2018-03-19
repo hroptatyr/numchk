@@ -43,13 +43,12 @@
 #include "nifty.h"
 
 typedef union {
-	intptr_t s;
+	nmck_t s;
 	struct {
+		short unsigned int pad;
 		char chk[2U];
 	};
 } lei_state_t;
-
-static const lei_state_t nul_state;
 
 static lei_state_t
 calc_st(const char *str, size_t UNUSED(len))
@@ -57,7 +56,6 @@ calc_st(const char *str, size_t UNUSED(len))
 	char buf[40U];
 	size_t bsz = 0U;
 	unsigned int sum = 0U;
-	lei_state_t res;
 	size_t j = 0U;
 
 	/* expand string first */
@@ -83,7 +81,7 @@ calc_st(const char *str, size_t UNUSED(len))
 			j++;
 			break;
 		default:
-			return nul_state;
+			return (lei_state_t){0};
 		}
 	}
 	/* and 00 */
@@ -103,9 +101,10 @@ calc_st(const char *str, size_t UNUSED(len))
 	/* this is the actual checksum */
 	sum = 98U - sum;
 
-	res.chk[0U] = (char)((sum / 10U) ^ '0');
-	res.chk[1U] = (char)((sum % 10U) ^ '0');
-	return res;
+	return (lei_state_t){
+		.chk[0U] = (char)((sum / 10U) ^ '0'),
+		.chk[1U] = (char)((sum % 10U) ^ '0')
+	};
 }
 
 
@@ -122,7 +121,7 @@ nmck_lei(const char *str, size_t len)
 			return -1;
 		} else if (str[18U] != st.chk[0U] || str[19U] != st.chk[1U]) {
 			/* record state */
-			return st.s;
+			return st.s | 1;
 		}
 	}
 	/* all's good */

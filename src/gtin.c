@@ -79,7 +79,7 @@ nmck_gtin(const char *str, size_t len)
 			return -1;
 		} else if (chk != str[len - 1U]) {
 			/* record state */
-			return chk;
+			return chk << 1 | 1;
 		}
 	}
 	return 0;
@@ -93,7 +93,7 @@ nmpr_gtin(nmck_t s, const char *str, size_t len)
 	} else if (s > 0 && len > 0) {
 		fputs("GTIN, not conformant, should be ", stdout);
 		fwrite(str, sizeof(*str), len - 1U, stdout);
-		fputc((char)s, stdout);
+		fputc((char)(s >> 1), stdout);
 	} else {
 		fputs("unknown", stdout);
 	}

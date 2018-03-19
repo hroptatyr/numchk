@@ -43,7 +43,7 @@
 #include "nifty.h"
 
 typedef union {
-	intptr_t s;
+	nmck_t s;
 	struct {
 		unsigned char len;
 		unsigned char chk;
@@ -147,7 +147,6 @@ nmck_istc(const char *str, size_t len)
 		}
 		return (istc_state_t){.len = 1U, .chk = (unsigned char)sum}.s;
 	}
-
 	return 0;
 }
 

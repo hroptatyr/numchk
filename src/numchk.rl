@@ -6,12 +6,16 @@
 #define NNMCK	(64U)
 #define is(x)	\
 	with (nmck_t y = nmck_##x(str, len)) { \
-		if (y > 0) { \
+		if (y < 0) { \
+			break; \
+		} else if (y & 0b1U) { \
 			candpr[ncand] = nmpr_##x; \
 			candck[ncand] = y; \
 			ncand++; \
-		} else if (!y) { \
-			surepr[nsure++] = nmpr_##x; \
+		} else { \
+			surepr[nsure] = nmpr_##x; \
+			sureck[nsure] = y; \
+			nsure++; \
 		} \
 	}
 
@@ -24,6 +28,7 @@ static void(*candpr[NNMCK])(nmck_t, const char*, size_t);
 static nmck_t candck[NNMCK];
 static size_t nsure;
 static void(*surepr[NNMCK])(nmck_t, const char*, size_t);
+static nmck_t sureck[NNMCK];
 
 %%{
 	machine numchk;
@@ -110,7 +115,7 @@ proc1(const char *str, size_t len)
 	if (ncand || nsure) {
 		for (size_t i = 0U; i < nsure; i++) {
 			fputc('\t', stdout);
-			surepr[i](0, str, len);
+			surepr[i](sureck[i], str, len);
 		}
 		if (!nsure) {
 			for (size_t i = 0U; i < ncand; i++) {

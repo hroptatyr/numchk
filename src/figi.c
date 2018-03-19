@@ -113,7 +113,7 @@ nmck_figi(const char *str, size_t len)
 			 * submit a bid higher than a borked isin
 			 * and because bbgids are so distinctive
 			 * we can even hnad out borked ones as definite */
-			return chk;
+			return chk << 1 | 1;
 		}
 	}
 	/* bid high */
@@ -128,7 +128,7 @@ nmpr_figi(nmck_t st, const char *str, size_t len)
 	} else if (st > 0 && len == 12U) {
 		fputs("FIGI, not conformant, should be ", stdout);
 		fwrite(str, sizeof(*str), 11U, stdout);
-		fputc((char)st, stdout);
+		fputc((char)(st >> 1), stdout);
 	} else {
 		fputs("unknown", stdout);
 	}
