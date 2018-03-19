@@ -48,6 +48,8 @@
 #include "numchk.h"
 #include "nifty.h"
 
+static unsigned int allp;
+
 
 static __attribute__((format(printf, 1, 2))) void
 error(const char *fmt, ...)
@@ -66,6 +68,55 @@ error(const char *fmt, ...)
 
 #include "numchk.rlc"
 
+static void
+prnt1_1ln(const char *str, size_t len)
+{
+	fputs(str, stdout);
+	if (ncand || nsure) {
+		for (size_t i = 0U; i < nsure; i++) {
+			fputc('\t', stdout);
+			surepr[i](sureck[i], str, len);
+		}
+		if (allp || !nsure) {
+			for (size_t i = 0U; i < ncand; i++) {
+				fputc('\t', stdout);
+				candpr[i](candck[i], str, len);
+			}
+		}
+		fputc('\n', stdout);
+	} else {
+		fputs("\tunknown\n", stdout);
+	}
+	return;
+}
+
+static void
+prnt1_mln(const char *str, size_t len)
+{
+	if (ncand || nsure) {
+		for (size_t i = 0U; i < nsure; i++) {
+			fputs(str, stdout);
+			fputc('\t', stdout);
+			surepr[i](sureck[i], str, len);
+			fputc('\n', stdout);
+		}
+		if (allp || !nsure) {
+			for (size_t i = 0U; i < ncand; i++) {
+				fputs(str, stdout);
+				fputc('\t', stdout);
+				candpr[i](candck[i], str, len);
+				fputc('\n', stdout);
+			}
+		}
+	} else {
+		fputs(str, stdout);
+		fputs("\tunknown\n", stdout);
+	}
+	return;
+}
+
+static void(*prnt1)(const char*, size_t);
+
 
 #include "numchk.yucc"
 
@@ -80,6 +131,9 @@ main(int argc, char *argv[])
 		goto out;
 	}
 
+	allp = argi->all_flag;
+	prnt1 = argi->one_line_flag ? prnt1_1ln : prnt1_mln;
+
 	if (!argi->nargs) {
 		char *line = NULL;
 		size_t llen = 0U;
@@ -89,7 +143,8 @@ main(int argc, char *argv[])
 			nrd -= nrd > 0 && line[nrd - 1] == '\n';
 			nrd -= nrd > 0 && line[nrd - 1] == '\r';
 			line[nrd] = '\0';
-			proc1(line, nrd);
+			chck1(line, nrd);
+			prnt1(line, nrd);
 		}
 		free(line);
 #elif defined HAVE_FGETLN
@@ -97,7 +152,8 @@ main(int argc, char *argv[])
 			llen -= llen && line[llen - 1] == '\n';
 			llen -= llen && line[llen - 1] == '\r';
 			line[llen] = '\0';
-			proc1(line, llen);
+			chck1(line, llen);
+			prnt1(line, llen);
 		}
 #else
 		errno = 0, error("\
@@ -111,8 +167,9 @@ error: reading from stdin disrupted");
 	} else {
 		for (size_t i = 0U; i < argi->nargs; i++) {
 			const char *str = argi->args[i];
-
-			proc1(str, strlen(str));
+			const size_t len = strlen(str);
+			chck1(str, len);
+			prnt1(str, len);
 		}
 	}
 

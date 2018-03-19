@@ -99,7 +99,7 @@ static nmck_t sureck[NNMCK];
 }%%
 
 static int
-proc1(const char *str, size_t len)
+chck1(const char *str, size_t len)
 {
 	const char *p = str;
 	const char *const pe = str + len;
@@ -110,22 +110,5 @@ proc1(const char *str, size_t len)
 	ncand = nsure = 0U;
 
 	%% write exec;
-
-	fputs(str, stdout);
-	if (ncand || nsure) {
-		for (size_t i = 0U; i < nsure; i++) {
-			fputc('\t', stdout);
-			surepr[i](sureck[i], str, len);
-		}
-		if (!nsure) {
-			for (size_t i = 0U; i < ncand; i++) {
-				fputc('\t', stdout);
-				candpr[i](candck[i], str, len);
-			}
-		}
-		fputc('\n', stdout);
-	} else {
-		fputs("\tunknown\n", stdout);
-	}
 	return 0;
 }
