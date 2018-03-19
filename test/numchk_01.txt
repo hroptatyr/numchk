@@ -1,0 +1,19 @@
+M-5215-9669-6	ISMN, conformant with ISO 10957:1993
+9790521596694	GTIN13, conformant	ISBN, conformant with ISO 2108:2005	ISMN, conformant with ISO 10957:2009
+0517-0497	ISSN, conformant with ISO 3297:1975
+9770517049007	GTIN13, conformant	ISSN, conformant with ISO 3297:2007
+0000 0001 2150 090X	ISNI, conformant with ISO 27729:2012
+000000012150090X	ISNI, conformant with ISO 27729:2012
+0000 0001 2281 955?	ISNI, not ISO 27729:2012 conformant, should be 0000 0001 2281 955X
+000000012281955?	ISNI, not ISO 27729:2012 conformant, should be 000000012281955X
+0A9-2002-12B4A105-7	ISTC, conformant
+0A9-2002-12B4A105-?	ISTC, not conformant, should be 0A9-2002-12B4A105-7
+87 612 114	TFN, conformant
+876121108	TFN, conformant
+876 121 108	TFN, conformant
+444-42-_	CASRN, not conformant, should be 444-42-8
+444-42-8	CASRN, conformant
+6948836	SEDOL, conformant
+694883?	SEDOL, not conformant, should be 6948836
+694883133	CUSIP, conformant
+69488313_	CUSIP, not conformant, should be 694883133

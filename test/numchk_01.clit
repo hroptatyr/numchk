@@ -1,0 +1,5 @@
+#!/usr/bin/clitoris  ## -*- shell-script -*-
+
+$ cut -f1 "${srcdir}/numchk_01.txt" | numchk -1
+< "${srcdir}/numchk_01.txt"
+$
