@@ -17,3 +17,5 @@ M-5215-9669-6	ISMN, conformant with ISO 10957:1993
 694883?	SEDOL, not conformant, should be 6948836
 694883133	CUSIP, conformant
 69488313_	CUSIP, not conformant, should be 694883133
+0000-0000-D07A-0090-Q-0000-0000-X	ISAN, conformant
+0000-0000-D07A-0090-?-0000-0000-?	ISAN, not conformant, should be 0000-0000-D07A-0090-Q-0000-0000-X
