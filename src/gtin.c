@@ -40,7 +40,16 @@
 #include "numchk.h"
 #include "nifty.h"
 
-static char
+typedef union {
+	nmck_t s;
+	struct {
+		unsigned char pad;
+		unsigned char len;
+		unsigned char chk;
+	};
+} gtin_state_t;
+
+static gtin_state_t
 calc_chk(const char *str, size_t len)
 {
 /* calculate the check digit for an expanded ISIN */
@@ -49,20 +58,23 @@ calc_chk(const char *str, size_t len)
 	/* use the left len - 1 digits, start with  the evens */
 	for (size_t i = len % 2U; i < len - 1U; i += 2U) {
 		if (UNLIKELY(str[i] < '0' || str[i] > '9')) {
-			return '\0';
+			return (gtin_state_t){0};
 		}
 		sum += 3U * (str[i] ^ '0');
 	}
 	/* odd numbers now */
 	for (size_t i = !(len % 2U); i < len - 1U; i += 2U) {
 		if (UNLIKELY(str[i] < '0' || str[i] > '9')) {
-			return '\0';
+			return (gtin_state_t){0};
 		}
 		sum += str[i] ^ '0';
 	}
 
 	/* sum can be at most 252, so check digit is */
-	return (char)(((400U - sum) % 10U) ^ '0');
+	return (gtin_state_t){
+		.len = len,
+		.chk = (char)(((400U - sum) % 10U) ^ '0')
+	};
 }
 
 
@@ -74,26 +86,39 @@ nmck_gtin(const char *str, size_t len)
 		return -1;
 	}
 
-	with (char chk = calc_chk(str, len)) {
-		if (!chk) {
+	with (gtin_state_t st = calc_chk(str, len)) {
+		if (!st.chk) {
 			return -1;
-		} else if (chk != str[len - 1U]) {
-			/* record state */
-			return chk << 1 | 1;
 		}
+		switch (st.len) {
+		case 8:
+		case 12:
+		case 13:
+		case 14:
+			break;
+		default:
+			return -1;
+		}
+		if (st.chk != str[len - 1U]) {
+			/* record state */
+			return st.s | 1;
+		}
+		return st.s;
 	}
-	return 0;
+	return -1;
 }
 
 void
 nmpr_gtin(nmck_t s, const char *str, size_t len)
 {
-	if (LIKELY(!s)) {
-		fputs("GTIN, conformant", stdout);
+	gtin_state_t st = {s};
+
+	if (LIKELY(!st.pad)) {
+		fprintf(stdout, "GTIN%d, conformant", st.len);
 	} else if (s > 0 && len > 0) {
-		fputs("GTIN, not conformant, should be ", stdout);
+		fprintf(stdout, "GTIN%d, not conformant, should be ", st.len);
 		fwrite(str, sizeof(*str), len - 1U, stdout);
-		fputc((char)(s >> 1), stdout);
+		fputc(st.chk, stdout);
 	} else {
 		fputs("unknown", stdout);
 	}
