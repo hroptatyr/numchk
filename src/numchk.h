@@ -103,6 +103,9 @@ extern void nmpr_ismn13(nmck_t, const char*, size_t);
 extern nmck_t nmck_isni(const char*, size_t);
 extern void nmpr_isni(nmck_t, const char*, size_t);
 
+extern nmck_t nmck_isan(const char*, size_t);
+extern void nmpr_isan(nmck_t, const char*, size_t);
+
 
 /* utils */
 static inline int ischeck(int c)
