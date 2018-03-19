@@ -39,20 +39,21 @@
 #include <stdio.h>
 #include "numchk.h"
 #include "nifty.h"
-#include "isbn.h"
-
 
 typedef union {
-	unsigned int s;
+	nmck_t s;
 	struct {
-		short unsigned int pos;
-		char std;
+		unsigned char pos;
+		unsigned char std;
 		char chk;
 	};
 } isbn_state_t;
 
-static const nmck_bid_t nul_bid;
-static const isbn_state_t nul_state;
+enum {
+	ISBN_UNK,
+	ISBN13,
+	ISBN10,
+};
 
 static isbn_state_t
 calc_isbn10(const char *str, size_t len)
@@ -72,7 +73,7 @@ calc_isbn10(const char *str, size_t len)
 			sum += (10 - j++) * (str[i] ^ '0');
 			break;
 		default:
-			return nul_state;
+			return (isbn_state_t){0};
 		}
 	}
 	/* check if need to skip optional - */
@@ -88,7 +89,7 @@ calc_isbn10(const char *str, size_t len)
 	}
 
 	/* return both, position of check digit and check digit */
-	return (isbn_state_t){.pos = i, .chk = chk};
+	return (isbn_state_t){.pos = i, .std = ISBN10, .chk = chk};
 }
 
 static isbn_state_t
@@ -111,12 +112,12 @@ calc_isbn13(const char *str, size_t len)
 			}
 			break;
 		default:
-			return (isbn_state_t){0U};
+			return (isbn_state_t){0};
 		}
 	}
 	/* check that we actually used up 12 digits */
 	if (UNLIKELY(j < 12U)) {
-		return nul_state;
+		return (isbn_state_t){0};
 	}
 	/* check if need to skip optional - */
 	if (LIKELY(i < len) && UNLIKELY(str[i] == '-')) {
@@ -127,91 +128,178 @@ calc_isbn13(const char *str, size_t len)
 	chk = (char)(((400U - sum) % 10U) ^ '0');
 
 	/* return both, position of check digit and check digit */
-	return (isbn_state_t){.pos = i, .std = 3, .chk = chk};
+	return (isbn_state_t){.pos = i, .std = ISBN13, .chk = chk};
+}
+
+static int
+isbn13p(const char *str, size_t len)
+{
+	return len >= 13U && str[0U] == '9' && str[1U] == '7' &&
+		(str[2U] == '8' || str[2U] == '9');
 }
 
 static isbn_state_t
 calc_chk(const char *str, size_t len)
 {
 /* we need a bit of guess work here */
-	if (str[0U] == '9' && str[1U] == '7') {
-		/* could be an isbn-13 */
-		if (len >= 13U && (str[2U] == '8' || str[2U] == '9')) {
-			isbn_state_t res = calc_isbn13(str, len);
+	if (isbn13p(str, len)) {
+		isbn_state_t res = calc_isbn13(str, len);
 
-			if (LIKELY(res.s)) {
-				return res;
-			}
-			/* otherwise make sure to try ISBN-10 again */
+		if (LIKELY(res.std == ISBN13)) {
+			return res;
 		}
+		/* otherwise make sure to try ISBN-10 again */
 	}
 	/* resort to good old ISO 2108 */
 	return calc_isbn10(str, len);
 }
 
 
-/* class implementation */
-static nmck_bid_t
-isbn_bid(const char *str, size_t len)
+/* isbns com in two variants, isbn10 and isbn13 */
+nmck_t
+nmck_isbn10(const char *str, size_t len)
+{
+	isbn_state_t st;
+
+	if (len < 10U || len > 13U) {
+		return -1;
+	}
+
+	st = calc_isbn10(str, len);
+	if (!st.s) {
+		return -1;
+	} else if (st.pos != len - 1U) {
+		return -1;
+	} else if (st.chk != str[st.pos]) {
+		/* hand out state */
+		st.pos = 1U;
+	} else {
+		/* we're conformant */
+		st.pos = 0U;
+	}
+	return st.s;
+}
+
+void
+nmpr_isbn10(nmck_t s, const char *str, size_t len)
+{
+	isbn_state_t st = {s};
+
+	if (LIKELY(!s)) {
+		fputs("ISBN, conformant with ISO 2108:1992", stdout);
+	} else if (s > 0 && len > 0) {
+		fputs("ISBN, not ISO 2108:1992 conformant, should be ", stdout);
+		fwrite(str, sizeof(*str), len - 1, stdout);
+		fputc(st.chk, stdout);
+	} else {
+		fputs("unknown", stdout);
+	}
+	return;
+}
+
+nmck_t
+nmck_isbn13(const char *str, size_t len)
+{
+	isbn_state_t st;
+
+	if (len < 13U || len > 18U) {
+		return -1;
+	} else if (!isbn13p(str, len)) {
+		return -1;
+	}
+
+	st = calc_isbn13(str, len);
+	if (!st.s) {
+		return -1;
+	} else if (st.pos != len - 1U) {
+		return -1;
+	} else if (st.chk != str[st.pos]) {
+		/* hand out state */
+		st.pos = 1U;
+	} else {
+		st.pos = 0U;
+	}
+	return st.s;
+}
+
+void
+nmpr_isbn13(nmck_t s, const char *str, size_t len)
+{
+	isbn_state_t st = {s};
+
+	if (LIKELY(!s)) {
+		fputs("ISBN, conformant with ISO 2108:2005", stdout);
+	} else if (s > 0 && len > 0) {
+		fputs("ISBN, not ISO 2108:2005 conformant, should be ", stdout);
+		fwrite(str, sizeof(*str), len - 1, stdout);
+		fputc(st.chk, stdout);
+	} else {
+		fputs("unknown", stdout);
+	}
+	return;
+}
+
+nmck_t
+nmck_isbn(const char *str, size_t len)
 {
 	isbn_state_t st;
 
 	/* common cases first */
 	if (len < 10U || len > 17U) {
-		return nul_bid;
+		return -1;
 	}
 
 	st = calc_chk(str, len);
 	if (!st.s) {
-		return nul_bid;
+		return -1;
 	} else if (st.pos != len - 1U) {
-		return nul_bid;
+		return -1;
 	} else if (st.chk != str[st.pos]) {
 		/* record state */
-		return (nmck_bid_t){65U, st.s};
+		st.pos = 1U;
+	} else {
+		st.pos = 0U;
 	}
-	/* nul out the check digit because it passed */
-	st.chk = 0;
-	/* bid higher than gtin */
-	return (nmck_bid_t){66U, st.s};
+	return st.s;
 }
 
-static int
-isbn_prnt(const char *str, size_t UNUSED(len), nmck_bid_t b)
+void
+nmpr_isbn(nmck_t s, const char *str, size_t len)
 {
-	isbn_state_t st = {b.state};
+	isbn_state_t st = {s};
 
-	if (LIKELY(!st.chk && st.std == 3)) {
-		fputs("ISBN, conformant with ISO 2108:2005", stdout);
-	} else if (LIKELY(!st.chk)) {
-		fputs("ISBN, conformant with ISO 2108:1992", stdout);
-	} else {
-		if (st.std == 3) {
-			fputs("ISBN, not ISO 2108:2005 conformant, should be ", stdout);
-		} else {
-			fputs("ISBN, not ISO 2108:1992 conformant, should be ", stdout);
+	if (UNLIKELY(s < 0)) {
+	unk:
+		fputs("unknown", stdout);
+	} else if (LIKELY(!st.pos)) {
+		fputs("ISBN, conformant with ", stdout);
+		switch (st.std) {
+		case ISBN13:
+			fputs("ISO 2108:2005", stdout);
+			break;
+		case ISBN10:
+			fputs("ISO 2108:1992", stdout);
+			break;
+		default:
+			goto unk;
 		}
-		fwrite(str, sizeof(*str), st.pos, stdout);
+	} else if (len > 0) {
+		fputs("ISBN, not ", stdout);
+		switch (st.std) {
+		case ISBN13:
+			fputs("ISO 2108:2005", stdout);
+			break;
+		case ISBN10:
+			fputs("ISO 2108:1992", stdout);
+			break;
+		default:
+			break;
+		}
+		fputs(" conformant, should be ", stdout);
+		fwrite(str, sizeof(*str), len - 1, stdout);
 		fputc(st.chk, stdout);
 	}
-	return 0;
-}
-
-const struct nmck_chkr_s*
-init_isbn(void)
-{
-	static const struct nmck_chkr_s this = {
-		.name = "ISBN",
-		.bidf = isbn_bid,
-		.prntf = isbn_prnt,
-	};
-	return &this;
-}
-
-int
-fini_isbn(void)
-{
-	return 0;
+	return;
 }
 
 /* isbn.c ends here */

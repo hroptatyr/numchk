@@ -40,125 +40,91 @@
 #include <assert.h>
 #include "numchk.h"
 #include "nifty.h"
-#include "cas.h"
 
 typedef union {
-	unsigned int s;
+	nmck_t s;
 	struct {
 		unsigned char len;
 		unsigned char chk;
 	};
 } cas_state_t;
 
-static const nmck_bid_t nul_bid;
-static const cas_state_t nul_state;
-
-static cas_state_t
-calc_cas(const char *str, size_t len)
+
+/* class implementation */
+nmck_t
+nmck_cas(const char *str, size_t len)
 {
 /* calculate the check digit, this one is right to left */
 	unsigned int sum;
 	size_t i = len, j = 1U;
 
-	if ((sum = (unsigned char)(str[--i] ^ '0')) >= 10U) {
-		return nul_state;
+	/* common cases first */
+	if (len < 7U || len > 12U) {
+		return -1;
+	}
+
+	if ((sum = (unsigned char)(str[--i] ^ '0')) >= 10U && str[i] != '_') {
+		return -1;
+	} else if (str[i] == '_') {
+		sum = 10U;
 	}
 	/* this was the check digit so invert */
 	sum = 10U - sum;
 
 	if (str[--i] != '-') {
-		return nul_state;
+		return -1;
 	}
 	with (unsigned int c = str[--i] ^ '0') {
 		if (c >= 10U) {
-			return nul_state;
+			return -1;
 		}
 		sum += j++ * c;
 	}
 	with (unsigned int c = str[--i] ^ '0') {
 		if (c >= 10U) {
-			return nul_state;
+			return -1;
 		}
 		sum += j++ * c;
 	}
 	/* hyphen again */
 	if (str[--i] != '-') {
-		return nul_state;
+		return -1;
 	}
 	/* now variable length */
 	for (; i > 0U;) {
 		unsigned int c = str[--i] ^ '0';
 		if (c >= 10U) {
-			return nul_state;
+			return -1;
 		}
 		sum += j++ * c;
 	}
 
-	if (sum %= 10U) {
+	if ((sum %= 10U) || str[len - 1U] == '_') {
 		/* record state */
-		unsigned int c = str[len - 1U] ^ '0';
-		sum += c;
-		sum %= 10U;
-	}
-
-	/* return both, length and check digit */
-	return (cas_state_t){.len = j, .chk = (unsigned char)sum};
-}
-
-
-/* class implementation */
-static nmck_bid_t
-cas_bid(const char *str, size_t len)
-{
-	/* common cases first */
-	if (len < 7U || len > 12U) {
-		return nul_bid;
-	}
-
-	with (cas_state_t st = calc_cas(str, len)) {
-		if (!st.s) {
-			return nul_bid;
-		} else if (st.chk >= 10U) {
-			return nul_bid;
-		} else if (st.chk) {
-			/* record state */
-			return (nmck_bid_t){31U, st.s};
+		if (str[len - 1U] != '_') {
+			sum += (unsigned int)(str[len - 1U] ^ '0');
+			sum %= 10U;
 		}
+		return (cas_state_t){.len = 1U, .chk = (unsigned char)sum}.s;
 	}
-	/* bid just any number really */
-	return (nmck_bid_t){63U};
+	return 0;
 }
 
-static int
-cas_prnt(const char *str, size_t len, nmck_bid_t b)
+void
+nmpr_cas(nmck_t s, const char *str, size_t len)
 {
-	cas_state_t st = {b.state};
+	cas_state_t st = {s};
 
-	if (LIKELY(!st.chk)) {
+	if (LIKELY(!s)) {
 		fputs("CASRN, conformant", stdout);
-	} else {
+	} else if (s > 0 && len > 0U) {
 		fputs("CASRN, not conformant, should be ", stdout);
 		fwrite(str, sizeof(*str), len - 1U, stdout);
 		fputc(st.chk ^ '0', stdout);
+	} else {
+		fputs("unknown", stdout);
 	}
-	return 0;
-}
-
-const struct nmck_chkr_s*
-init_cas(void)
-{
-	static const struct nmck_chkr_s this = {
-		.name = "CAS",
-		.bidf = cas_bid,
-		.prntf = cas_prnt,
-	};
-	return &this;
-}
-
-int
-fini_cas(void)
-{
-	return 0;
+	return;
 }
 
 /* cas.c ends here */

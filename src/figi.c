@@ -40,12 +40,9 @@
 #include <assert.h>
 #include "numchk.h"
 #include "nifty.h"
-#include "figi.h"
-
-static const nmck_bid_t nul_bid;
 
 static char
-calc_chk(const char *str, size_t UNUSED(len))
+calc_chk(const char *str)
 {
 /* calculate the check digit for an expanded ISIN */
 	unsigned int sum = 0U;
@@ -99,62 +96,43 @@ calc_chk(const char *str, size_t UNUSED(len))
 }
 
 
-/* class implementation */
-static nmck_bid_t
-figi_bid(const char *str, size_t len)
+nmck_t
+nmck_figi(const char *str, size_t len)
 {
-	/* common cases first */
-	if (len != 12) {
-		return nul_bid;
+	if (len != 12U) {
+		return -1;
 	} else if (str[0U] != 'B' || str[1U] != 'B' || str[2U] != 'G') {
 		/* currently only BB is registered as certified provider */
-		return nul_bid;
+		return -1;
 	}
-
-	with (char chk = calc_chk(str, len)) {
+	with (char chk = calc_chk(str)) {
 		if (!chk) {
-			return nul_bid;
+			return -1;
 		} else if (chk != str[11U]) {
 			/* record state and
 			 * submit a bid higher than a borked isin
 			 * and because bbgids are so distinctive
 			 * we can even hnad out borked ones as definite */
-			return (nmck_bid_t){191U, chk};
+			return chk << 1 | 1;
 		}
 	}
 	/* bid high */
-	return (nmck_bid_t){255U};
+	return 0;
 }
 
-static int
-figi_prnt(const char *str, size_t len, nmck_bid_t b)
+void
+nmpr_figi(nmck_t st, const char *str, size_t len)
 {
-	if (LIKELY(!b.state)) {
+	if (!st) {
 		fputs("FIGI, conformant with http://www.omg.org/spec/FIGI/1.0", stdout);
-	} else {
-		assert(len == 12U);
+	} else if (st > 0 && len == 12U) {
 		fputs("FIGI, not conformant, should be ", stdout);
 		fwrite(str, sizeof(*str), 11U, stdout);
-		fputc((char)b.state, stdout);
+		fputc((char)(st >> 1), stdout);
+	} else {
+		fputs("unknown", stdout);
 	}
-	return 0;
-}
-
-const struct nmck_chkr_s*
-init_figi(void)
-{
-	static const struct nmck_chkr_s this = {
-		.name = "FIGI",
-		.bidf = figi_bid,
-		.prntf = figi_prnt,
-	};
-	return &this;
-}
-
-int
-fini_figi(void)
-{
-	return 0;
+	return;
 }
 
 /* figi.c ends here */

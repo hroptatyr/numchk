@@ -41,9 +41,6 @@
 #include <assert.h>
 #include "numchk.h"
 #include "nifty.h"
-#include "isin.h"
-
-static const nmck_bid_t nul_bid;
 
 /* allowed isin country codes */
 #include "isin-cc.c"
@@ -67,18 +64,16 @@ calc_chk(const char *str, size_t len)
 }
 
 
-/* class implementation */
-static nmck_bid_t
-isin_bid(const char *str, size_t len)
+nmck_t
+nmck_isin(const char *str, size_t len)
 {
 	char buf[24U];
 	size_t bsz = 0U;
 
-	/* common cases first */
-	if (len != 12) {
-		return nul_bid;
+	if (UNLIKELY(len != 12U)) {
+		return -1;
 	} else if (!valid_cc_p(str)) {
-		return nul_bid;
+		return -1;
 	}
 
 	/* expand the left 11 digits */
@@ -100,48 +95,31 @@ isin_bid(const char *str, size_t len)
 			buf[bsz++] = (char)((str[i] - 'U') ^ '0');
 			break;
 		default:
-			return nul_bid;
+			return -1;
 		}
 	}
 	with (char chk = calc_chk(buf, bsz)) {
 		if (chk != str[11U]) {
 			/* record state but submit a bid */
-			return (nmck_bid_t){63U, chk};
+			return chk << 1 | 1;
 		}
 	}
-	/* bid bid bid */
-	return (nmck_bid_t){255U};
+	return 0;
 }
 
-static int
-isin_prnt(const char *str, size_t len, nmck_bid_t b)
+void
+nmpr_isin(nmck_t st, const char *str, size_t len)
 {
-	if (LIKELY(!b.state)) {
+	if (!st) {
 		fputs("ISIN, conformant with ISO 6166:2013", stdout);
-	} else {
-		assert(len == 12U);
+	} else if (st > 0 && len == 12U) {
 		fputs("ISIN, not ISO 6166 conformant, should be ", stdout);
 		fwrite(str, sizeof(*str), 11U, stdout);
-		fputc((char)b.state, stdout);
+		fputc((char)(st >> 1), stdout);
+	} else {
+		fputs("unknown", stdout);
 	}
-	return 0;
-}
-
-const struct nmck_chkr_s*
-init_isin(void)
-{
-	static const struct nmck_chkr_s this = {
-		.name = "ISIN",
-		.bidf = isin_bid,
-		.prntf = isin_prnt,
-	};
-	return &this;
-}
-
-int
-fini_isin(void)
-{
-	return 0;
+	return;
 }
 
 /* isin.c ends here */

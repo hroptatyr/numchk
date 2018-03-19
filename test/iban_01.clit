@@ -1,6 +1,6 @@
 #!/usr/bin/clitoris  ## -*- shell-script -*-
 
-$ numchk < "${srcdir}/nordea.xmpl"
+$ numchk < "${srcdir}/nordea.xmpl" | grep IBAN
 AL47212110090000000235698741	IBAN, conformant with ISO 13616-1:2007
 AD12 00012030200359100100	IBAN, conformant with ISO 13616-1:2007
 AT611904300235473201	IBAN, not ISO 13616-1 conformant, should be AT161904300235473201

@@ -2,3 +2,6 @@ Usage: numchk [NUMBER]...
 
 Determine tpe of NUMBERs and check their consistency.
 If NUMBERs are omitted read from stdin.
+
+  -a, --all         Also print all non-conformant candidates.
+  -1, --one-line    Condense results into one tab-separated line.

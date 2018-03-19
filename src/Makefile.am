@@ -23,26 +23,27 @@ EXTRA_DIST += version.c.in
 noinst_LIBRARIES += libnumchk.a
 libnumchk_a_SOURCES = version.c version.h
 EXTRA_libnumchk_a_SOURCES =
-libnumchk_a_SOURCES += isin.c isin.h
+libnumchk_a_SOURCES += isin.c
 BUILT_SOURCES += isin-cc.c
-libnumchk_a_SOURCES += figi.c figi.h
-libnumchk_a_SOURCES += cusip.c cusip.h
-libnumchk_a_SOURCES += sedol.c sedol.h
-libnumchk_a_SOURCES += iban.c iban.h
+libnumchk_a_SOURCES += figi.c
+libnumchk_a_SOURCES += cusip.c
+libnumchk_a_SOURCES += sedol.c
+libnumchk_a_SOURCES += iban.c
 BUILT_SOURCES += iban-cc.c
-libnumchk_a_SOURCES += lei.c lei.h
-libnumchk_a_SOURCES += gtin.c gtin.h
-libnumchk_a_SOURCES += isbn.c isbn.h
-libnumchk_a_SOURCES += credcard.c credcard.h
-libnumchk_a_SOURCES += tfn.c tfn.h
-libnumchk_a_SOURCES += cas.c cas.h
-libnumchk_a_SOURCES += istc.c istc.h
+libnumchk_a_SOURCES += lei.c
+libnumchk_a_SOURCES += gtin.c
+libnumchk_a_SOURCES += isbn.c
+libnumchk_a_SOURCES += credcard.c
+libnumchk_a_SOURCES += tfn.c
+libnumchk_a_SOURCES += cas.c
+libnumchk_a_SOURCES += istc.c
 
 bin_PROGRAMS += numchk
-numchk_SOURCES = numchk.c numchk.h numchk.yuck
+numchk_SOURCES = numchk.c numchk.h numchk.yuck numchk.rl
 numchk_SOURCES += nifty.h
 numchk_LDADD = libnumchk.a
 BUILT_SOURCES += numchk.yucc
+BUILT_SOURCES += numchk.rlc
 
 ## ccl->c
 SUFFIXES += .ccl
@@ -58,9 +59,14 @@ version.c: version.c.in $(top_builddir)/.version
 ## yuck rule
 SUFFIXES += .yuck
 SUFFIXES += .yucc
+SUFFIXES += .re
 .yuck.yucc:
 	$(AM_V_GEN) PATH=$(top_builddir)/build-aux:"$${PATH}" \
 		yuck$(EXEEXT) gen -o $@ $<
+
+.rl.rlc:
+	$(AM_V_GEN) PATH=$(top_builddir)/build-aux:"$${PATH}" \
+		ragel -F1 -C -o $@ $<
 
 ## Create preprocessor output (debugging purposes only)
 .c.i:

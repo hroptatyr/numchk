@@ -39,9 +39,6 @@
 #include <stdio.h>
 #include "numchk.h"
 #include "nifty.h"
-#include "cusip.h"
-
-static const nmck_bid_t nul_bid;
 
 static unsigned int
 calc_chk(const char *str, size_t len)
@@ -92,13 +89,12 @@ calc_chk(const char *str, size_t len)
 }
 
 
-/* class implementation */
-static nmck_bid_t
-cusip_bid(const char *str, size_t len)
+nmck_t
+nmck_cusip(const char *str, size_t len)
 {
 	/* common cases first */
 	if (len < 8U || len > 11U) {
-		return nul_bid;
+		return -1;
 	}
 
 	with (unsigned int cc = calc_chk(str, len)) {
@@ -106,49 +102,34 @@ cusip_bid(const char *str, size_t len)
 		char chk = (char)(cc & 0xff);
 
 		if (!cc) {
-			return nul_bid;
+			return -1;
 		} else if (consumed != len - 1U) {
-			return nul_bid;
+			return -1;
 		} else if (chk != str[consumed]) {
 			/* record state */
-			return (nmck_bid_t){31U, cc};
+			return cc << 1U | 1U;
 		}
 	}
-	/* bid higher than isin */
-	return (nmck_bid_t){63U};
+	return 0;
 }
 
-static int
-cusip_prnt(const char *str, size_t UNUSED(len), nmck_bid_t b)
+void
+nmpr_cusip(nmck_t s, const char *str, size_t UNUSED(len))
 {
-	if (LIKELY(!b.state)) {
+	if (LIKELY(!s)) {
 		fputs("CUSIP, conformant", stdout);
-	} else {
-		unsigned int consumed = b.state >> 8U;
-		char chk = (char)(b.state & 0xff);
+	} else if (s > 0) {
+		unsigned int st = s >> 1;
+		unsigned int consumed = (unsigned int)st >> 8U;
+		char chk = (char)(st & 0xff);
 
 		fputs("CUSIP, not conformant, should be ", stdout);
 		fwrite(str, sizeof(*str), consumed, stdout);
 		fputc(chk, stdout);
+	} else {
+		fputs("unknown", stdout);
 	}
-	return 0;
-}
-
-const struct nmck_chkr_s*
-init_cusip(void)
-{
-	static const struct nmck_chkr_s this = {
-		.name = "CUSIP",
-		.bidf = cusip_bid,
-		.prntf = cusip_prnt,
-	};
-	return &this;
-}
-
-int
-fini_cusip(void)
-{
-	return 0;
+	return;
 }
 
 /* cusip.c ends here */

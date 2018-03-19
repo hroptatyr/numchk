@@ -41,18 +41,14 @@
 #include <stdint.h>
 #include "numchk.h"
 #include "nifty.h"
-#include "istc.h"
 
 typedef union {
-	unsigned int s;
+	nmck_t s;
 	struct {
 		unsigned char len;
 		unsigned char chk;
 	};
 } istc_state_t;
-
-static const nmck_bid_t nul_bid;
-static const istc_state_t nul_state;
 
 static __attribute__((pure, const)) uint_fast32_t
 _chex(char c)
@@ -76,19 +72,28 @@ _hexc(char c)
 	return (char)(c + '7');
 }
 
-static istc_state_t
-calc_istc(const char *str, size_t len)
+
+nmck_t
+nmck_istc(const char *str, size_t len)
 {
 /* calculate the check digit, this one is right to left */
 	static uint_fast32_t x[] = {1, 3, 9, 11};
 	uint_fast32_t sum;
-	ssize_t i = len - 1;
+	ssize_t i = len - 1U;
 	size_t j, k = 1U;
 
-	if ((sum = _chex(str[i--])) >= 16U) {
-		return nul_state;
+	/* common istces first */
+	if (len < 13U || len > 19U) {
+		return -1;
+	}
+
+	if ((sum = _chex(str[i])) >= 16U && str[i] != '_') {
+		return -1;
+	} else if (str[i] == '_') {
+		sum = 16U;
 	}
 	sum = 16U - sum;
+	i--;
 
 	i -= str[i] == '-';
 
@@ -97,13 +102,13 @@ calc_istc(const char *str, size_t len)
 		uint_fast32_t c = _chex(str[i]);
 
 		if (UNLIKELY(c >= 16U)) {
-			return nul_state;
+			return -1;
 		}
 		sum += x[k++] * c;
 		k %= countof(x);
 	}
 	if (j < 8U) {
-		return nul_state;
+		return -1;
 	}
 
 	i -= str[i] == '-';
@@ -113,13 +118,13 @@ calc_istc(const char *str, size_t len)
 		uint_fast32_t c = _chex(str[i]);
 
 		if (UNLIKELY(c >= 16U)) {
-			return nul_state;
+			return -1;
 		}
 		sum += x[k++] * c;
 		k %= countof(x);
 	}
 	if (j < 4U) {
-		return nul_state;
+		return -1;
 	}
 
 	i -= str[i] == '-';
@@ -129,75 +134,37 @@ calc_istc(const char *str, size_t len)
 		uint_fast32_t c = _chex(str[i]);
 
 		if (UNLIKELY(c >= 16U)) {
-			return nul_state;
+			return -1;
 		}
 		sum += x[k++] * c;
 		k %= countof(x);
 	}
 
-	if (sum %= 16U) {
-		sum += _chex(str[len - 1]);
-		sum %= 16U;
-	}
-
-	/* return both, length and check digit */
-	return (istc_state_t){.len = 1U, .chk = (unsigned char)sum};
-}
-
-
-/* class implementation */
-static nmck_bid_t
-istc_bid(const char *str, size_t len)
-{
-	/* common istces first */
-	if (len < 13U || len > 19U) {
-		return nul_bid;
-	}
-
-	with (istc_state_t st = calc_istc(str, len)) {
-		if (!st.s) {
-			return nul_bid;
-		} else if (st.chk >= 16U) {
-			return nul_bid;
-		} else if (st.chk) {
-			/* record state */
-			return (nmck_bid_t){31U, st.s};
+	if ((sum %= 16U) || str[len - 1] == '_') {
+		if (str[len - 1] != '_') {
+			sum += _chex(str[len - 1]);
+			sum %= 16U;
 		}
+		return (istc_state_t){.len = 1U, .chk = (unsigned char)sum}.s;
 	}
-	/* bid just any number really */
-	return (nmck_bid_t){63U};
+	return 0;
 }
 
-static int
-istc_prnt(const char *str, size_t len, nmck_bid_t b)
+void
+nmpr_istc(nmck_t s, const char *str, size_t len)
 {
-	istc_state_t st = {b.state};
+	istc_state_t st = {s};
 
-	if (LIKELY(!st.chk)) {
+	if (LIKELY(!s)) {
 		fputs("ISTC, conformant", stdout);
-	} else {
+	} else if (s > 0 && len > 0) {
 		fputs("ISTC, not conformant, should be ", stdout);
 		fwrite(str, sizeof(*str), len - 1U, stdout);
 		fputc(_hexc(st.chk), stdout);
+	} else {
+		fputs("unknown", stdout);
 	}
-	return 0;
-}
-
-const struct nmck_chkr_s*
-init_istc(void)
-{
-	static const struct nmck_chkr_s this = {
-		.name = "ISTC",
-		.bidf = istc_bid,
-		.prntf = istc_prnt,
-	};
-	return &this;
-}
-
-int
-fini_istc(void)
-{
-	return 0;
+	return;
 }
 
 /* istc.c ends here */

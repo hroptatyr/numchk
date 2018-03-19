@@ -41,17 +41,14 @@
 #include <assert.h>
 #include "numchk.h"
 #include "nifty.h"
-#include "lei.h"
 
 typedef union {
-	unsigned int s;
+	nmck_t s;
 	struct {
+		short unsigned int pad;
 		char chk[2U];
 	};
 } lei_state_t;
-
-static const nmck_bid_t nul_bid;
-static const lei_state_t nul_state;
 
 static lei_state_t
 calc_st(const char *str, size_t UNUSED(len))
@@ -59,7 +56,6 @@ calc_st(const char *str, size_t UNUSED(len))
 	char buf[40U];
 	size_t bsz = 0U;
 	unsigned int sum = 0U;
-	lei_state_t res;
 	size_t j = 0U;
 
 	/* expand string first */
@@ -85,7 +81,7 @@ calc_st(const char *str, size_t UNUSED(len))
 			j++;
 			break;
 		default:
-			return nul_state;
+			return (lei_state_t){0};
 		}
 	}
 	/* and 00 */
@@ -105,65 +101,49 @@ calc_st(const char *str, size_t UNUSED(len))
 	/* this is the actual checksum */
 	sum = 98U - sum;
 
-	res.chk[0U] = (char)((sum / 10U) ^ '0');
-	res.chk[1U] = (char)((sum % 10U) ^ '0');
-	return res;
+	return (lei_state_t){
+		.chk[0U] = (char)((sum / 10U) ^ '0'),
+		.chk[1U] = (char)((sum % 10U) ^ '0')
+	};
 }
 
 
-/* class implementation */
-static nmck_bid_t
-lei_bid(const char *str, size_t len)
+nmck_t
+nmck_lei(const char *str, size_t len)
 {
 	/* common cases first */
 	if (len != 20) {
-		return nul_bid;
+		return -1;
 	}
 
 	with (lei_state_t st = calc_st(str, len)) {
 		if (!st.s) {
-			return nul_bid;
+			return -1;
 		} else if (str[18U] != st.chk[0U] || str[19U] != st.chk[1U]) {
 			/* record state */
-			return (nmck_bid_t){31U, st.s};
+			return st.s | 1;
 		}
 	}
-	/* bid just any number really */
-	return (nmck_bid_t){255U};
+	/* all's good */
+	return 0;
 }
 
-static int
-lei_prnt(const char *str, size_t len, nmck_bid_t b)
+void
+nmpr_lei(nmck_t s, const char *str, size_t len)
 {
-	lei_state_t st = {b.state};
+	lei_state_t st = {s};
 
-	if (LIKELY(!b.state)) {
+	if (LIKELY(!s)) {
 		fputs("LEI, conformant with ISO 17442:2012", stdout);
-	} else {
-		assert(len == 20U);
+	} else if (s > 0 && len == 20U) {
 		fputs("LEI, not ISO 17442 conformant, should be ", stdout);
 		fwrite(str, sizeof(*str), 18U, stdout);
 		fputc(st.chk[0U], stdout);
 		fputc(st.chk[1U], stdout);
+	} else {
+		fputs("unknown", stdout);
 	}
-	return 0;
-}
-
-const struct nmck_chkr_s*
-init_lei(void)
-{
-	static const struct nmck_chkr_s this = {
-		.name = "LEI",
-		.bidf = lei_bid,
-		.prntf = lei_prnt,
-	};
-	return &this;
-}
-
-int
-fini_lei(void)
-{
-	return 0;
+	return;
 }
 
 /* lei.c ends here */

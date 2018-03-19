@@ -40,12 +40,9 @@
 #include <assert.h>
 #include "numchk.h"
 #include "nifty.h"
-#include "sedol.h"
-
-static const nmck_bid_t nul_bid;
 
 static char
-calc_chk(const char *str, size_t UNUSED(len))
+calc_chk(const char *str)
 {
 /* calculate the check digit for an expanded ISIN */
 	unsigned int w[] = {1U, 3U, 1U, 7U, 3U, 9U};
@@ -74,56 +71,39 @@ calc_chk(const char *str, size_t UNUSED(len))
 }
 
 
-/* class implementation */
-static nmck_bid_t
-sedol_bid(const char *str, size_t len)
+nmck_t
+nmck_sedol(const char *str, size_t len)
 {
 	/* common cases first */
 	if (len != 7U) {
-		return nul_bid;
+		return -1;
 	}
 
-	with (char chk = calc_chk(str, len)) {
+	with (char chk = calc_chk(str)) {
 		if (!chk) {
-			return nul_bid;
+			return -1;
 		} else if (chk != str[6U]) {
 			/* record state */
-			return (nmck_bid_t){31U, chk};
+			return (unsigned char)chk << 1 | 1;
 		}
 	}
-	/* bid just any number really */
-	return (nmck_bid_t){63U};
+	return 0;
 }
 
-static int
-sedol_prnt(const char *str, size_t UNUSED(len), nmck_bid_t b)
+void
+nmpr_sedol(nmck_t st, const char *str, size_t len)
 {
-	if (LIKELY(!b.state)) {
+	if (LIKELY(!st)) {
 		fputs("SEDOL, conformant", stdout);
-	} else {
+	} else if (st > 0 && len == 7U) {
 		assert(len == 7U);
 		fputs("SEDOL, not conformant, should be ", stdout);
 		fwrite(str, sizeof(*str), 6U, stdout);
-		fputc((char)b.state, stdout);
+		fputc((char)(st >> 1), stdout);
+	} else {
+		fputs("unknown", stdout);
 	}
-	return 0;
-}
-
-const struct nmck_chkr_s*
-init_sedol(void)
-{
-	static const struct nmck_chkr_s this = {
-		.name = "SEDOL",
-		.bidf = sedol_bid,
-		.prntf = sedol_prnt,
-	};
-	return &this;
-}
-
-int
-fini_sedol(void)
-{
-	return 0;
+	return;
 }
 
 /* sedol.c ends here */

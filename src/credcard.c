@@ -39,13 +39,12 @@
 #include <stdio.h>
 #include "numchk.h"
 #include "nifty.h"
-#include "credcard.h"
-
 
 typedef union {
-	unsigned int s;
+	nmck_t s;
 	struct {
-		short unsigned int pos;
+		char pad;
+		unsigned char pos;
 		unsigned char issuer;
 		char chk;
 	};
@@ -75,7 +74,6 @@ typedef enum {
 	ISS_UATP,
 } cc_issuer_t;
 
-static const nmck_bid_t nul_bid;
 static const cc_state_t nul_state;
 
 static const char *issuers[] = {
@@ -140,7 +138,7 @@ calc_st(const char *str, size_t len)
 		}
 	}
 	if (UNLIKELY(j < 12U || j > 19U)) {
-		return nul_state;
+		return (cc_state_t){0};
 	}
 
 	/* return both, position of check digit and check digit */
@@ -148,15 +146,15 @@ calc_st(const char *str, size_t len)
 }
 
 
-/* class implementation */
-static nmck_bid_t
-cc_bid(const char *str, size_t len)
+/* this will always yield a non-0 result in order to track the issuer */
+nmck_t
+nmck_credcard(const char *str, size_t len)
 {
 	cc_state_t st;
 
 	/* common cases first */
 	if (len < 12U || len > 19U + 3U) {
-		return nul_bid;
+		return -1;
 	}
 	/* just calc checksum first and sort through issuers later */
 	st = calc_st(str, len);
@@ -320,54 +318,42 @@ cc_bid(const char *str, size_t len)
 		break;
 	}
 	/* we expect valid numbers to branch to the final label */
-	return nul_bid;
+	return -1;
 
 final:
 	if (!st.s) {
-		return nul_bid;
+		return -1;
 	} else if (st.pos != len - 1U) {
-		return nul_bid;
+		return -1;
 	} else if (st.chk != str[st.pos]) {
-		/* record state */
-		return (nmck_bid_t){31U, st.s};
+		/* this is non-conformant, let the guesser know */
+		st.s |= 1U;
 	}
-	/* nul out the check digit because it passed */
-	st.chk = 0;
 	/* bid higher than gtin? */
-	return (nmck_bid_t){63U, st.s};
+	return st.s;
 }
 
-static int
-cc_prnt(const char *str, size_t UNUSED(len), nmck_bid_t b)
+void
+nmpr_credcard(nmck_t s, const char *str, size_t len)
 {
-	cc_state_t st = {b.state};
+	cc_state_t st = {s};
 
-	fputs(issuers[st.issuer], stdout);
-	if (LIKELY(!st.chk)) {
-		fputs(", conformant account number", stdout);
+	if (s < 0) {
+	unk:
+		fputs("unknown", stdout);
 	} else {
-		fputs(", non-conformant account number, should be ", stdout);
-		fwrite(str, sizeof(*str), st.pos, stdout);
-		fputc(st.chk, stdout);
+		fputs(issuers[st.issuer], stdout);
+		if (LIKELY(!st.pad)) {
+			fputs(", conformant account number", stdout);
+		} else if (len > st.pos) {
+			fputs(", non-conformant account number, should be ", stdout);
+			fwrite(str, sizeof(*str), st.pos, stdout);
+			fputc(st.chk, stdout);
+		} else {
+			goto unk;
+		}
 	}
-	return 0;
-}
-
-const struct nmck_chkr_s*
-init_credcard(void)
-{
-	static const struct nmck_chkr_s this = {
-		.name = "CREDCARD",
-		.bidf = cc_bid,
-		.prntf = cc_prnt,
-	};
-	return &this;
-}
-
-int
-fini_credcard(void)
-{
-	return 0;
+	return;
 }
 
 /* credcard.c ends here */
