@@ -76,18 +76,17 @@ _hexc(char c)
 nmck_t
 nmck_istc(const char *str, size_t len)
 {
-/* calculate the check digit, this one is right to left */
-	static uint_fast32_t x[] = {1, 3, 9, 11};
-	uint_fast32_t sum;
+/* calculate the check digit, this one is right to left, mod 16-3 */
+	uint_fast32_t sum, wgt = 3U;
 	ssize_t i = len - 1U;
-	size_t j, k = 1U;
+	size_t j;
 
 	/* common istces first */
 	if (len < 13U || len > 19U) {
 		return -1;
 	}
 
-	if ((sum = _chex(str[i])) >= 16U && str[i] != '_') {
+	if ((sum = _chex(str[i])) >= 16U && !ischeck(str[i])) {
 		return -1;
 	} else if (str[i] == '_') {
 		sum = 16U;
@@ -104,8 +103,9 @@ nmck_istc(const char *str, size_t len)
 		if (UNLIKELY(c >= 16U)) {
 			return -1;
 		}
-		sum += x[k++] * c;
-		k %= countof(x);
+		sum += wgt * c;
+		wgt *= 3U;
+		wgt %= 16U;
 	}
 	if (j < 8U) {
 		return -1;
@@ -114,14 +114,24 @@ nmck_istc(const char *str, size_t len)
 	i -= str[i] == '-';
 
 	/* 4 digit year */
-	for (j = 0U; i >= 0U && j < 4U; j++, i--) {
-		uint_fast32_t c = _chex(str[i]);
-
-		if (UNLIKELY(c >= 16U)) {
+	with (uint_fast32_t c = (unsigned char)str[i--] ^ '0') {
+		if (!c || c >= 3U) {
+			/* year 3000? */
 			return -1;
 		}
-		sum += x[k++] * c;
-		k %= countof(x);
+		sum += wgt * c;
+		wgt *= 3U;
+		wgt %= 16U;
+	}
+	for (j = 1U; i >= 0U && j < 4U; j++, i--) {
+		uint_fast32_t c = str[i] ^ '0';
+
+		if (UNLIKELY(c >= 10U)) {
+			return -1;
+		}
+		sum += wgt * c;
+		wgt *= 3U;
+		wgt %= 16U;
 	}
 	if (j < 4U) {
 		return -1;
@@ -136,8 +146,9 @@ nmck_istc(const char *str, size_t len)
 		if (UNLIKELY(c >= 16U)) {
 			return -1;
 		}
-		sum += x[k++] * c;
-		k %= countof(x);
+		sum += wgt * c;
+		wgt *= 3U;
+		wgt %= 16U;
 	}
 
 	if ((sum %= 16U) || str[len - 1] == '_') {
