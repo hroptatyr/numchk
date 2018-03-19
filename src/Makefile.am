@@ -33,6 +33,7 @@ BUILT_SOURCES += iban-cc.c
 libnumchk_a_SOURCES += lei.c
 libnumchk_a_SOURCES += gtin.c
 libnumchk_a_SOURCES += isbn.c
+libnumchk_a_SOURCES += issn.c
 libnumchk_a_SOURCES += credcard.c
 libnumchk_a_SOURCES += tfn.c
 libnumchk_a_SOURCES += cas.c

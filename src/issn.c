@@ -1,4 +1,4 @@
-/*** isbn.c -- checker for ISBNs
+/*** issn.c -- checker for ISSNs and ISSN GTINs
  *
  * Copyright (C) 2014-2018 Sebastian Freundt
  *
@@ -47,53 +47,50 @@ typedef union {
 		unsigned char std;
 		char chk;
 	};
-} isbn_state_t;
+} issn_state_t;
 
 enum {
-	ISBN_UNK,
-	ISBN13,
-	ISBN10,
+	ISSN_UNK,
+	ISSN13,
+	ISSN8,
 };
 
-static isbn_state_t
-calc_isbn10(const char *str, size_t len)
+static issn_state_t
+calc_issn8(const char *str, size_t len)
 {
-/* calculate the check digit for an expanded ISIN */
 	unsigned int sum = 0U;
 	size_t i = 0U;
 	char chk;
 
-	/* use the left 9 digits, for ISBN-10 */
-	for (size_t j = 0U; j < 9U && i < len; i++) {
+	/* use the left 7 digits, for ISSN-8 */
+	for (size_t j = 0U; j < 7U && i < len; i++) {
 		switch (str[i]) {
-		case '-':
-			/* ignore */
-			continue;
 		case '0' ... '9':
-			sum += (10 - j++) * (str[i] ^ '0');
+			sum += (8 - j++) * (str[i] ^ '0');
 			break;
+		case '-':
+			/* ignore if 4th*/
+			if (i == 4U) {
+				continue;
+			}
 		default:
-			return (isbn_state_t){0};
+			return (issn_state_t){0};
 		}
-	}
-	/* check if need to skip optional - */
-	if (LIKELY(i < len) && UNLIKELY(str[i] == '-')) {
-		i++;
 	}
 
 	/* reduce sum mod 11 */
-	if ((sum = (814U - sum) % 11U) < 10U) {
-		chk = (char)(sum ^ '0');
+	if (sum %= 11U) {
+		chk = (char)(sum < 10 ? sum ^ '0' : 'X');
 	} else {
-		chk = 'X';
+		chk = '0';
 	}
 
 	/* return both, position of check digit and check digit */
-	return (isbn_state_t){.pos = i, .std = ISBN10, .chk = chk};
+	return (issn_state_t){.pos = i, .std = ISSN8, .chk = chk};
 }
 
-static isbn_state_t
-calc_isbn13(const char *str, size_t len)
+static issn_state_t
+calc_issn13(const char *str, size_t len)
 {
 /* this is essentially the gtin process */
 	unsigned int sum = 0U;
@@ -112,12 +109,12 @@ calc_isbn13(const char *str, size_t len)
 			}
 			break;
 		default:
-			return (isbn_state_t){0};
+			return (issn_state_t){0};
 		}
 	}
 	/* check that we actually used up 12 digits */
 	if (UNLIKELY(j < 12U)) {
-		return (isbn_state_t){0};
+		return (issn_state_t){0};
 	}
 	/* check if need to skip optional - */
 	if (LIKELY(i < len) && UNLIKELY(str[i] == '-')) {
@@ -128,44 +125,44 @@ calc_isbn13(const char *str, size_t len)
 	chk = (char)(((400U - sum) % 10U) ^ '0');
 
 	/* return both, position of check digit and check digit */
-	return (isbn_state_t){.pos = i, .std = ISBN13, .chk = chk};
+	return (issn_state_t){.pos = i, .std = ISSN13, .chk = chk};
 }
 
 static int
-isbn13p(const char *str, size_t len)
+issn13p(const char *str, size_t len)
 {
-	return len >= 13U && str[0U] == '9' && str[1U] == '7' &&
-		(str[2U] == '8' || str[2U] == '9');
+	return len >= 13U &&
+		str[0U] == '9' && str[1U] == '7' && str[2U] == '7';
 }
 
-static isbn_state_t
+static issn_state_t
 calc_chk(const char *str, size_t len)
 {
 /* we need a bit of guess work here */
-	if (isbn13p(str, len)) {
-		isbn_state_t res = calc_isbn13(str, len);
+	if (issn13p(str, len)) {
+		issn_state_t res = calc_issn13(str, len);
 
-		if (LIKELY(res.std == ISBN13)) {
+		if (LIKELY(res.std == ISSN13)) {
 			return res;
 		}
-		/* otherwise make sure to try ISBN-10 again */
+		/* otherwise make sure to try ISSN-8 again */
 	}
-	/* resort to good old ISO 2108 */
-	return calc_isbn10(str, len);
+	/* resort to good old ISO 3297 */
+	return calc_issn8(str, len);
 }
 
 
-/* isbns com in two variants, isbn10 and isbn13 */
+/* issns com in two variants, issn8 and issn13 */
 nmck_t
-nmck_isbn10(const char *str, size_t len)
+nmck_issn8(const char *str, size_t len)
 {
-	isbn_state_t st;
+	issn_state_t st;
 
-	if (len < 10U || len > 13U) {
+	if (len < 8U || len > 9U) {
 		return -1;
 	}
 
-	st = calc_isbn10(str, len);
+	st = calc_issn8(str, len);
 	if (!st.s) {
 		return -1;
 	} else if (st.pos != len - 1U) {
@@ -181,14 +178,14 @@ nmck_isbn10(const char *str, size_t len)
 }
 
 void
-nmpr_isbn10(nmck_t s, const char *str, size_t len)
+nmpr_issn8(nmck_t s, const char *str, size_t len)
 {
-	isbn_state_t st = {s};
+	issn_state_t st = {s};
 
 	if (LIKELY(!st.pos)) {
-		fputs("ISBN, conformant with ISO 2108:1992", stdout);
+		fputs("ISSN, conformant with ISO 3297:1975", stdout);
 	} else if (s > 0 && len > 0) {
-		fputs("ISBN, not ISO 2108:1992 conformant, should be ", stdout);
+		fputs("ISSN, not ISO 3297:1975 conformant, should be ", stdout);
 		fwrite(str, sizeof(*str), len - 1, stdout);
 		fputc(st.chk, stdout);
 	} else {
@@ -198,17 +195,17 @@ nmpr_isbn10(nmck_t s, const char *str, size_t len)
 }
 
 nmck_t
-nmck_isbn13(const char *str, size_t len)
+nmck_issn13(const char *str, size_t len)
 {
-	isbn_state_t st;
+	issn_state_t st;
 
-	if (len < 13U || len > 18U) {
+	if (len != 13U) {
 		return -1;
-	} else if (!isbn13p(str, len)) {
+	} else if (!issn13p(str, len)) {
 		return -1;
 	}
 
-	st = calc_isbn13(str, len);
+	st = calc_issn13(str, len);
 	if (!st.s) {
 		return -1;
 	} else if (st.pos != len - 1U) {
@@ -223,14 +220,14 @@ nmck_isbn13(const char *str, size_t len)
 }
 
 void
-nmpr_isbn13(nmck_t s, const char *str, size_t len)
+nmpr_issn13(nmck_t s, const char *str, size_t len)
 {
-	isbn_state_t st = {s};
+	issn_state_t st = {s};
 
 	if (LIKELY(!st.pos)) {
-		fputs("ISBN, conformant with ISO 2108:2005", stdout);
+		fputs("ISSN, conformant with ISO 3297:2007", stdout);
 	} else if (s > 0 && len > 0) {
-		fputs("ISBN, not ISO 2108:2005 conformant, should be ", stdout);
+		fputs("ISSN, not ISO 3297:2007 conformant, should be ", stdout);
 		fwrite(str, sizeof(*str), len - 1, stdout);
 		fputc(st.chk, stdout);
 	} else {
@@ -240,12 +237,12 @@ nmpr_isbn13(nmck_t s, const char *str, size_t len)
 }
 
 nmck_t
-nmck_isbn(const char *str, size_t len)
+nmck_issn(const char *str, size_t len)
 {
-	isbn_state_t st;
+	issn_state_t st;
 
 	/* common cases first */
-	if (len < 10U || len > 17U) {
+	if (len < 8U || len > 13U) {
 		return -1;
 	}
 
@@ -264,33 +261,33 @@ nmck_isbn(const char *str, size_t len)
 }
 
 void
-nmpr_isbn(nmck_t s, const char *str, size_t len)
+nmpr_issn(nmck_t s, const char *str, size_t len)
 {
-	isbn_state_t st = {s};
+	issn_state_t st = {s};
 
 	if (UNLIKELY(s < 0)) {
 	unk:
 		fputs("unknown", stdout);
 	} else if (LIKELY(!st.pos)) {
-		fputs("ISBN, conformant with ", stdout);
+		fputs("ISSN, conformant with ", stdout);
 		switch (st.std) {
-		case ISBN13:
-			fputs("ISO 2108:2005", stdout);
+		case ISSN13:
+			fputs("ISO 3297:2007", stdout);
 			break;
-		case ISBN10:
-			fputs("ISO 2108:1992", stdout);
+		case ISSN8:
+			fputs("ISO 3297:1975", stdout);
 			break;
 		default:
 			goto unk;
 		}
 	} else if (len > 0) {
-		fputs("ISBN, not ", stdout);
+		fputs("ISSN, not ", stdout);
 		switch (st.std) {
-		case ISBN13:
-			fputs("ISO 2108:2005", stdout);
+		case ISSN13:
+			fputs("ISO 3297:2007", stdout);
 			break;
-		case ISBN10:
-			fputs("ISO 2108:1992", stdout);
+		case ISSN8:
+			fputs("ISO 3297:1975", stdout);
 			break;
 		default:
 			break;
@@ -302,4 +299,4 @@ nmpr_isbn(nmck_t s, const char *str, size_t len)
 	return;
 }
 
-/* isbn.c ends here */
+/* issn.c ends here */

@@ -86,6 +86,13 @@ extern void nmpr_cas(nmck_t, const char*, size_t);
 extern nmck_t nmck_istc(const char*, size_t);
 extern void nmpr_istc(nmck_t, const char*, size_t);
 
+extern nmck_t nmck_issn(const char*, size_t);
+extern void nmpr_issn(nmck_t, const char*, size_t);
+extern nmck_t nmck_issn8(const char*, size_t);
+extern void nmpr_issn8(nmck_t, const char*, size_t);
+extern nmck_t nmck_issn13(const char*, size_t);
+extern void nmpr_issn13(nmck_t, const char*, size_t);
+
 
 /* utils */
 static inline int ischeck(int c)
