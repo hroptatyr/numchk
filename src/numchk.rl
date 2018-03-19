@@ -88,6 +88,9 @@ static nmck_t sureck[NNMCK];
 	action ismn13 {
 		is(ismn13);
 	}
+	action isni {
+		is(isni);
+	}
 
 	main :=
 		upper{2} digit{2} (upnum | ' '){11,42} %iban |
@@ -109,6 +112,7 @@ static nmck_t sureck[NNMCK];
 		(digit | " "){12,22} %credcard |
 		digit{2,3} " "? digit{3} " "? digit{3} %tfn |
 		digit+ "-" digit{2} "-" (digit | check) %cas |
+		digit{4} " "? digit{4} " "? digit{4} " "? digit{3} (digit | "X" | check) %isni |
 		any*;
 
 	write data;
