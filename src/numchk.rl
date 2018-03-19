@@ -35,7 +35,7 @@ static nmck_t sureck[NNMCK];
 
 	upnum = digit | upper;
 	lonum = digit | lower;
-	check = '_';
+	check = "_" | "?";
 
 	action isin {
 		is(isin);
@@ -91,7 +91,7 @@ static nmck_t sureck[NNMCK];
 		digit{3} "-"? digit "-"? digit{4} "-"? digit{4} "-"? (digit | check) %isbn13 |
 		digit "-"? digit{4} "-"? digit{4} "-"? (digit | "X" | check) %isbn10 |
 		(digit | " "){12,22} %credcard |
-		digit{2,3} " "? digit{3} " "? digit{2} (digit | check) %tfn |
+		digit{2,3} " "? digit{3} " "? digit{3} %tfn |
 		digit+ "-" digit{2} "-" (digit | check) %cas |
 		any*;
 
