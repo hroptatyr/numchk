@@ -17,7 +17,7 @@ $ numchk < "${srcdir}/paypalobjects.xmpl" | grep -v "ISTC"
 4111111111111111	Visa, conformant account number
 4012888888881881	Visa, conformant account number
 4222222222222	Visa, conformant account number
-76009244561	GTIN, conformant
+76009244561	unknown
 5019717010103742	MasterCard, conformant account number
 6331101999990016	Maestro, conformant account number
 $
