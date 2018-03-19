@@ -1,11 +1,12 @@
 #!/usr/bin/clitoris  ## -*- shell-script -*-
 
 ## replace check digit with 7
-$ awk '{$0 = substr($0, 1, length($0) - 1) "7"; print}' "${srcdir}/bsym.xmpl" | numchk
+$ awk '{$0 = substr($0, 1, length($0) - 1) "7"; print}' "${srcdir}/bsym.xmpl" | numchk | grep FIGI
 BBG000CLKVQ7	FIGI, not conformant, should be BBG000CLKVQ0
 BBG000CLKWZ7	FIGI, not conformant, should be BBG000CLKWZ8
 BBG000CLKW47	FIGI, not conformant, should be BBG000CLKW42
 BBG000H4S5W7	FIGI, not conformant, should be BBG000H4S5W5
 BBG000H4TB07	FIGI, not conformant, should be BBG000H4TB06
-BBG000H4S6Z7	FIGI, not conformant, should be BBG000H4S6Z0
 $
+
+## last one is accidentally a valid ISIN
