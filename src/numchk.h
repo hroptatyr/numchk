@@ -112,6 +112,9 @@ extern void nmpr_imo(nmck_t, const char*, size_t);
 extern nmck_t nmck_vin(const char*, size_t);
 extern void nmpr_vin(nmck_t, const char*, size_t);
 
+extern nmck_t nmck_grid(const char*, size_t);
+extern void nmpr_grid(nmck_t, const char*, size_t);
+
 
 /* utils */
 static inline int ischeck(int c)
