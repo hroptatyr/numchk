@@ -73,7 +73,7 @@ _b36c(char c)
 	return (char)(c + '7');
 }
 
-static isan_state_t
+static nmck_t
 calc_isan(const char *str, size_t len)
 {
 	uint_fast32_t sum = 36U;
@@ -87,7 +87,7 @@ calc_isan(const char *str, size_t len)
 		if (str[i] == '-') {
 			continue;
 		} else if ((c = _chex(str[i])) >= 16U) {
-			return (isan_state_t){0};
+			return -1;
 		}
 		if ((sum += c) > 36U) {
 			sum -= 36U;
@@ -109,7 +109,7 @@ calc_isan(const char *str, size_t len)
 		if (str[i] == '-') {
 			continue;
 		} else if ((c = _chex(str[i])) >= 16U) {
-			return (isan_state_t){0};
+			return -1;
 		}
 		if ((sum += c) > 36U) {
 			sum -= 36U;
@@ -128,12 +128,12 @@ calc_isan(const char *str, size_t len)
 		chk[1U] = stc[1U] = '\0';
 	}
 	if (i < len) {
-		return (isan_state_t){0};
+		return -1;
 	}
 
 	return (isan_state_t){
 		.pad = (unsigned char)(chk[0U] != stc[0U] || chk[1U] != stc[1U]),
-			.chk = {chk[0U], chk[1U]}, .len = pos};
+			.chk = {chk[0U], chk[1U]}, .len = pos}.s;
 }
 
 
@@ -153,13 +153,7 @@ nmck_isan(const char *str, size_t len)
 		of++;
 	}
 
-	with (isan_state_t st = calc_isan(str + of, len - of)) {
-		if (!st.s) {
-			break;
-		}
-		return st.s;
-	}
-	return -1;
+	return calc_isan(str + of, len - of);
 }
 
 void

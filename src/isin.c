@@ -99,10 +99,7 @@ nmck_isin(const char *str, size_t len)
 		}
 	}
 	with (char chk = calc_chk(buf, bsz)) {
-		if (chk != str[11U]) {
-			/* record state but submit a bid */
-			return chk << 1 | 1;
-		}
+		return chk << 1U ^ (chk != str[11U]);
 	}
 	return 0;
 }
@@ -110,7 +107,7 @@ nmck_isin(const char *str, size_t len)
 void
 nmpr_isin(nmck_t st, const char *str, size_t len)
 {
-	if (!st) {
+	if (!(st & 0b1U)) {
 		fputs("ISIN, conformant with ISO 6166:2013", stdout);
 	} else if (st > 0 && len == 12U) {
 		fputs("ISIN, not ISO 6166 conformant, should be ", stdout);

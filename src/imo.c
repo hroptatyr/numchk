@@ -73,17 +73,13 @@ nmck_imo(const char *str, size_t len)
 	}
 	sum %= 10U;
 	sum ^= '0';
-	if (str[of + 6U] != sum) {
-		return sum << 1U ^ 1U;
-	}
-	/* all's good */
-	return 0;
+	return sum << 1U ^ (str[of + 6U] != (char)sum);
 }
 
 void
 nmpr_imo(nmck_t s, const char *str, size_t len)
 {
-	if (LIKELY(!s)) {
+	if (LIKELY(!(s & 0b1U))) {
 		fputs("IMO, conformant", stdout);
 	} else if (s > 0 && len > 0) {
 		fputs("IMO, not conformant, should be ", stdout);

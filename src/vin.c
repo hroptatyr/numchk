@@ -82,17 +82,13 @@ nmck_vin(const char *str, size_t len)
 	/* digits remain digits, 10 -> X */
 	sum ^= sum < 10U ? '0' : 'R';
 
-	if (str[8U] != sum) {
-		return sum << 1U ^ 1U;
-	}
-	/* all's good */
-	return 0;
+	return sum << 1U ^ (str[8U] != (char)sum);
 }
 
 void
 nmpr_vin(nmck_t s, const char *str, size_t len)
 {
-	if (LIKELY(!s)) {
+	if (LIKELY(!(s & 0b1U))) {
 		fputs("VIN, conformant", stdout);
 	} else if (s > 0 && len > 8U) {
 		fputs("VIN, not conformant, should be ", stdout);
