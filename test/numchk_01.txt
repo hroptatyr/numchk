@@ -22,3 +22,6 @@ M-5215-9669-6	ISMN, conformant with ISO 10957:1993
 BBG00JHWPB07	FIGI, conformant with http://www.omg.org/spec/FIGI/1.0
 BBG00JHWPB0?	ISIN, not ISO 6166 conformant, should be BBG00JHWPB06	FIGI, not conformant, should be BBG00JHWPB07
 IMO 8814275	IMO, conformant
+1M8GDM9AXKP042788	VIN, conformant
+1M8GDM9A_KP042788	VIN, not conformant, should be 1M8GDM9AXKP042788
+JH4TB2H26CC000000	VIN, conformant
