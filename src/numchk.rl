@@ -97,6 +97,9 @@ static nmck_t sureck[NNMCK];
 	action imo {
 		is(imo);
 	}
+	action vin {
+		is(vin);
+	}
 
 	main :=
 		upper{2} digit{2} (upnum | ' '){11,42} %iban |
@@ -122,6 +125,7 @@ static nmck_t sureck[NNMCK];
 		("ISAN" (" " | "-" | ":")?)? xdigit{4} "-"? xdigit{4} "-"? xdigit{4} "-"? xdigit{4} "-"? (alnum | check) %isan |
 		("ISAN" (" " | "-" | ":")?)? xdigit{4} "-"? xdigit{4} "-"? xdigit{4} "-"? xdigit{4} "-"? (alnum | check) "-"? xdigit{4} "-"? xdigit{4} "-"? (alnum | check) %isan |
 		"IMO" " "? digit{6} (digit | check) %imo |
+		upnum{8} (digit | "X" | check) upnum{8} %vin |
 		any*;
 
 	write data;

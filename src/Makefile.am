@@ -42,6 +42,7 @@ libnumchk_a_SOURCES += istc.c
 libnumchk_a_SOURCES += isni.c
 libnumchk_a_SOURCES += isan.c
 libnumchk_a_SOURCES += imo.c
+libnumchk_a_SOURCES += vin.c
 
 bin_PROGRAMS += numchk
 numchk_SOURCES = numchk.c numchk.h numchk.yuck numchk.rl
