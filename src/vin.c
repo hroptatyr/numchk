@@ -83,7 +83,7 @@ nmck_vin(const char *str, size_t len)
 	sum ^= sum < 10U ? '0' : 'R';
 
 	if (str[8U] != sum) {
-		return sum;
+		return sum << 1U ^ 1U;
 	}
 	/* all's good */
 	return 0;
@@ -97,7 +97,7 @@ nmpr_vin(nmck_t s, const char *str, size_t len)
 	} else if (s > 0 && len > 8U) {
 		fputs("VIN, not conformant, should be ", stdout);
 		fwrite(str, sizeof(*str), 8U, stdout);
-		fputc(s & 0x7FU, stdout);
+		fputc(s >> 1U & 0x7FU, stdout);
 		fwrite(str + 9U, sizeof(*str), len - 9U, stdout);
 	} else {
 		fputs("unknown", stdout);

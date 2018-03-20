@@ -124,7 +124,7 @@ static nmck_t sureck[NNMCK];
 		digit{4} " "? digit{4} " "? digit{4} " "? digit{3} (digit | "X" | check) %isni |
 		("ISAN" (" " | "-" | ":")?)? xdigit{4} "-"? xdigit{4} "-"? xdigit{4} "-"? xdigit{4} "-"? (alnum | check) %isan |
 		("ISAN" (" " | "-" | ":")?)? xdigit{4} "-"? xdigit{4} "-"? xdigit{4} "-"? xdigit{4} "-"? (alnum | check) "-"? xdigit{4} "-"? xdigit{4} "-"? (alnum | check) %isan |
-		"IMO" " "? digit{6} (digit | check) %imo |
+		("IMO" " "?)? digit{6} (digit | check) %imo |
 		upnum{8} (digit | "X" | check) upnum{8} %vin |
 		any*;
 

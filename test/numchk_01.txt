@@ -14,7 +14,7 @@ M-5215-9669-6	ISMN, conformant with ISO 10957:1993
 444-42-_	CASRN, not conformant, should be 444-42-8
 444-42-8	CASRN, conformant
 6948836	SEDOL, conformant
-694883?	SEDOL, not conformant, should be 6948836
+694883?	SEDOL, not conformant, should be 6948836	IMO, not conformant, should be 6948838
 694883133	CUSIP, conformant
 69488313_	CUSIP, not conformant, should be 694883133
 0000-0000-D07A-0090-Q-0000-0000-X	ISAN, conformant

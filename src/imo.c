@@ -74,7 +74,7 @@ nmck_imo(const char *str, size_t len)
 	sum %= 10U;
 	sum ^= '0';
 	if (str[of + 6U] != sum) {
-		return sum;
+		return sum << 1U ^ 1U;
 	}
 	/* all's good */
 	return 0;
@@ -88,7 +88,7 @@ nmpr_imo(nmck_t s, const char *str, size_t len)
 	} else if (s > 0 && len > 0) {
 		fputs("IMO, not conformant, should be ", stdout);
 		fwrite(str, sizeof(*str), len - 1U, stdout);
-		fputc(s & 0x7FU, stdout);
+		fputc(s >> 1U & 0x7FU, stdout);
 	} else {
 		fputs("unknown", stdout);
 	}
