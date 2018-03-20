@@ -11,7 +11,7 @@ easy extension.
 
 Red tape
 --------
-+ no external dependencies
++ dependencies: C99, POSIX, [Ragel][2]
 + licensed under BSD3c
 
 Resources
@@ -65,6 +65,7 @@ Input from stdin is of course allowed:
 
 
   [1]: http://libarchive.org/
+  [2]: http://www.colm.net/open-source/ragel/
 
 <!--
   Local variables:
