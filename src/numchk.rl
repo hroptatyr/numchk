@@ -103,6 +103,21 @@ static nmck_t sureck[NNMCK];
 	action grid {
 		is(grid);
 	}
+	action devatid {
+		is(devatid);
+	}
+	action bevatid {
+		is(bevatid);
+	}
+	action dkvatid {
+		is(dkvatid);
+	}
+	action fivatid {
+		is(fivatid);
+	}
+	action frvatid {
+		is(frvatid);
+	}
 
 	main :=
 		upper{2} digit{2} (upnum | ' '){11,42} %iban |
@@ -130,6 +145,11 @@ static nmck_t sureck[NNMCK];
 		("IMO" " "?)? digit{6} (digit | check) %imo |
 		upnum{8} (digit | "X" | check) upnum{8} %vin |
 		upnum{2} "-"? upnum{5} "-"? upnum{10} "-"? (upnum | check) %grid |
+		("DE" " "?)? digit{3} " "? digit{3} " "? digit{2} (digit | check) %devatid |
+		("BE" "."?)? digit{3,4} "."? digit{3} "."? digit{1} (digit{2} | check{2}) %bevatid |
+		"DK"? digit{7} (digit | check) %dkvatid |
+		"FI"? digit{7} (digit | check) %fivatid |
+		("FR" " "?)? (digit{2} | check{2}) /[ ,]/? digit{3} /[ ,]/? digit{3} /[ ,]/? digit{3} %frvatid |
 		any*;
 
 	write data;

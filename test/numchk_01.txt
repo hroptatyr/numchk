@@ -16,7 +16,7 @@ M-5215-9669-6	ISMN, conformant with ISO 10957:1993
 6948836	SEDOL, conformant
 694883?	SEDOL, not conformant, should be 6948836	IMO, not conformant, should be 6948838
 694883133	CUSIP, conformant
-69488313_	CUSIP, not conformant, should be 694883133
+69488313_	CUSIP, not conformant, should be 694883133	German VAT-ID, not conformant, should be 694883132
 0000-0000-D07A-0090-Q-0000-0000-X	ISAN, conformant
 0000-0000-D07A-0090-?-0000-0000-?	ISAN, not conformant, should be 0000-0000-D07A-0090-Q-0000-0000-X
 BBG00JHWPB07	FIGI, conformant with http://www.omg.org/spec/FIGI/1.0
@@ -29,3 +29,11 @@ A1-2425G-ABC1234002-M	GRid, conformant
 A12425GABC1234002M	GRid, conformant
 A1-2425G-ABC1234002-?	GRid, not conformant, should be A1-2425G-ABC1234002-M
 A12425GABC1234002?	GRid, not conformant, should be A12425GABC1234002M
+DE999 999 995	German VAT-ID, conformant
+999999995	German VAT-ID, conformant
+BE0999999922	Belgian VAT-ID, conformant
+999.999.922	Belgian VAT-ID, conformant
+DK13585628	Danish VAT-ID, conformant
+FI13669598	Finnish VAT-ID, conformant
+FR 83,404,833,048	French VAT-ID, conformant
+FR__404833048	French VAT-ID, not conformant, should be FR83404833048
