@@ -41,15 +41,7 @@
 #include "numchk.h"
 #include "nifty.h"
 
-typedef union {
-	nmck_t s;
-	struct {
-		unsigned char len;
-		unsigned char chk;
-	};
-} tfn_state_t;
-
-static tfn_state_t
+static nmck_t
 calc_tfn(const char *str, size_t len)
 {
 /* calculate the check digit */
@@ -63,16 +55,16 @@ calc_tfn(const char *str, size_t len)
 		if ((unsigned char)str[i] <= ' ') {
 			continue;
 		} else if (UNLIKELY((unsigned char)(str[i] ^ '0') >= 10)) {
-			return (tfn_state_t){0};
+			return -1;
 		}
 		sum += (unsigned char)(str[i] ^ '0') * wgt[j++];
 	}
 	if (i < len) {
 		/* more? */
-		return (tfn_state_t){0};
+		return -1;
 	} else if (j < 8U) {
 		/* um, need at least 8 digits, no? */
-		return (tfn_state_t){0};
+		return -1;
 	}
 
 	if (sum %= 11U) {
@@ -86,43 +78,31 @@ calc_tfn(const char *str, size_t len)
 		sum %= 11U;
 	}
 
-	/* return both, length and check digit */
-	return (tfn_state_t){.len = j, .chk = (unsigned char)sum};
+	return sum << 1U ^ (sum > 0);
 }
 
 
 nmck_t
 nmck_tfn(const char *str, size_t len)
 {
+
 	/* common cases first */
 	if (len < 8U || len > 11U) {
 		return -1;
 	}
 
-	with (tfn_state_t st = calc_tfn(str, len)) {
-		if (!st.s) {
-			return -1;
-		} else if (st.chk >= 10U) {
-			return -1;
-		} else if (st.chk) {
-			/* record state */
-			return st.s | 1;
-		}
-	}
-	return 0;
+	return calc_tfn(str, len);
 }
 
 void
 nmpr_tfn(nmck_t s, const char *str, size_t len)
 {
-	tfn_state_t st = {s};
-
 	if (LIKELY(!s)) {
 		fputs("TFN, conformant", stdout);
 	} else if (s > 0 && len > 0) {
 		fputs("TFN, not conformant, should be ", stdout);
 		fwrite(str, sizeof(*str), len - 1U, stdout);
-		fputc(st.chk ^ '0', stdout);
+		fputc((s >> 1U & 0xfU) ^ '0', stdout);
 	} else {
 		fputs("unknown", stdout);
 	}

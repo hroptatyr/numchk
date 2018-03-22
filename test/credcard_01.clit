@@ -1,7 +1,7 @@
 #!/usr/bin/clitoris  ## -*- shell-script -*-
 
 ## test card numbers from https://www.paypalobjects.com/en_US/vhelp/paypalmanager_help/credit_card_numbers.htm
-$ numchk < "${srcdir}/paypalobjects.xmpl" | grep -v "ISTC"
+$ numchk < "${srcdir}/paypalobjects.xmpl" | grep -v "ISTC" | grep -v "French"
 378282246310005	American Express, conformant account number
 371449635398431	American Express, conformant account number
 378734493671000	American Express, conformant account number
@@ -17,7 +17,6 @@ $ numchk < "${srcdir}/paypalobjects.xmpl" | grep -v "ISTC"
 4111111111111111	Visa, conformant account number
 4012888888881881	Visa, conformant account number
 4222222222222	Visa, conformant account number
-76009244561	unknown
 5019717010103742	MasterCard, conformant account number
 6331101999990016	Maestro, conformant account number
 $

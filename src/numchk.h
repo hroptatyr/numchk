@@ -115,6 +115,19 @@ extern void nmpr_vin(nmck_t, const char*, size_t);
 extern nmck_t nmck_grid(const char*, size_t);
 extern void nmpr_grid(nmck_t, const char*, size_t);
 
+extern nmck_t nmck_euvatid(const char*, size_t);
+extern void nmpr_euvatid(nmck_t, const char*, size_t);
+extern nmck_t nmck_devatid(const char*, size_t);
+extern void nmpr_devatid(nmck_t, const char*, size_t);
+extern nmck_t nmck_bevatid(const char*, size_t);
+extern void nmpr_bevatid(nmck_t, const char*, size_t);
+extern nmck_t nmck_dkvatid(const char*, size_t);
+extern void nmpr_dkvatid(nmck_t, const char*, size_t);
+extern nmck_t nmck_fivatid(const char*, size_t);
+extern void nmpr_fivatid(nmck_t, const char*, size_t);
+extern nmck_t nmck_frvatid(const char*, size_t);
+extern void nmpr_frvatid(nmck_t, const char*, size_t);
+
 
 /* utils */
 static inline int ischeck(int c)
