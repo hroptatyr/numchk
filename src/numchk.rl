@@ -121,6 +121,9 @@ static nmck_t sureck[NNMCK];
 	action bicc {
 		is(bicc);
 	}
+	action bic {
+		is(bic);
+	}
 
 	main :=
 		upper{2} digit{2} (upnum | ' '){11,42} %iban |
@@ -154,6 +157,7 @@ static nmck_t sureck[NNMCK];
 		"FI"? digit{7} (digit | check) %fivatid |
 		("FR" " "?)? (digit{2} | check{2}) /[ ,]/? digit{3} /[ ,]/? digit{3} /[ ,]/? digit{3} %frvatid |
 		upper{3} ("U" | "J" | "Z") digit{6} (digit | check) %bicc |
+		upper{6} upnum{2} upnum? (upnum{3})? %bic |
 		any*;
 
 	write data;
