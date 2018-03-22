@@ -45,6 +45,7 @@ libnumchk_a_SOURCES += imo.c
 libnumchk_a_SOURCES += vin.c
 libnumchk_a_SOURCES += grid.c
 libnumchk_a_SOURCES += euvatid.c
+libnumchk_a_SOURCES += bicc.c
 
 bin_PROGRAMS += numchk
 numchk_SOURCES = numchk.c numchk.h numchk.yuck numchk.rl

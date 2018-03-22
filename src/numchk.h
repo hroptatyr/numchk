@@ -115,6 +115,9 @@ extern void nmpr_vin(nmck_t, const char*, size_t);
 extern nmck_t nmck_grid(const char*, size_t);
 extern void nmpr_grid(nmck_t, const char*, size_t);
 
+extern nmck_t nmck_bicc(const char*, size_t);
+extern void nmpr_bicc(nmck_t, const char*, size_t);
+
 extern nmck_t nmck_euvatid(const char*, size_t);
 extern void nmpr_euvatid(nmck_t, const char*, size_t);
 extern nmck_t nmck_devatid(const char*, size_t);
