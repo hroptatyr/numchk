@@ -41,3 +41,8 @@ TOLU4734787	BICC, conformant with ISO 6346:1995
 DEUTDEFF	BIC, conformant with ISO 9362:2009
 BSAMLKLXXXX	BIC, conformant with ISO 9362:2009
 DEUTDEFF3	FIN address, Swift conformant
+A0B321	WKN, conformant
+AOB321	unknown
+A0B32I	unknown
+CBKTLR	WKN, conformant
+CBKBZR	WKN, conformant
