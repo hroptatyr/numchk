@@ -133,6 +133,9 @@ static nmck_t sureck[NNMCK];
 	action wkn {
 		c(wkn);
 	}
+	action imei {
+		c(imei);
+	}
 
 	main :=
 		upper{2} digit{2} (upnum | ' '){11,42} %iban |
@@ -168,6 +171,7 @@ static nmck_t sureck[NNMCK];
 		upper{3} ("U" | "J" | "Z") digit{6} (digit | check) %bicc |
 		upper{6} upnum{2} upnum? (upnum{3})? %bic |
 		upnum{6} %wkn |
+		digit{2} "-"? digit{6} "-"? digit{6} "-"? ((digit | check) | digit{2}) %imei |
 		any*;
 
 	write data;
