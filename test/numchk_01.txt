@@ -46,3 +46,7 @@ AOB321	unknown
 A0B32I	unknown
 CBKTLR	WKN, conformant
 CBKBZR	WKN, conformant
+490154203237518	IMEI, GSMA conformant
+49-015420-323751-8	IMEI, GSMA conformant
+49-015420-323751-?	IMEI, not GSMA conformant, should be 49-015420-323751-8
+4901542032375180	IMEISV, GSMA conformant

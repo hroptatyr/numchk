@@ -49,6 +49,7 @@ libnumchk_a_SOURCES += bicc.c
 libnumchk_a_SOURCES += bic.c
 BUILT_SOURCES += bic-cc.c
 libnumchk_a_SOURCES += wkn.c
+libnumchk_a_SOURCES += imei.c
 
 bin_PROGRAMS += numchk
 numchk_SOURCES = numchk.c numchk.h numchk.yuck numchk.rl
