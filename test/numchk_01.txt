@@ -37,3 +37,4 @@ DK13585628	Danish VAT-ID, conformant
 FI13669598	Finnish VAT-ID, conformant
 FR 83,404,833,048	French VAT-ID, conformant
 FR__404833048	French VAT-ID, not conformant, should be FR83404833048
+TOLU4734787	BICC, conformant with ISO 6346:1995
