@@ -4,7 +4,13 @@
 #include "nifty.h"
 
 #define NNMCK	(64U)
-#define is(x)	\
+
+#define maybe(x)	\
+	candpr[ncand] = nmpr_##x; \
+	candck[ncand] = 0; \
+	ncand++
+
+#define c(x)	\
 	with (nmck_t y = nmck_##x(str, len)) { \
 		if (y < 0) { \
 			break; \
@@ -38,91 +44,94 @@ static nmck_t sureck[NNMCK];
 	check = "_" | "?";
 
 	action isin {
-		is(isin);
+		c(isin);
 	}
 	action figi {
-		is(figi);
+		c(figi);
 	}
 	action iban {
-		is(iban);
+		c(iban);
 	}
 	action cusip {
-		is(cusip);
+		c(cusip);
 	}
 	action sedol {
-		is(sedol);
+		c(sedol);
 	}
 	action lei {
-		is(lei);
+		c(lei);
 	}
 	action gtin {
-		is(gtin);
+		c(gtin);
 	}
 	action isbn10 {
-		is(isbn10);
+		c(isbn10);
 	}
 	action isbn13 {
-		is(isbn13);
+		c(isbn13);
 	}
 	action credcard {
-		is(credcard);
+		c(credcard);
 	}
 	action tfn {
-		is(tfn);
+		c(tfn);
 	}
 	action cas {
-		is(cas);
+		c(cas);
 	}
 	action istc {
-		is(istc);
+		c(istc);
 	}
 	action issn8 {
-		is(issn8);
+		c(issn8);
 	}
 	action issn13 {
-		is(issn13);
+		c(issn13);
 	}
 	action ismn10 {
-		is(ismn10);
+		c(ismn10);
 	}
 	action ismn13 {
-		is(ismn13);
+		c(ismn13);
 	}
 	action isni {
-		is(isni);
+		c(isni);
 	}
 	action isan {
-		is(isan);
+		c(isan);
 	}
 	action imo {
-		is(imo);
+		c(imo);
 	}
 	action vin {
-		is(vin);
+		c(vin);
 	}
 	action grid {
-		is(grid);
+		c(grid);
 	}
 	action devatid {
-		is(devatid);
+		c(devatid);
 	}
 	action bevatid {
-		is(bevatid);
+		c(bevatid);
 	}
 	action dkvatid {
-		is(dkvatid);
+		c(dkvatid);
 	}
 	action fivatid {
-		is(fivatid);
+		c(fivatid);
 	}
 	action frvatid {
-		is(frvatid);
+		c(frvatid);
 	}
 	action bicc {
-		is(bicc);
+		c(bicc);
 	}
 	action bic {
-		is(bic);
+		c(bic);
+	}
+	action wkn {
+		c(wkn);
 	}
 
 	main :=
@@ -158,6 +167,7 @@ static nmck_t sureck[NNMCK];
 		("FR" " "?)? (digit{2} | check{2}) /[ ,]/? digit{3} /[ ,]/? digit{3} /[ ,]/? digit{3} %frvatid |
 		upper{3} ("U" | "J" | "Z") digit{6} (digit | check) %bicc |
 		upper{6} upnum{2} upnum? (upnum{3})? %bic |
+		upnum{6} %wkn |
 		any*;
 
 	write data;

@@ -134,6 +134,9 @@ extern void nmpr_frvatid(nmck_t, const char*, size_t);
 extern nmck_t nmck_bic(const char*, size_t);
 extern void nmpr_bic(nmck_t, const char*, size_t);
 
+extern nmck_t nmck_wkn(const char*, size_t);
+extern void nmpr_wkn(nmck_t, const char*, size_t);
+
 
 /* utils */
 static inline int ischeck(int c)
