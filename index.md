@@ -14,13 +14,18 @@ numbers and checks their correctness.  In short, it is like `file(1)`
 for numbers with check digits.
 
 The focus is on fast bulk processing of identifiers arising primarily in
-the financial sector.  The design, inspired by [libarchive][1], allows for
-easy extension.
+the financial sector.  Unlike similar libraries numchk only provides
+syntactic and first level semantic checks (mostly check digits and
+country code validation) in order to identify and disambiguate the
+input.  Deep semantic verification, aspects of formatting and
+canonicalisation are left to its competitors.
+
 
 Red tape
 --------
-+ dependencies: C99, POSIX, [Ragel][2]
++ dependencies: C99, POSIX, [Ragel][1]
 + licensed under BSD3c
+
 
 Resources
 ---------
@@ -41,8 +46,8 @@ As of version 0.1 the following numbers can be identified and checked:
 + CUSIPs
 + SEDOLs
 + credit card account numbers
-+ GTINs
-+ ISBNs
+
+and many more.
 
 
 Examples
@@ -77,8 +82,14 @@ Further Reading
 + [Wikipedia on check digits](https://en.wikipedia.org/wiki/Check_digit)
 
 
-  [1]: http://libarchive.org/
-  [2]: http://www.colm.net/open-source/ragel/
+Similar projects
+----------------
++ [python-stdnum][2]
+
+
+  [1]: http://www.colm.net/open-source/ragel/
+  [2]: https://arthurdejong.org/python-stdnum/
+
 
 <!--
   Local variables:
