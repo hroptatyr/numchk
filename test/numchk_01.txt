@@ -16,7 +16,7 @@ M-5215-9669-6	ISMN, conformant with ISO 10957:1993
 6948836	SEDOL, conformant
 694883?	SEDOL, not conformant, should be 6948836	IMO, not conformant, should be 6948838
 694883133	CUSIP, conformant
-69488313_	CUSIP, not conformant, should be 694883133	German VAT-ID, not conformant, should be 694883132
+69488313_	CUSIP, not conformant, should be 694883133	German VAT-ID, not conformant, should be 694883132	Greek VAT-ID, not conformant, should be 694883137
 0000-0000-D07A-0090-Q-0000-0000-X	ISAN, conformant
 0000-0000-D07A-0090-?-0000-0000-?	ISAN, not conformant, should be 0000-0000-D07A-0090-Q-0000-0000-X
 BBG00JHWPB07	FIGI, conformant with http://www.omg.org/spec/FIGI/1.0
@@ -50,3 +50,8 @@ CBKBZR	WKN, conformant
 49-015420-323751-8	IMEI, GSMA conformant
 49-015420-323751-?	IMEI, not GSMA conformant, should be 49-015420-323751-8
 4901542032375180	IMEISV, GSMA conformant
+EL123456783	Greek VAT-ID, conformant
+EL12345678?	Greek VAT-ID, not conformant, should be EL123456783
+IE9+12345U	Irish VAT-ID, conformant
+IE 8473625E	Irish VAT-ID, conformant
+IE1234567FE	Irish VAT-ID, conformant

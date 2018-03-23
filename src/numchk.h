@@ -130,6 +130,10 @@ extern nmck_t nmck_fivatid(const char*, size_t);
 extern void nmpr_fivatid(nmck_t, const char*, size_t);
 extern nmck_t nmck_frvatid(const char*, size_t);
 extern void nmpr_frvatid(nmck_t, const char*, size_t);
+extern nmck_t nmck_grvatid(const char*, size_t);
+extern void nmpr_grvatid(nmck_t, const char*, size_t);
+extern nmck_t nmck_ievatid(const char*, size_t);
+extern void nmpr_ievatid(nmck_t, const char*, size_t);
 
 extern nmck_t nmck_bic(const char*, size_t);
 extern void nmpr_bic(nmck_t, const char*, size_t);

@@ -43,99 +43,39 @@ static nmck_t sureck[NNMCK];
 	lonum = digit | lower;
 	check = "_" | "?";
 
-	action isin {
-		c(isin);
-	}
-	action figi {
-		c(figi);
-	}
-	action iban {
-		c(iban);
-	}
-	action cusip {
-		c(cusip);
-	}
-	action sedol {
-		c(sedol);
-	}
-	action lei {
-		c(lei);
-	}
-	action gtin {
-		c(gtin);
-	}
-	action isbn10 {
-		c(isbn10);
-	}
-	action isbn13 {
-		c(isbn13);
-	}
-	action credcard {
-		c(credcard);
-	}
-	action tfn {
-		c(tfn);
-	}
-	action cas {
-		c(cas);
-	}
-	action istc {
-		c(istc);
-	}
-	action issn8 {
-		c(issn8);
-	}
-	action issn13 {
-		c(issn13);
-	}
-	action ismn10 {
-		c(ismn10);
-	}
-	action ismn13 {
-		c(ismn13);
-	}
-	action isni {
-		c(isni);
-	}
-	action isan {
-		c(isan);
-	}
-	action imo {
-		c(imo);
-	}
-	action vin {
-		c(vin);
-	}
-	action grid {
-		c(grid);
-	}
-	action devatid {
-		c(devatid);
-	}
-	action bevatid {
-		c(bevatid);
-	}
-	action dkvatid {
-		c(dkvatid);
-	}
-	action fivatid {
-		c(fivatid);
-	}
-	action frvatid {
-		c(frvatid);
-	}
-	action bicc {
-		c(bicc);
-	}
-	action bic {
-		c(bic);
-	}
-	action wkn {
-		c(wkn);
-	}
-	action imei {
-		c(imei);
-	}
+	action isin {c(isin)}
+	action figi {c(figi)}
+	action iban {c(iban)}
+	action cusip {c(cusip)}
+	action sedol {c(sedol)}
+	action lei {c(lei)}
+	action gtin {c(gtin)}
+	action isbn10 {c(isbn10)}
+	action isbn13 {c(isbn13)}
+	action credcard {c(credcard)}
+	action tfn {c(tfn)}
+	action cas {c(cas)}
+	action istc {c(istc)}
+	action issn8 {c(issn8)}
+	action issn13 {c(issn13)}
+	action ismn10 {c(ismn10)}
+	action ismn13 {c(ismn13)}
+	action isni {c(isni)}
+	action isan {c(isan)}
+	action imo {c(imo)}
+	action vin {c(vin)}
+	action grid {c(grid)}
+	action devatid {c(devatid)}
+	action bevatid {c(bevatid)}
+	action dkvatid {c(dkvatid)}
+	action fivatid {c(fivatid)}
+	action frvatid {c(frvatid)}
+	action grvatid {c(grvatid)}
+	action ievatid {c(ievatid)}
+	action bicc {c(bicc)}
+	action bic {c(bic)}
+	action wkn {c(wkn)}
+	action imei {c(imei)}
 
 	main :=
 		upper{2} digit{2} (upnum | ' '){11,42} %iban |
@@ -168,6 +108,9 @@ static nmck_t sureck[NNMCK];
 		"DK"? digit{7} (digit | check) %dkvatid |
 		"FI"? digit{7} (digit | check) %fivatid |
 		("FR" " "?)? (digit{2} | check{2}) /[ ,]/? digit{3} /[ ,]/? digit{3} /[ ,]/? digit{3} %frvatid |
+		(("GR" | "EL") " "?)? digit{8} (digit | check) %grvatid |
+		("IE" " "?)? digit{7} upper? (upper | check) "W"? %ievatid |
+		("IE" " "?)? digit (upper | "*" | "+") digit{5} (upper | check) "W"? %ievatid |
 		upper{3} ("U" | "J" | "Z") digit{6} (digit | check) %bicc |
 		upper{6} upnum{2} upnum? (upnum{3})? %bic |
 		upnum{6} %wkn |
