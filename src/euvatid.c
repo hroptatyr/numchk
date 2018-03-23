@@ -41,6 +41,12 @@
 #include "numchk.h"
 #include "nifty.h"
 
+static inline int
+isdigit(int x)
+{
+	return (unsigned char)(x ^ '0') < 10U;
+}
+
 
 nmck_t
 nmck_devatid(const char *str, size_t len)
@@ -313,6 +319,112 @@ nmpr_frvatid(nmck_t s, const char *str, size_t len)
 		fputc((c / 10U) ^ '0', stdout);
 		fputc((c % 10U) ^ '0', stdout);
 		fwrite(str + 4U, sizeof(*str), len - 4U, stdout);
+	} else {
+		fputs("unknown", stdout);
+	}
+	return;
+}
+
+nmck_t
+nmck_grvatid(const char *str, size_t len)
+{
+	uint_fast32_t sum = 0U;
+	size_t i = 0U;
+
+	/* common cases first */
+	if (len < 8U || len > 11U) {
+		return -1;
+	}
+	if (str[0U] == 'G' && str[1U] == 'R' ||
+	    str[0U] == 'E' && str[1U] == 'L') {
+		i += 2U;
+	}
+	i += str[i] == ' ';
+	for (size_t j = 0U; i < len && j < 8U; i++, j++) {
+		uint_fast32_t c = (str[i] ^ '0');
+
+		sum += c;
+		sum *= 2U;
+	}
+	sum %= 11U;
+	sum %= 10U;
+	sum ^= '0';
+
+	return sum << 1U ^ ((char)sum != str[len - 1U]);
+}
+
+void
+nmpr_grvatid(nmck_t s, const char *str, size_t len)
+{
+	if (LIKELY(!(s & 0b1U))) {
+		fputs("Greek VAT-ID, conformant", stdout);
+	} else if (s > 0 && len > 0U) {
+		fputs("Greek VAT-ID, not conformant, should be ", stdout);
+		fwrite(str, sizeof(*str), len - 1U, stdout);
+		fputc(s >> 1U & 0x7fU, stdout);
+	} else {
+		fputs("unknown", stdout);
+	}
+	return;
+}
+
+nmck_t
+nmck_ievatid(const char *str, size_t len)
+{
+	static const char r[] = "WABCDEFGHIJKLMNOPQRSTUV";
+	uint_fast32_t sum = 0U, w = 8U, v = 0U;
+	size_t i = 0U;
+
+	/* common cases first */
+	if (len < 8U || len > 12U) {
+		return -1;
+	}
+	if (str[0U] == 'I' && str[1U] == 'E') {
+		i += 2U;
+	}
+	i += str[i] == ' ';
+	if (!isdigit(str[i + 0U])) {
+		return -1;
+	} else if (!isdigit(str[i + 1U])) {
+		/* one of them very old ones */
+		sum += 2U * (unsigned char)(str[i] ^ '0');
+		i += 2U;
+		v++;
+	}
+	for (; i < len - 1U && (w - v) >= 2U; i++, w--) {
+		uint_fast32_t c = (str[i] ^ '0');
+
+		if (c >= 10U) {
+			return -1;
+		}
+		sum += (w + v) * c;
+	}
+	if (i + 1U < len) {
+		/* 2013+ scheme */
+		uint_fast32_t c;
+
+		if (str[i] < 'A' || str[i] > 'W') {
+			return -1;
+		}
+		c = strchr(r, str[i]) - r;
+		sum += 9U * c;
+		i++;
+	}
+	sum %= 23U;
+	sum = (unsigned char)r[sum];
+
+	return sum << 1U ^ ((char)sum != str[len - 1U]);
+}
+
+void
+nmpr_ievatid(nmck_t s, const char *str, size_t len)
+{
+	if (LIKELY(!(s & 0b1U))) {
+		fputs("Irish VAT-ID, conformant", stdout);
+	} else if (s > 0 && len > 0U) {
+		fputs("Irish VAT-ID, not conformant, should be ", stdout);
+		fwrite(str, sizeof(*str), len - 1U, stdout);
+		fputc(s >> 1U & 0x7fU, stdout);
 	} else {
 		fputs("unknown", stdout);
 	}
