@@ -144,6 +144,9 @@ extern void nmpr_wkn(nmck_t, const char*, size_t);
 extern nmck_t nmck_imei(const char*, size_t);
 extern void nmpr_imei(nmck_t, const char*, size_t);
 
+extern nmck_t nmck_kennitala(const char*, size_t);
+extern void nmpr_kennitala(nmck_t, const char*, size_t);
+
 
 /* utils */
 static inline int ischeck(int c)

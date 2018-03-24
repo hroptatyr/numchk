@@ -55,3 +55,5 @@ EL12345678?	Greek VAT-ID, not conformant, should be EL123456783
 IE9+12345U	Irish VAT-ID, conformant
 IE 8473625E	Irish VAT-ID, conformant
 IE1234567FE	Irish VAT-ID, conformant
+1201603389	kennitala, conformant
+420160-3489	kennitala, conformant
