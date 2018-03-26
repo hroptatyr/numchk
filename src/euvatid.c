@@ -311,14 +311,19 @@ nmpr_frvatid(nmck_t s, const char *str, size_t len)
 {
 	if (LIKELY(!(s & 0b1U))) {
 		fputs("French VAT-ID, conformant", stdout);
-	} else if (s > 0 && len >= 4U) {
+	} else if (s > 0 && len >= 3U) {
 		uint_fast32_t c = s >> 1U;
+		size_t plen = 0U;
+
+		plen += str[0U] == 'F';
+		plen += str[1U] == 'R';
+		plen += str[2U] == ' ';
 
 		fputs("French VAT-ID, not conformant, should be ", stdout);
-		fwrite(str, sizeof(*str), 2U, stdout);
+		fwrite(str, sizeof(*str), plen, stdout);
 		fputc((c / 10U) ^ '0', stdout);
 		fputc((c % 10U) ^ '0', stdout);
-		fwrite(str + 4U, sizeof(*str), len - 4U, stdout);
+		fwrite(str + plen + 2U, sizeof(*str), len - (plen + 2U), stdout);
 	} else {
 		fputs("unknown", stdout);
 	}
