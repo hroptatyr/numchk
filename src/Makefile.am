@@ -53,6 +53,7 @@ libnumchk_a_SOURCES += imei.c
 libnumchk_a_SOURCES += kennitala.c
 libnumchk_a_SOURCES += tckimlik.c
 libnumchk_a_SOURCES += aadhaar.c
+libnumchk_a_SOURCES += iposan.c
 
 bin_PROGRAMS += numchk
 numchk_SOURCES = numchk.c numchk.h numchk.yuck numchk.rl
