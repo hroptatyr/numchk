@@ -51,6 +51,7 @@ BUILT_SOURCES += bic-cc.c
 libnumchk_a_SOURCES += wkn.c
 libnumchk_a_SOURCES += imei.c
 libnumchk_a_SOURCES += kennitala.c
+libnumchk_a_SOURCES += tckimlik.c
 
 bin_PROGRAMS += numchk
 numchk_SOURCES = numchk.c numchk.h numchk.yuck numchk.rl

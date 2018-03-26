@@ -57,3 +57,4 @@ IE 8473625E	Irish VAT-ID, conformant
 IE1234567FE	Irish VAT-ID, conformant
 1201603389	kennitala, conformant
 420160-3489	kennitala, conformant
+98768109974	TC kimlik no, conformant
