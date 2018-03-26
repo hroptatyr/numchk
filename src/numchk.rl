@@ -80,6 +80,7 @@ static nmck_t sureck[NNMCK];
 	action tckimlik {c(tckimlik)}
 	action aadhaar {c(aadhaar)}
 	action titulo_eleitoral {c(titulo_eleitoral)}
+	action iposan {c(iposan)}
 
 	main :=
 		upper{2} digit{2} (upnum | ' '){11,42} %iban |
@@ -123,6 +124,7 @@ static nmck_t sureck[NNMCK];
 		digit{9} (digit{2} | check{2}) %tckimlik |
 		digit{4} " "? digit{4} " "? digit{3} (digit | check) %aadhaar |
 		digit{4} " "? digit{4} " "? digit{2} " "? (digit{2} | check{2}) %titulo_eleitoral |
+		("10" | "11" | "20" | "30" | "40") digit{4} digit{5} (/[P-Y]/ | check) ("-" digit{2})? %iposan |
 		any*;
 
 	write data;

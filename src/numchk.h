@@ -156,6 +156,9 @@ extern void nmpr_aadhaar(nmck_t, const char*, size_t);
 extern nmck_t nmck_titulo_eleitoral(const char*, size_t);
 extern void nmpr_titulo_eleitoral(nmck_t, const char*, size_t);
 
+extern nmck_t nmck_iposan(const char*, size_t);
+extern void nmpr_iposan(nmck_t, const char*, size_t);
+
 
 /* utils */
 static inline int ischeck(int c)
