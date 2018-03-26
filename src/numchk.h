@@ -150,6 +150,9 @@ extern void nmpr_kennitala(nmck_t, const char*, size_t);
 extern nmck_t nmck_tckimlik(const char*, size_t);
 extern void nmpr_tckimlik(nmck_t, const char*, size_t);
 
+extern nmck_t nmck_aadhaar(const char*, size_t);
+extern void nmpr_aadhaar(nmck_t, const char*, size_t);
+
 
 /* utils */
 static inline int ischeck(int c)
