@@ -60,3 +60,5 @@ IE1234567FE	Irish VAT-ID, conformant
 98768109974	TC kimlik no, conformant
 9944 1234 5560	Aadhaar, conformant
 9944 1234 556?	Aadhaar, not conformant, should be 9944 1234 5560
+0043 5687 09 06	Titulo Eleitoral, conformant
+0043 5687 09??	Titulo Eleitoral, not conformant, should be 0043 5687 0906
