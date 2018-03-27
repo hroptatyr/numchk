@@ -1,4 +1,4 @@
-/*** cpf.c -- checker for Brazil's Cadastro de Pessoas Fisicas
+/*** nhi.c -- checker for National Provider Identifiers
  *
  * Copyright (C) 2017-2018 Sebastian Freundt
  *
@@ -44,57 +44,49 @@
 
 
 nmck_t
-nmck_cpf(const char *str, size_t len)
+nmck_nhi(const char *str, size_t len)
 {
-	uint_fast32_t s1 = 0U, s2 = 0U;
-	size_t i = 0U;
+/* A-Z \ {I, O} -> 1 - 24,
+ * weighting is 7, 6, 5, 4, ..., 11 minus that is 4, 5, 6, ... */
+	uint_fast32_t sum = 0U;
+	uint_fast32_t w = 4U;
 
-	if (UNLIKELY(len < 11U || len > 14U)) {
+	if (UNLIKELY(len < 7U || len > 7U)) {
 		return -1;
 	}
 
-	for (uint_fast32_t j = 1U; i < len && j < 10U; i++) {
-		uint_fast32_t c = (unsigned char)(str[i] ^ '0');
-
-		if (str[i] == '.') {
-			continue;
-		} else if (UNLIKELY(c >= 10U)) {
+	/* process alpha part */
+	for (size_t i = 0U; i < 3U; i++) {
+		if (str[i] < 'A' || str[i] > 'Z') {
 			return -1;
 		}
-		s1 += c * j++;
+		sum += w * (str[i] - ('@' + (str[i] > 'I') + (str[i] > 'O')));
+		w++;
 	}
-	s1 %= 11U;
-	s1 %= 10U;
-
-	for (uint_fast32_t j = i = 1U; i < len - 2U && j < 9U; i++) {
+	for (size_t i = 3U; i < 6U; i++) {
 		uint_fast32_t c = (unsigned char)(str[i] ^ '0');
 
-		if (str[i] == '.') {
-			continue;
-		} else if (UNLIKELY(c >= 10U)) {
+		if (UNLIKELY(c >= 10U)) {
 			return -1;
 		}
-		s2 += c * j++;
+		sum += w * c;
+		w++;
 	}
-	s2 += s1 * 9U;
-	s2 %= 11U;
-	s2 %= 10U;
-	s1 ^= '0';
-	s2 ^= '0';
+	sum %= 11U;
+	sum %= 10U;
+	sum ^= '0';
 
-	return (s1 << 8U ^ s2) << 1U ^
-		((char)s1 != str[len - 2U] || (char)s2 != str[len - 1U]);
+	return sum << 1U ^ ((char)sum != str[len - 1U]);
 }
 
 void
-nmpr_cpf(nmck_t s, const char *str, size_t len)
+nmpr_nhi(nmck_t s, const char *str, size_t len)
 {
 	if (!(s & 0b1U)) {
-		fputs("CPF, conformant", stdout);
-	} else if (s > 0 && len > 2U) {
-		fputs("CPF, not conformant, should be ", stdout);
-		fwrite(str, sizeof(*str), len - 2U, stdout);
-		fputc(s >> 9 & 0x7f, stdout);
+		fputs("NHI, conformant", stdout);
+	} else if (s > 0 && len > 1U) {
+		fputs("NHI, not conformant, should be ", stdout);
+		fwrite(str, sizeof(*str), len - 1U, stdout);
 		fputc(s >> 1 & 0x7f, stdout);
 	} else {
 		fputs("unknown", stdout);
@@ -102,4 +94,4 @@ nmpr_cpf(nmck_t s, const char *str, size_t len)
 	return;
 }
 
-/* cpf.c ends here */
+/* nhi.c ends here */

@@ -58,7 +58,7 @@ nmck_titulo_eleitoral(const char *str, size_t len)
 
 		if (str[i] == ' ') {
 			continue;
-		} else if (UNLIKELY(c > 10U)) {
+		} else if (UNLIKELY(c >= 10U)) {
 			return -1;
 		}
 		s1 += c * j++;
@@ -71,7 +71,7 @@ nmck_titulo_eleitoral(const char *str, size_t len)
 
 		if (str[i] == ' ') {
 			continue;
-		} else if (UNLIKELY(c > 10U)) {
+		} else if (UNLIKELY(c >= 10U)) {
 			return -1;
 		}
 		s2 += c * j++;
