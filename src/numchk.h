@@ -165,6 +165,9 @@ extern void nmpr_iposan(nmck_t, const char*, size_t);
 extern nmck_t nmck_npi(const char*, size_t);
 extern void nmpr_npi(nmck_t, const char*, size_t);
 
+extern nmck_t nmck_abartn(const char*, size_t);
+extern void nmpr_abartn(nmck_t, const char*, size_t);
+
 
 /* utils */
 static inline int ischeck(int c)
