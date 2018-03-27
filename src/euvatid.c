@@ -315,9 +315,9 @@ nmpr_frvatid(nmck_t s, const char *str, size_t len)
 		uint_fast32_t c = s >> 1U;
 		size_t plen = 0U;
 
-		plen += str[0U] == 'F';
-		plen += str[1U] == 'R';
-		plen += str[2U] == ' ';
+		plen += (str[0U] == 'F') && str[1U] == 'R';
+		plen += (str[0U] == 'F') && str[1U] == 'R';
+		plen += str[plen] == ' ';
 
 		fputs("French VAT-ID, not conformant, should be ", stdout);
 		fwrite(str, sizeof(*str), plen, stdout);
