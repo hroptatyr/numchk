@@ -1,4 +1,4 @@
-/*** cpf.c -- checker for Brazil's Cadastro de Pessoas Fisicas
+/*** npi.c -- checker for National Provider Identifiers
  *
  * Copyright (C) 2017-2018 Sebastian Freundt
  *
@@ -44,57 +44,44 @@
 
 
 nmck_t
-nmck_cpf(const char *str, size_t len)
+nmck_npi(const char *str, size_t len)
 {
-	uint_fast32_t s1 = 0U, s2 = 0U;
-	size_t i = 0U;
+/* Luhn, started with 80840 */
+	uint_fast32_t sum = 4U;
+	uint_fast32_t w = 2U;
 
-	if (UNLIKELY(len < 11U || len > 14U)) {
+	if (UNLIKELY(len < 10U || len > 10U)) {
 		return -1;
 	}
 
-	for (uint_fast32_t j = 1U; i < len && j < 10U; i++) {
+	for (size_t i = 0U; i < len - 1U; i++) {
 		uint_fast32_t c = (unsigned char)(str[i] ^ '0');
 
-		if (str[i] == '.') {
-			continue;
-		} else if (UNLIKELY(c > 10U)) {
+		if (UNLIKELY(c > 10U)) {
 			return -1;
 		}
-		s1 += c * j++;
-	}
-	s1 %= 11U;
-	s1 %= 10U;
-
-	for (uint_fast32_t j = i = 1U; i < len - 2U && j < 9U; i++) {
-		uint_fast32_t c = (unsigned char)(str[i] ^ '0');
-
-		if (str[i] == '.') {
-			continue;
-		} else if (UNLIKELY(c > 10U)) {
-			return -1;
+		with (uint_fast32_t x = c * w) {
+			sum += x;
+			sum += (x >= 10U);
 		}
-		s2 += c * j++;
+		w ^= 3U;
 	}
-	s2 += s1 * 9U;
-	s2 %= 11U;
-	s2 %= 10U;
-	s1 ^= '0';
-	s2 ^= '0';
+	sum %= 10U;
+	sum = 10 - sum;
+	sum %= 10U;
+	sum ^= '0';
 
-	return (s1 << 8U ^ s2) << 1U ^
-		((char)s1 != str[len - 2U] || (char)s2 != str[len - 1U]);
+	return sum << 1U ^ ((char)sum != str[len - 1U]);
 }
 
 void
-nmpr_cpf(nmck_t s, const char *str, size_t len)
+nmpr_npi(nmck_t s, const char *str, size_t len)
 {
 	if (!(s & 0b1U)) {
-		fputs("CPF, conformant", stdout);
-	} else if (s > 0 && len > 2U) {
-		fputs("CPF, not conformant, should be ", stdout);
-		fwrite(str, sizeof(*str), len - 2U, stdout);
-		fputc(s >> 9 & 0x7f, stdout);
+		fputs("NPI, conformant", stdout);
+	} else if (s > 0 && len > 1U) {
+		fputs("NPI, not conformant, should be ", stdout);
+		fwrite(str, sizeof(*str), len - 1U, stdout);
 		fputc(s >> 1 & 0x7f, stdout);
 	} else {
 		fputs("unknown", stdout);
@@ -102,4 +89,4 @@ nmpr_cpf(nmck_t s, const char *str, size_t len)
 	return;
 }
 
-/* cpf.c ends here */
+/* npi.c ends here */
