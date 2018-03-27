@@ -100,7 +100,7 @@ static nmck_t sureck[NNMCK];
 		digit{7,10} (digit | check) %cusip |
 		digit{6} (digit | check) %sedol |
 		upnum{18} (digit{2} | check{2}) %lei |
-		digit{7,13} (digit | check) %gtin |
+		digit{7,17} (digit | check) %gtin |
 		/97[89]/ "-"? digit "-"? digit{4} "-"? digit{4} "-"? (digit | check) %isbn13 |
 		digit "-"? digit{4} "-"? digit{4} "-"? (digit | "X" | check) %isbn10 |
 		digit{4} "-"? digit{3} (digit | "X" | check) %issn8 |

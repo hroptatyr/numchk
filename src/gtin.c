@@ -40,87 +40,101 @@
 #include "numchk.h"
 #include "nifty.h"
 
-typedef union {
-	nmck_t s;
-	struct {
-		unsigned char pad;
-		unsigned char len;
-		unsigned char chk;
-	};
-} gtin_state_t;
+typedef enum {
+	GS1_UNK,
+	GTIN8,
+	GTIN12,
+	GTIN13,
+	GTIN14,
+	GSIN,
+	SSCC,
+	GS1_NTYPES,
+} gs1_type_t;
 
-static gtin_state_t
-calc_chk(const char *str, size_t len)
-{
-/* calculate the check digit for an expanded ISIN */
-	unsigned int sum = 0U;
-
-	/* use the left len - 1 digits, start with  the evens */
-	for (size_t i = len % 2U; i < len - 1U; i += 2U) {
-		if (UNLIKELY(str[i] < '0' || str[i] > '9')) {
-			return (gtin_state_t){0};
-		}
-		sum += 3U * (str[i] ^ '0');
-	}
-	/* odd numbers now */
-	for (size_t i = !(len % 2U); i < len - 1U; i += 2U) {
-		if (UNLIKELY(str[i] < '0' || str[i] > '9')) {
-			return (gtin_state_t){0};
-		}
-		sum += str[i] ^ '0';
-	}
-
-	/* sum can be at most 252, so check digit is */
-	return (gtin_state_t){
-		.len = len,
-		.chk = (char)(((400U - sum) % 10U) ^ '0')
-	};
-}
+static const char *types[] = {
+	[GS1_UNK] = "GS1",
+	[GTIN8] = "GTIN8",
+	[GTIN12] = "GTIN12",
+	[GTIN13] = "GTIN13",
+	[GTIN14] = "GTIN14",
+	[GSIN] = "GSIN",
+	[SSCC] = "SSCC",
+};
 
 
 nmck_t
 nmck_gtin(const char *str, size_t len)
 {
-	/* common cases first */
-	if (len < 8U || len > 14U) {
+/* weights are ... , 1, 3, 1, 3, 1, mod 10
+ * subtracting 10 is ..., 9, 7, 9, 7, 9 */
+	uint_fast32_t s1 = 0U, s2 = 0U;
+	gs1_type_t t = GS1_UNK;
+
+	switch (len) {
+	case 8U:
+		t++;
+	case 12U:
+		t++;
+	case 13U:
+		t++;
+	case 14U:
+		t++;
+	case 17U:
+		t++;
+	case 18U:
+		t++;
+		break;
+	default:
 		return -1;
 	}
 
-	with (gtin_state_t st = calc_chk(str, len)) {
-		if (!st.chk) {
+	/* use the left len - 1 digits, start with  the odds */
+	for (size_t i = !(len % 2U); i < len - 1U; i += 2U) {
+		uint_fast32_t c = str[i] ^ '0';
+
+		if (UNLIKELY(c >= 10U)) {
 			return -1;
 		}
-		switch (st.len) {
-		case 8:
-		case 12:
-		case 13:
-		case 14:
-			break;
-		default:
-			return -1;
-		}
-		if (st.chk != str[len - 1U]) {
-			/* record state */
-			return st.s | 1;
-		}
-		return st.s;
+		s1 += c;
 	}
-	return -1;
+	/* this is the weight 9 */
+	s1 *= 9U;
+
+	/* evens now */
+	for (size_t i = len % 2U; i < len - 1U; i += 2U) {
+		uint_fast32_t c = str[i] ^ '0';
+
+		if (UNLIKELY(c >= 10U)) {
+			return -1;
+		}
+		s2 += c;
+	}
+	/* this is the weight 7 */
+	s2 *= 7U;
+
+	s1 += s2;
+	s1 %= 10U;
+	s1 ^= '0';
+	return (s1 << 8U ^ (GS1_NTYPES - t)) << 1U ^ ((char)s1 != str[len - 1U]);
 }
 
 void
 nmpr_gtin(nmck_t s, const char *str, size_t len)
 {
-	gtin_state_t st = {s};
+	gs1_type_t t = (gs1_type_t)(s >> 1U & 0xfU);
 
-	if (LIKELY(!st.pad)) {
-		fprintf(stdout, "GTIN%d, conformant", st.len);
-	} else if (s > 0 && len > 0) {
-		fprintf(stdout, "GTIN%d, not conformant, should be ", st.len);
-		fwrite(str, sizeof(*str), len - 1U, stdout);
-		fputc(st.chk, stdout);
-	} else {
+	if (UNLIKELY(s < 0 || !t || t >= GS1_NTYPES)) {
 		fputs("unknown", stdout);
+		return;
+	}
+
+	fputs(types[t], stdout);
+	if (LIKELY(!(s & 0b1U))) {
+		fputs(", conformant", stdout);
+	} else if (s > 0 && len > 0) {
+		fputs(", not conformant, should be ", stdout);
+		fwrite(str, sizeof(*str), len - 1U, stdout);
+		fputc(s >> 8U >> 1U & 0x7fU, stdout);
 	}
 	return;
 }
