@@ -177,6 +177,9 @@ extern void nmpr_ppsn(nmck_t, const char*, size_t);
 extern nmck_t nmck_idnr(const char*, size_t);
 extern void nmpr_idnr(nmck_t, const char*, size_t);
 
+extern nmck_t nmck_oib(const char*, size_t);
+extern void nmpr_oib(nmck_t, const char*, size_t);
+
 
 /* utils */
 static inline int ischeck(int c)

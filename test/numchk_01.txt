@@ -76,4 +76,6 @@ EPT633?	NHI, not conformant, should be EPT6335
 1234567FA	PPS No, conformant
 1234567_A	PPS No, not conformant, should be 1234567FA
 57 663 984 214	IdNr, conformant
-5766398421?	IdNr, not conformant, should be 57663984214
+5766398421?	IdNr, not conformant, should be 57663984214	OIB, not conformant, should be 57663984214
+HR57663984214	OIB, conformant
+97342508862	IdNr, conformant	OIB, conformant
