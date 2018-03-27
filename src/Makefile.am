@@ -62,6 +62,7 @@ libnumchk_a_SOURCES += nhi.c
 libnumchk_a_SOURCES += ppsn.c
 libnumchk_a_SOURCES += idnr.c
 libnumchk_a_SOURCES += oib.c
+libnumchk_a_SOURCES += nhs.c
 
 bin_PROGRAMS += numchk
 numchk_SOURCES = numchk.c numchk.h numchk.yuck numchk.rl

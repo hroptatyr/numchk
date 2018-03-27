@@ -88,6 +88,7 @@ static nmck_t sureck[NNMCK];
 	action ppsn {c(ppsn)}
 	action idnr {c(idnr)}
 	action oib {c(oib)}
+	action nhs {c(nhs)}
 
 	main :=
 		upper{2} digit{2} (upnum | ' '){11,42} %iban |
@@ -139,6 +140,7 @@ static nmck_t sureck[NNMCK];
 		digit{7} (upper | check) ("/"? /[A-Z ]/)? %ppsn |
 		digit{2} " "? digit{3} " "? digit{3} " "? digit{2} (digit | check) %idnr |
 		"HR"? digit{10} (digit | check) %oib |
+		digit{9} (digit | check) %nhs |
 		any*;
 
 	write data;
