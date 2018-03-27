@@ -84,6 +84,7 @@ static nmck_t sureck[NNMCK];
 	action iposan {c(iposan)}
 	action npi {c(npi)}
 	action abartn {c(abartn)}
+	action nhi {c(nhi)}
 
 	main :=
 		upper{2} digit{2} (upnum | ' '){11,42} %iban |
@@ -131,6 +132,7 @@ static nmck_t sureck[NNMCK];
 		("10" | "11" | "20" | "30" | "40") digit{4} digit{5} (/[P-Y]/ | check) ("-" digit{2})? %iposan |
 		digit{9} (digit | check) %npi |
 		digit{8} (digit | check) %abartn |
+		upper{3} digit{3} (digit | check) %nhi |
 		any*;
 
 	write data;
