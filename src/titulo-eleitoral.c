@@ -46,7 +46,6 @@
 nmck_t
 nmck_titulo_eleitoral(const char *str, size_t len)
 {
-/* this is Verhoeff */
 	uint_fast32_t s1 = 0U, s2 = 0U;
 	size_t i = 0U;
 
@@ -64,7 +63,6 @@ nmck_titulo_eleitoral(const char *str, size_t len)
 		}
 		s1 += c * j++;
 	}
-	/* invert prod */
 	s1 %= 11U;
 	s1 %= 10U;
 

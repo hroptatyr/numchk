@@ -66,3 +66,5 @@ IE1234567FE	Irish VAT-ID, conformant
 11201709953T	IPOS application number, conformant
 043.033.407-90	CPF, conformant
 047047000-??	CPF, not conformant, should be 047047000-38
+1659475283	NPI, conformant
+165947528?	ISBN, not ISO 2108:1992 conformant, should be 1659475287	NPI, not conformant, should be 1659475283

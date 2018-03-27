@@ -46,6 +46,7 @@
 nmck_t
 nmck_imei(const char *str, size_t len)
 {
+/* Luhn */
 	uint_fast32_t sum = 0U;
 	uint_fast32_t w = 1U;
 	size_t j = 0U;
@@ -63,7 +64,7 @@ nmck_imei(const char *str, size_t len)
 			return -1;
 		}
 		with (uint_fast32_t x = c * w) {
-			sum += (x % 10U);
+			sum += x;
 			sum += (x >= 10U);
 		}
 		w ^= 3U;
