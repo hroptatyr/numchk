@@ -73,3 +73,5 @@ IE1234567FE	Irish VAT-ID, conformant
 CGC2720	NHI, conformant
 EPT6335	NHI, conformant
 EPT633?	NHI, not conformant, should be EPT6335
+1234567FA	PPS No, conformant
+1234567_A	PPS No, not conformant, should be 1234567FA
