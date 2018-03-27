@@ -80,6 +80,7 @@ static nmck_t sureck[NNMCK];
 	action tckimlik {c(tckimlik)}
 	action aadhaar {c(aadhaar)}
 	action titulo_eleitoral {c(titulo_eleitoral)}
+	action cpf {c(cpf)}
 	action iposan {c(iposan)}
 
 	main :=
@@ -124,6 +125,7 @@ static nmck_t sureck[NNMCK];
 		digit{9} (digit{2} | check{2}) %tckimlik |
 		digit{4} " "? digit{4} " "? digit{3} (digit | check) %aadhaar |
 		digit{4} " "? digit{4} " "? digit{2} " "? (digit{2} | check{2}) %titulo_eleitoral |
+		digit{3} "."? digit{3} "."? digit{3} "-"? (digit{2} | check{2}) %cpf |
 		("10" | "11" | "20" | "30" | "40") digit{4} digit{5} (/[P-Y]/ | check) ("-" digit{2})? %iposan |
 		any*;
 

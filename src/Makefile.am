@@ -54,6 +54,7 @@ libnumchk_a_SOURCES += kennitala.c
 libnumchk_a_SOURCES += tckimlik.c
 libnumchk_a_SOURCES += aadhaar.c
 libnumchk_a_SOURCES += titulo-eleitoral.c
+libnumchk_a_SOURCES += cpf.c
 libnumchk_a_SOURCES += iposan.c
 
 bin_PROGRAMS += numchk
