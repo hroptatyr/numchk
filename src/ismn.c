@@ -40,119 +40,18 @@
 #include "numchk.h"
 #include "nifty.h"
 
-typedef union {
-	nmck_t s;
-	struct {
-		unsigned char pos;
-		unsigned char std;
-		char chk;
-	};
-} ismn_state_t;
-
 enum {
 	ISMN_UNK,
 	ISMN13,
 	ISMN10,
 };
 
-static ismn_state_t
-calc_ismn10(const char *str, size_t len)
-{
-/* calculate the check digit for an expanded ISIN */
-	unsigned int sum = 0U;
-	size_t i = 1U;
-	char chk;
-
-	/* use the left 9 digits, for ISMN-10 */
-	for (size_t j = 1U; j < 9U && i < len; i++) {
-		switch (str[i]) {
-		case '-':
-			/* ignore */
-			continue;
-		case '0' ... '9':
-			sum += (10 - j++) * (str[i] ^ '0');
-			break;
-		default:
-			return (ismn_state_t){0};
-		}
-	}
-	/* check if need to skip optional - */
-	if (LIKELY(i < len) && UNLIKELY(str[i] == '-')) {
-		i++;
-	}
-
-	/* reduce sum mod 11 */
-	if ((sum = (814U - sum) % 11U) < 10U) {
-		chk = (char)(sum ^ '0');
-	} else {
-		chk = 'X';
-	}
-
-	/* return both, position of check digit and check digit */
-	return (ismn_state_t){.pos = i, .std = ISMN10, .chk = chk};
-}
-
-static ismn_state_t
-calc_ismn13(const char *str, size_t len)
-{
-/* this is essentially the gtin process */
-	unsigned int sum = 0U;
-	size_t i, j;
-	char chk;
-
-	for (i = 0U, j = 0U; j < 12U && i < len; i++) {
-		switch (str[i]) {
-		case '-':
-			/* ignore */
-			continue;
-		case '0' ... '9':
-			sum += (str[i] ^ '0');
-			if (j++ % 2U) {
-				sum += (str[i] ^ '0') * 2U;
-			}
-			break;
-		default:
-			return (ismn_state_t){0};
-		}
-	}
-	/* check that we actually used up 12 digits */
-	if (UNLIKELY(j < 12U)) {
-		return (ismn_state_t){0};
-	}
-	/* check if need to skip optional - */
-	if (LIKELY(i < len) && UNLIKELY(str[i] == '-')) {
-		i++;
-	}
-
-	/* reduce sum mod 10 */
-	chk = (char)(((400U - sum) % 10U) ^ '0');
-
-	/* return both, position of check digit and check digit */
-	return (ismn_state_t){.pos = i, .std = ISMN13, .chk = chk};
-}
-
 static int
 ismn13p(const char *str, size_t len)
 {
 	return len >= 13U &&
 		str[0U] == '9' && str[1U] == '7' &&
-		str[2U] == '9' || str[3U] == '0';
-}
-
-static ismn_state_t
-calc_chk(const char *str, size_t len)
-{
-/* we need a bit of guess work here */
-	if (ismn13p(str, len)) {
-		ismn_state_t res = calc_ismn13(str, len);
-
-		if (LIKELY(res.std == ISMN13)) {
-			return res;
-		}
-		/* otherwise make sure to try ISMN-10 again */
-	}
-	/* resort to good old ISO 2108 */
-	return calc_ismn10(str, len);
+		str[2U] == '9' && str[3U] == '0';
 }
 
 
@@ -160,40 +59,39 @@ calc_chk(const char *str, size_t len)
 nmck_t
 nmck_ismn10(const char *str, size_t len)
 {
-	ismn_state_t st;
+	uint_fast32_t sum = 0U;
 
-	if (len < 10U || len > 13U) {
+	if (UNLIKELY(len < 10U || len > 13U)) {
 		return -1;
 	} else if (*str != 'M') {
 		return -1;
 	}
+	/* skip first character as it is supposed to be M */
+	for (size_t i = 1U, j = 2U; i < len - 1U; i++) {
+		uint_fast32_t c = (str[i] ^ '0');
 
-	st = calc_ismn10(str, len);
-	if (!st.s) {
-		return -1;
-	} else if (st.pos != len - 1U) {
-		return -1;
-	} else if (st.chk != str[st.pos]) {
-		/* hand out state */
-		st.pos = 1U;
-	} else {
-		/* we're conformant */
-		st.pos = 0U;
+		if (str[i] == '-') {
+			continue;
+		} else if (UNLIKELY(c >= 10U)) {
+			return -1;
+		}
+		sum += j++ * c;
 	}
-	return st.s;
+	sum %= 11U;
+	sum ^= sum < 10U ? '0' : 'R'/*0xA^'X'*/;
+
+	return (sum << 8U ^ ISMN10) << 8U ^ ((char)sum != str[len - 1U]);
 }
 
 void
 nmpr_ismn10(nmck_t s, const char *str, size_t len)
 {
-	ismn_state_t st = {s};
-
-	if (LIKELY(!st.pos)) {
+	if (LIKELY(!(s & 0b1U))) {
 		fputs("ISMN, conformant with ISO 10957:1993", stdout);
 	} else if (s > 0 && len > 0) {
 		fputs("ISMN, not ISO 10957:1993 conformant, should be ", stdout);
 		fwrite(str, sizeof(*str), len - 1, stdout);
-		fputc(st.chk, stdout);
+		fputc(s >> 16U & 0x7fU, stdout);
 	} else {
 		fputs("unknown", stdout);
 	}
@@ -203,7 +101,10 @@ nmpr_ismn10(nmck_t s, const char *str, size_t len)
 nmck_t
 nmck_ismn13(const char *str, size_t len)
 {
-	ismn_state_t st;
+/* this is essentially the gtin process */
+	uint_fast32_t sum = 0U;
+	uint_fast32_t w = 1U;
+	size_t j;
 
 	if (len < 13U || len > 18U) {
 		return -1;
@@ -211,31 +112,38 @@ nmck_ismn13(const char *str, size_t len)
 		return -1;
 	}
 
-	st = calc_ismn13(str, len);
-	if (!st.s) {
-		return -1;
-	} else if (st.pos != len - 1U) {
-		return -1;
-	} else if (st.chk != str[st.pos]) {
-		/* hand out state */
-		st.pos = 1U;
-	} else {
-		st.pos = 0U;
+	for (size_t i = j = 0U; j < 12U && i < len; i++) {
+		uint_fast32_t c = (str[i] ^ '0');
+
+		if (str[i] == '-') {
+			continue;
+		} else if (UNLIKELY(c >= 10U)) {
+			return -1;
+		}
+		sum += c * w;
+		w ^= 2U;
+		j++;
 	}
-	return st.s;
+	/* check that we actually used up 12 digits */
+	if (UNLIKELY(j < 12U)) {
+		return -1;
+	}
+
+	/* reduce sum mod 10 */
+	sum = (((400U - sum) % 10U) ^ '0');
+
+	return ((sum << 8U) ^ ISMN13) << 8U ^ ((char)sum != str[len - 1U]);
 }
 
 void
 nmpr_ismn13(nmck_t s, const char *str, size_t len)
 {
-	ismn_state_t st = {s};
-
-	if (LIKELY(!st.pos)) {
+	if (LIKELY(!(s & 0b1U))) {
 		fputs("ISMN, conformant with ISO 10957:2009", stdout);
 	} else if (s > 0 && len > 0) {
 		fputs("ISMN, not ISO 10957:2009 conformant, should be ", stdout);
 		fwrite(str, sizeof(*str), len - 1, stdout);
-		fputc(st.chk, stdout);
+		fputc(s >> 16U & 0x7fU, stdout);
 	} else {
 		fputs("unknown", stdout);
 	}
@@ -245,38 +153,18 @@ nmpr_ismn13(nmck_t s, const char *str, size_t len)
 nmck_t
 nmck_ismn(const char *str, size_t len)
 {
-	ismn_state_t st;
-
-	/* common cases first */
-	if (len < 10U || len > 17U) {
-		return -1;
-	}
-
-	st = calc_chk(str, len);
-	if (!st.s) {
-		return -1;
-	} else if (st.pos != len - 1U) {
-		return -1;
-	} else if (st.chk != str[st.pos]) {
-		/* record state */
-		st.pos = 1U;
-	} else {
-		st.pos = 0U;
-	}
-	return st.s;
+	return ismn13p(str, len) ? nmck_ismn13(str, len) : nmck_ismn10(str, len);
 }
 
 void
 nmpr_ismn(nmck_t s, const char *str, size_t len)
 {
-	ismn_state_t st = {s};
-
 	if (UNLIKELY(s < 0)) {
 	unk:
 		fputs("unknown", stdout);
-	} else if (LIKELY(!st.pos)) {
+	} else if (LIKELY(!(s & 0b1U))) {
 		fputs("ISMN, conformant with ", stdout);
-		switch (st.std) {
+		switch (s >> 8U & 0x7fU) {
 		case ISMN13:
 			fputs("ISO 10957:2009", stdout);
 			break;
@@ -288,7 +176,7 @@ nmpr_ismn(nmck_t s, const char *str, size_t len)
 		}
 	} else if (len > 0) {
 		fputs("ISMN, not ", stdout);
-		switch (st.std) {
+		switch (s >> 8U & 0x7fU) {
 		case ISMN13:
 			fputs("ISO 10957:2009", stdout);
 			break;
@@ -300,7 +188,7 @@ nmpr_ismn(nmck_t s, const char *str, size_t len)
 		}
 		fputs(" conformant, should be ", stdout);
 		fwrite(str, sizeof(*str), len - 1, stdout);
-		fputc(st.chk, stdout);
+		fputc(s >> 16 & 0x7fU, stdout);
 	}
 	return;
 }
