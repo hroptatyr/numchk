@@ -102,6 +102,12 @@ nmck_isbn13(const char *str, size_t len)
 	uint_fast32_t w = 1U;
 	size_t j;
 
+	if (len < 13U || len > 18U) {
+		return -1;
+	} else if (!isbn13p(str, len)) {
+		return -1;
+	}
+
 	for (size_t i = j = 0U; j < 12U && i < len; i++) {
 		uint_fast32_t c = (str[i] ^ '0');
 

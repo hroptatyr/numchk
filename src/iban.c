@@ -41,114 +41,20 @@
 #include "numchk.h"
 #include "nifty.h"
 
-typedef union {
-	nmck_t s;
-	struct {
-		short unsigned int len;
-		char chk[2U];
-	};
-} iban_state_t;
-
 /* here we register all allowed country codes, as per
  * http://www.nordea.com/Our+services/Cash+Management/Products+and+services/IBAN+countries/908462.html */
 #include "iban-cc.c"
 
-static iban_state_t
-calc_st(const char *str, size_t len)
-{
-/* calculate the check digit for an expanded ISIN */
-	char buf[78U];
-	size_t bsz = 0U;
-	unsigned int sum = 0U;
-	iban_state_t res;
-	size_t j = 0U;
-
-	/* expand string first */
-	for (size_t i = 4U; i < len; i++) {
-		switch (str[i]) {
-		case ' ':
-			continue;
-		case '0' ... '9':
-			buf[bsz++] = str[i];
-			j++;
-			break;
-		case 'A' ... 'J':
-			buf[bsz++] = '1';
-			buf[bsz++] = (char)((str[i] - 'A') ^ '0');
-			j++;
-			break;
-		case 'K' ... 'T':
-			buf[bsz++] = '2';
-			buf[bsz++] = (char)((str[i] - 'K') ^ '0');
-			j++;
-			break;
-		case 'U' ... 'Z':
-			buf[bsz++] = '3';
-			buf[bsz++] = (char)((str[i] - 'U') ^ '0');
-			j++;
-			break;
-		default:
-			return (iban_state_t){};
-		}
-	}
-	/* append the country code */
-	switch (str[0U]) {
-	case 'A' ... 'J':
-		buf[bsz++] = '1';
-		buf[bsz++] = (char)((str[0U] - 'A') ^ '0');
-		break;
-	case 'K' ... 'T':
-		buf[bsz++] = '2';
-		buf[bsz++] = (char)((str[0U] - 'K') ^ '0');
-		break;
-	case 'U' ... 'Z':
-		buf[bsz++] = '3';
-		buf[bsz++] = (char)((str[0U] - 'U') ^ '0');
-		break;
-	default:
-		return (iban_state_t){};
-	}
-	switch (str[1U]) {
-	case 'A' ... 'J':
-		buf[bsz++] = '1';
-		buf[bsz++] = (char)((str[1U] - 'A') ^ '0');
-		break;
-	case 'K' ... 'T':
-		buf[bsz++] = '2';
-		buf[bsz++] = (char)((str[1U] - 'K') ^ '0');
-		break;
-	case 'U' ... 'Z':
-		buf[bsz++] = '3';
-		buf[bsz++] = (char)((str[1U] - 'U') ^ '0');
-		break;
-	default:
-		return (iban_state_t){};
-	}
-	/* and 00 */
-	buf[bsz++] = '0';
-	buf[bsz++] = '0';
-
-	/* now calc first sum */
-	sum = (buf[0U] ^ '0') * 10U + (buf[1U] ^ '0');
-	for (size_t i = 2U; i < bsz; sum %= 97U) {
-		for (const size_t n = i + 7U < bsz ? i + 7U : bsz; i < n; i++) {
-			sum *= 10U;
-			sum += (buf[i] ^ '0');
-		}
-	}
-	/* this is the actual checksum */
-	sum = 98U - sum;
-	res.len = (unsigned short)((j + 4U) * 2U);
-	res.chk[0U] = (char)((sum / 10U) ^ '0');
-	res.chk[1U] = (char)((sum % 10U) ^ '0');
-	return res;
-}
-
 
-/* class implementation */
 nmck_t
 nmck_iban(const char *str, size_t len)
 {
+	uint_fast8_t buf[78U];
+	size_t bsz = 0U;
+	char chk[2U];
+	uint_fast32_t sum = 0U;
+	size_t j = 0U;
+
 	/* common cases first */
 	if (len < 15U || len > 34U) {
 		return -1;
@@ -156,33 +62,105 @@ nmck_iban(const char *str, size_t len)
 		return -1;
 	}
 
-	with (iban_state_t st = calc_st(str, len)) {
-		if (!st.s) {
+	/* expand string first */
+	for (size_t i = 4U; i < len; i++) {
+		switch (str[i]) {
+		case ' ':
+			continue;
+		case '0' ... '9':
+			buf[bsz++] = (unsigned char)(str[i] ^ '0');
+			j++;
+			break;
+		case 'A' ... 'J':
+			buf[bsz++] = 1U;
+			buf[bsz++] = (unsigned char)(str[i] - 'A');
+			j++;
+			break;
+		case 'K' ... 'T':
+			buf[bsz++] = 2U;
+			buf[bsz++] = (unsigned char)(str[i] - 'K');
+			j++;
+			break;
+		case 'U' ... 'Z':
+			buf[bsz++] = 3U;
+			buf[bsz++] = (unsigned char)(str[i] - 'U');
+			j++;
+			break;
+		default:
 			return -1;
-		} else if (cc_len(str) != st.len / 2U) {
-			return -1;
-		} else if (str[2U] != st.chk[0U] || str[3U] != st.chk[1U]) {
-			/* make it non-conformant */
-			st.s |= 1;
-			return st.s;
 		}
 	}
-	/* all is tickety-boo */
-	return 0;
+	/* append the country code */
+	switch (str[0U]) {
+	case 'A' ... 'J':
+		buf[bsz++] = 1U;
+		buf[bsz++] = (unsigned char)(str[0U] - 'A');
+		break;
+	case 'K' ... 'T':
+		buf[bsz++] = 2U;
+		buf[bsz++] = (unsigned char)(str[0U] - 'K');
+		break;
+	case 'U' ... 'Z':
+		buf[bsz++] = 3U;
+		buf[bsz++] = (unsigned char)(str[0U] - 'U');
+		break;
+	default:
+		return -1;
+	}
+	switch (str[1U]) {
+	case 'A' ... 'J':
+		buf[bsz++] = 1U;
+		buf[bsz++] = (unsigned char)(str[1U] - 'A');
+		break;
+	case 'K' ... 'T':
+		buf[bsz++] = 2U;
+		buf[bsz++] = (unsigned char)(str[1U] - 'K');
+		break;
+	case 'U' ... 'Z':
+		buf[bsz++] = 3U;
+		buf[bsz++] = (unsigned char)(str[1U] - 'U');
+		break;
+	default:
+		return -1;
+	}
+	/* and 00 */
+	buf[bsz++] = 0U;
+	buf[bsz++] = 0U;
+
+	/* check length for country */
+	if (UNLIKELY(cc_len(str) != j + 4U)) {
+		return -1;
+	}
+
+	/* now calc first sum */
+	sum = buf[0U] * 10U + buf[1U];
+	for (size_t i = 2U; i < bsz; sum %= 97U) {
+		for (const size_t n = i + 7U < bsz ? i + 7U : bsz; i < n; i++) {
+			sum *= 10U;
+			sum += buf[i];
+		}
+	}
+	/* this is the actual checksum */
+	sum = 98U - sum;
+	chk[0U] = (char)((sum / 10U) ^ '0');
+	chk[1U] = (char)((sum % 10U) ^ '0');
+
+	/* all is tickety-boo? */
+	return (chk[0U] << 8U ^ chk[1U]) << 8U ^
+		(chk[0U] != str[2U] || chk[1U] != str[3U]);
 }
 
 void
-nmpr_iban(nmck_t st, const char *str, size_t len)
+nmpr_iban(nmck_t s, const char *str, size_t len)
 {
-	if (LIKELY(!(st & 0b1U))) {
+	if (LIKELY(!(s & 0b1U))) {
 		fputs("IBAN, conformant with ISO 13616-1:2007", stdout);
-	} else if (st > 0) {
-		iban_state_t ibst = {st};
+	} else if (s > 0 && len >= 4U) {
 		fputs("IBAN, not ISO 13616-1 conformant, should be ", stdout);
 		fputc(str[0U], stdout);
 		fputc(str[1U], stdout);
-		fputc(ibst.chk[0U], stdout);
-		fputc(ibst.chk[1U], stdout);
+		fputc(s >> 16U & 0x7fU, stdout);
+		fputc(s >> 8U & 0x7fU, stdout);
 		fwrite(str + 4U, sizeof(*str), len - 4U, stdout);
 	} else {
 		fputs("unknown", stdout);

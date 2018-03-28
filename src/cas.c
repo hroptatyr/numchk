@@ -41,36 +41,22 @@
 #include "numchk.h"
 #include "nifty.h"
 
-typedef union {
-	nmck_t s;
-	struct {
-		unsigned char len;
-		unsigned char chk;
-	};
-} cas_state_t;
-
 
 /* class implementation */
 nmck_t
 nmck_cas(const char *str, size_t len)
 {
 /* calculate the check digit, this one is right to left */
-	unsigned int sum;
-	size_t i = len, j = 1U;
+	uint_fast32_t sum = 0U;
+	size_t i = len, j = 0U;
 
 	/* common cases first */
 	if (len < 7U || len > 12U) {
 		return -1;
 	}
 
-	if ((sum = (unsigned char)(str[--i] ^ '0')) >= 10U && str[i] != '_') {
-		return -1;
-	} else if (str[i] == '_') {
-		sum = 10U;
-	}
-	/* this was the check digit so invert */
-	sum = 10U - sum;
-
+	/* start before the check digit */
+	i--, j++;
 	if (str[--i] != '-') {
 		return -1;
 	}
@@ -99,28 +85,20 @@ nmck_cas(const char *str, size_t len)
 		sum += j++ * c;
 	}
 
-	if ((sum %= 10U) || str[len - 1U] == '_') {
-		/* record state */
-		if (str[len - 1U] != '_') {
-			sum += (unsigned int)(str[len - 1U] ^ '0');
-			sum %= 10U;
-		}
-		return (cas_state_t){.len = 1U, .chk = (unsigned char)sum}.s;
-	}
-	return 0;
+	sum %= 10U;
+	sum ^= '0';
+	return sum << 1U ^ ((char)sum != str[len - 1U]);
 }
 
 void
 nmpr_cas(nmck_t s, const char *str, size_t len)
 {
-	cas_state_t st = {s};
-
-	if (LIKELY(!s)) {
+	if (LIKELY(!(s & 0b1U))) {
 		fputs("CASRN, conformant", stdout);
 	} else if (s > 0 && len > 0U) {
 		fputs("CASRN, not conformant, should be ", stdout);
 		fwrite(str, sizeof(*str), len - 1U, stdout);
-		fputc(st.chk ^ '0', stdout);
+		fputc(s >> 1U & 0x7fU, stdout);
 	} else {
 		fputs("unknown", stdout);
 	}

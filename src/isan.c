@@ -42,15 +42,6 @@
 #include "numchk.h"
 #include "nifty.h"
 
-typedef union {
-	nmck_t s;
-	struct {
-		unsigned char pad;
-		unsigned char chk[2U];
-		unsigned char len;
-	};
-} isan_state_t;
-
 static __attribute__((pure, const)) uint_fast32_t
 _chex(char c)
 {
@@ -73,103 +64,83 @@ _b36c(char c)
 	return (char)(c + '7');
 }
 
-static nmck_t
-calc_isan(const char *str, size_t len)
-{
-	uint_fast32_t sum = 36U;
-	unsigned char chk[2U];
-	unsigned char pos;
-	char stc[2U];
-	size_t i;
-
-	for (size_t j = i = 0U; j < 16U && i < len; i++) {
-		uint_fast32_t c;
-		if (str[i] == '-') {
-			continue;
-		} else if ((c = _chex(str[i])) >= 16U) {
-			return -1;
-		}
-		if ((sum += c) > 36U) {
-			sum -= 36U;
-		}
-		sum *= 2U;
-		sum %= 37U;
-		j++;
-	}
-	if (str[i] == '-') {
-		i++;
-	}
-	chk[0U] = _b36c(37U - sum);
-	stc[0U] = str[i++];
-	pos = i;
-
-	/* possibly more */
-	for (size_t j = 0U; j < 8U && i < len; i++) {
-		uint_fast32_t c;
-		if (str[i] == '-') {
-			continue;
-		} else if ((c = _chex(str[i])) >= 16U) {
-			return -1;
-		}
-		if ((sum += c) > 36U) {
-			sum -= 36U;
-		}
-		sum *= 2U;
-		sum %= 37U;
-		j++;
-	}
-	if (i < len) {
-		if (str[i] == '-') {
-			i++;
-		}
-		chk[1U] = _b36c(37U - sum);
-		stc[1U] = str[i++];
-	} else {
-		chk[1U] = stc[1U] = '\0';
-	}
-	if (i < len) {
-		return -1;
-	}
-
-	return (isan_state_t){
-		.pad = (unsigned char)(chk[0U] != stc[0U] || chk[1U] != stc[1U]),
-			.chk = {chk[0U], chk[1U]}, .len = pos}.s;
-}
-
 
 nmck_t
 nmck_isan(const char *str, size_t len)
 {
 /* isan is mod 37,36 */
-	size_t of = 0U;
+	uint_fast32_t sum = 36U;
+	unsigned char pos;
+	char chk[2U];
+	size_t i = 0U;
 
 	if (len < 16U) {
 		return -1;
 	}
 	if (!memcmp(str, "ISAN", 4U)) {
-		of += 4U;
+		i += 4U;
 	}
-	if (_chex(str[of]) >= 16U) {
-		of++;
+	i += _chex(str[i]) >= 16U;
+
+	for (size_t j = 0U; j < 16U && i < len; i++) {
+		uint_fast32_t c;
+
+		if (str[i] == '-') {
+			continue;
+		} else if ((c = _chex(str[i])) >= 16U) {
+			return -1;
+		}
+		if ((sum += c) > 36U) {
+			sum -= 36U;
+		}
+		sum *= 2U;
+		sum %= 37U;
+		j++;
+	}
+	i += str[i] == '-';
+	chk[0U] = _b36c(37U - sum);
+	pos = i++;
+
+	/* possibly more */
+	for (size_t j = 0U; j < 8U && i < len; i++) {
+		uint_fast32_t c;
+
+		if (str[i] == '-') {
+			continue;
+		} else if ((c = _chex(str[i])) >= 16U) {
+			return -1;
+		}
+		if ((sum += c) > 36U) {
+			sum -= 36U;
+		}
+		sum *= 2U;
+		sum %= 37U;
+		j++;
+	}
+	i += i < len && str[i] == '-';
+	i += i < len;
+	chk[1U] = _b36c(37U - sum);
+	if (UNLIKELY(i < len)) {
+		return -1;
 	}
 
-	return calc_isan(str + of, len - of);
+	return ((chk[0U] << 8U ^ chk[1U]) << 8U ^ pos) << 8U ^
+		(chk[0U] != str[pos] || chk[1U] != str[i - 1U]);
 }
 
 void
 nmpr_isan(nmck_t s, const char *str, size_t len)
 {
-	isan_state_t st = {s};
-
-	if (LIKELY(!st.pad)) {
+	if (LIKELY(!(s & 0b1U))) {
 		fputs("ISAN, conformant", stdout);
 	} else if (s > 0 && len > 0) {
+		size_t pos = s >> 8U & 0x7fU;
 		fputs("ISAN, not conformant, should be ", stdout);
-		fwrite(str, 1, st.len - 1U, stdout);
-		fputc(st.chk[0U], stdout);
-		if (st.chk[1U]) {
-			fwrite(str + st.len, 1, len - st.len - 1U, stdout);
-			fputc(st.chk[1U], stdout);
+		fwrite(str, 1, pos, stdout);
+		fputc(s >> 24U & 0x7fU, stdout);
+		if (pos + 1U < len) {
+			fwrite(str + pos + 1, 1, len - (pos + 1U) - 1U, stdout);
+			fputc(s >> 16U & 0x7fU, stdout);
 		}
 	} else {
 		fputs("unknown", stdout);
