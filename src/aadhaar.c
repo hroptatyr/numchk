@@ -87,7 +87,7 @@ nmck_aadhaar(const char *str, size_t len)
 
 		if (str[i - 1U] == ' ') {
 			continue;
-		} else if (UNLIKELY(c > 10U)) {
+		} else if (UNLIKELY(c >= 10U)) {
 			return -1;
 		}
 		f = perm[j++ % 8U][c];

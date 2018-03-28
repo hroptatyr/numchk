@@ -57,7 +57,7 @@ nmck_npi(const char *str, size_t len)
 	for (size_t i = 0U; i < len - 1U; i++) {
 		uint_fast32_t c = (unsigned char)(str[i] ^ '0');
 
-		if (UNLIKELY(c > 10U)) {
+		if (UNLIKELY(c >= 10U)) {
 			return -1;
 		}
 		with (uint_fast32_t x = c * w) {

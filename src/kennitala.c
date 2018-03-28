@@ -61,7 +61,7 @@ nmck_kennitala(const char *str, size_t len)
 	for (; i < 6U; i++) {
 		uint_fast32_t c = (unsigned char)(str[i] ^ '0');
 
-		if (UNLIKELY(c > 10U)) {
+		if (UNLIKELY(c >= 10U)) {
 			return -1;
 		}
 		/* weights are 3 2 7 6 5 4 */

@@ -57,7 +57,7 @@ nmck_tckimlik(const char *str, size_t len)
 	for (uint_fast32_t w = 7U; i < 9U; i++, w ^= 0xe) {
 		uint_fast32_t c = (unsigned char)(str[i] ^ '0');
 
-		if (UNLIKELY(c > 10U)) {
+		if (UNLIKELY(c >= 10U)) {
 			return -1;
 		}
 		s1 += c * w;

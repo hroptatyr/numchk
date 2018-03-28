@@ -82,7 +82,7 @@ nmck_iposan(const char *str, size_t len)
 	for (size_t i = 2U; i < 11U; i++) {
 		uint_fast8_t c = (unsigned char)(str[i] ^ '0');
 
-		if (UNLIKELY(c > 10U)) {
+		if (UNLIKELY(c >= 10U)) {
 			return -1;
 		}
 		prod = damm[prod][c];
