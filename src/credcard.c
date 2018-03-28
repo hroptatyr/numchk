@@ -40,16 +40,6 @@
 #include "numchk.h"
 #include "nifty.h"
 
-typedef union {
-	nmck_t s;
-	struct {
-		char pad;
-		unsigned char pos;
-		unsigned char issuer;
-		char chk;
-	};
-} cc_state_t;
-
 typedef enum {
 	ISS_UNK,
 	ISS_AMEX,
@@ -72,12 +62,11 @@ typedef enum {
 	ISS_VISA,
 	ISS_VELEC,
 	ISS_UATP,
+	NISSUERS,
 } cc_issuer_t;
 
-static const cc_state_t nul_state;
-
 static const char *issuers[] = {
-	[ISS_UNK] = "unknown",
+	[ISS_UNK] = "unknown issuer",
 	[ISS_AMEX] = "American Express",
 	[ISS_BANKCARD] = "Bankcard",
 	[ISS_CUP] = "China UnionPay",
@@ -100,70 +89,46 @@ static const char *issuers[] = {
 	[ISS_UATP] = "UATP",
 };
 
-static char
-calc_chk(const char *str, size_t len)
-{
-/* this one is just the numbers */
-	unsigned int sum = 0U;
-
-	/* don't check last digit */
-	len--;
-
-	for (size_t i = !(len % 2U); i < len; i += 2U) {
-		static uint_fast8_t s[] = {0, 2, 4, 6, 8, 1, 3, 5, 7, 9};
-		sum += s[(str[i] ^ '0')];
-	}
-	for (size_t i = (len % 2U); i < len; i += 2U) {
-		sum += (str[i] ^ '0');
-	}
-	return (char)(((360U - sum) % 10U) ^ '0');
-}
-
-static cc_state_t
-calc_st(const char *str, size_t len)
-{
-	char buf[24U];
-	size_t i, j;
-
-	for (i = 0U, j = 0U; j < sizeof(buf) && i < len; i++) {
-		switch (str[i]) {
-		case ' ':
-			/* ignore */
-			continue;
-		case '0' ... '9':
-			buf[j++] = str[i];
-			break;
-		default:
-			return nul_state;
-		}
-	}
-	if (UNLIKELY(j < 12U || j > 19U)) {
-		return (cc_state_t){0};
-	}
-
-	/* return both, position of check digit and check digit */
-	return (cc_state_t){.pos = --i, .issuer = j, .chk = calc_chk(buf, j)};
-}
-
 
 /* this will always yield a non-0 result in order to track the issuer */
 nmck_t
 nmck_credcard(const char *str, size_t len)
 {
-	cc_state_t st;
+	uint_fast32_t dbl[2U] = {0U, 0U};
+	uint_fast32_t one[2U] = {0U, 0U};
+	uint_fast32_t sum;
+	cc_issuer_t iss;
+	size_t k;
 
 	/* common cases first */
 	if (len < 12U || len > 19U + 3U) {
 		return -1;
 	}
 	/* just calc checksum first and sort through issuers later */
-	st = calc_st(str, len);
+	for (size_t i = k = 0U; i < len - 1U; i++) {
+		uint_fast32_t c = (unsigned char)(str[i] ^ '0');
+
+		if (str[i] == ' ') {
+			continue;
+		} else if (UNLIKELY(c >= 10U)) {
+			return -1;
+		}
+		dbl[k & 0b1U] += 2U * c;
+		one[k & 0b1U] += 2U * c >= 10U;
+		k++;
+	}
+	/* decide now which sum was the 2-weighted one */
+	k++;
+	sum = dbl[(k & 0b1U) ^ 1U] / 2U + dbl[k & 0b1U] + one[k & 0b1U];
+	sum = 100000U - sum;
+	sum %= 10U;
+	sum ^= '0';
 
 	switch (str[0U]) {
 	case '1':
 		/* uatp */
-		if (st.issuer == 15U) {
-			st.issuer = ISS_UATP;
+		if (k == 15U) {
+			iss = ISS_UATP;
 			goto final;
 		}
 		break;
@@ -173,14 +138,14 @@ nmck_credcard(const char *str, size_t len)
 		switch (str[1U]) {
 		case '0':
 		case '1':
-			if (st.issuer == 15U) {
-				st.issuer = ISS_DC_ENROUTE;
+			if (k == 15U) {
+				iss = ISS_DC_ENROUTE;
 				goto final;
 			}
 			break;
 		case '2' ... '7':
-			if (st.issuer == 16U) {
-				st.issuer = ISS_MASTER;
+			if (k == 16U) {
+				iss = ISS_MASTER;
 				goto final;
 			}
 			break;
@@ -193,33 +158,33 @@ nmck_credcard(const char *str, size_t len)
 		switch (str[1U]) {
 		case '4':
 		case '7':
-			if (st.issuer == 15U) {
-				st.issuer = ISS_AMEX;
+			if (k == 15U) {
+				iss = ISS_AMEX;
 				goto final;
 			}
 			break;
 
 		case '5':
 			/* jcb */
-			if (st.issuer == 16U &&
+			if (k == 16U &&
 			    (str[2U] >= '2' && str[2U] <= '8')) {
-				st.issuer = ISS_JCB;
+				iss = ISS_JCB;
 				goto final;
 			}
 			break;
 
 		case '0':
-			if (st.issuer == 14U &&
+			if (k == 14U &&
 			    (str[2U] >= '0' && str[2U] <= '5')) {
-				st.issuer = ISS_DC_CB;
+				iss = ISS_DC_CB;
 				goto final;
 			}
 			/*@fallthrough@*/
 		case '6':
 		case '8':
 		case '9':
-			if (st.issuer == 14U) {
-				st.issuer = ISS_DC_INTL;
+			if (k == 14U) {
+				iss = ISS_DC_INTL;
 				goto final;
 			}
 			break;
@@ -230,7 +195,7 @@ nmck_credcard(const char *str, size_t len)
 
 	case '4':
 		/* visa */
-		if (st.issuer == 16U &&
+		if (k == 16U &&
 		    (!memcmp(str, "4026", 4U) ||
 		     !memcmp(str, "4175", 4U) ||
 		     !memcmp(str, "4405", 4U) ||
@@ -238,10 +203,10 @@ nmck_credcard(const char *str, size_t len)
 		     !memcmp(str, "4844", 4U) ||
 		     !memcmp(str, "4913", 4U) ||
 		     !memcmp(str, "4917", 4U))) {
-			st.issuer = ISS_VELEC;
+			iss = ISS_VELEC;
 			goto final;
-		} else if (st.issuer == 13U || st.issuer == 16U) {
-			st.issuer = ISS_VISA;
+		} else if (k == 13U || k == 16U) {
+			iss = ISS_VISA;
 			goto final;
 		}
 		break;
@@ -252,15 +217,15 @@ nmck_credcard(const char *str, size_t len)
 		case '0':
 
 		case '1' ... '5':
-			if (st.issuer == 16U) {
-				st.issuer = ISS_MASTER;
+			if (k == 16U) {
+				iss = ISS_MASTER;
 				goto final;
 			}
 			break;
 		case '6' ... '9':
 		maestro:
-			if (st.issuer >= 12U && st.issuer <= 19U) {
-				st.issuer = ISS_MAESTRO;
+			if (k >= 12U && k <= 19U) {
+				iss = ISS_MAESTRO;
 				goto final;
 			}
 			break;
@@ -273,30 +238,30 @@ nmck_credcard(const char *str, size_t len)
 		/* rest */
 		switch (str[1U]) {
 		case '2':
-			if (st.issuer >= 16U && st.issuer <= 19U) {
-				st.issuer = ISS_CUP;
+			if (k >= 16U && k <= 19U) {
+				iss = ISS_CUP;
 				goto final;
 			}
 			break;
 		case '0':
 		case '4':
 		case '5':
-			if (st.issuer == 16U) {
-				st.issuer = ISS_DISC;
+			if (k == 16U) {
+				iss = ISS_DISC;
 				goto final;
 			}
 			break;
 		case '3':
 			switch (str[2U]) {
 			case '6':
-				if (st.issuer >= 16U && st.issuer <= 19U) {
-					st.issuer = ISS_INTPAY;
+				if (k >= 16U && k <= 19U) {
+					iss = ISS_INTPAY;
 					goto final;
 				}
 				break;
 			case '7' ... '9':
-				if (st.issuer == 16U) {
-					st.issuer = ISS_INSTAP;
+				if (k == 16U) {
+					iss = ISS_INSTAP;
 					goto final;
 				}
 				break;
@@ -321,34 +286,28 @@ nmck_credcard(const char *str, size_t len)
 	return -1;
 
 final:
-	if (!st.s) {
-		return -1;
-	} else if (st.pos != len - 1U) {
-		return -1;
-	} else if (st.chk != str[st.pos]) {
-		/* this is non-conformant, let the guesser know */
-		st.s |= 1U;
-	}
-	/* bid higher than gtin? */
-	return st.s;
+	return (sum << 8U ^ iss) << 8U ^ ((char)sum != str[len - 1U]);
 }
 
 void
 nmpr_credcard(nmck_t s, const char *str, size_t len)
 {
-	cc_state_t st = {s};
-
 	if (s < 0) {
 	unk:
 		fputs("unknown", stdout);
 	} else {
-		fputs(issuers[st.issuer], stdout);
-		if (LIKELY(!st.pad)) {
+		unsigned int iss = s >> 8U & 0xffU;
+		if (iss < NISSUERS) {
+			fputs(issuers[iss], stdout);
+		} else {
+			fprintf(stdout, "issuer %u", iss);
+		}
+		if (LIKELY(!(s & 0b1U))) {
 			fputs(", conformant account number", stdout);
-		} else if (len > st.pos) {
+		} else if (len > 1U) {
 			fputs(", non-conformant account number, should be ", stdout);
-			fwrite(str, sizeof(*str), st.pos, stdout);
-			fputc(st.chk, stdout);
+			fwrite(str, sizeof(*str), len - 1U, stdout);
+			fputc(s >> 16U & 0x7fU, stdout);
 		} else {
 			goto unk;
 		}
