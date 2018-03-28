@@ -41,69 +41,46 @@
 #include "numchk.h"
 #include "nifty.h"
 
-typedef union {
-	nmck_t s;
-	struct {
-		unsigned char pad;
-		unsigned char chk;
-	};
-} isni_state_t;
-
-static isni_state_t
-calc_isni(const char *str, size_t len)
-{
-/* calculate the check digit, mod 11-2 */
-	unsigned int sum = 0U, wgt = 2U;
-	size_t i, j;
-
-	for (j = 0U, i = len - 1U; j < 15U && i-- > 0;) {
-		if ((unsigned char)str[i] <= ' ') {
-			continue;
-		} else if (UNLIKELY((unsigned char)(str[i] ^ '0') >= 10)) {
-			return (isni_state_t){0};
-		}
-		sum += wgt * (unsigned char)(str[i] ^ '0');
-		wgt *= 2U;
-		wgt %= 11U;
-		j++;
-	}
-	/* sum + last digit would be 1 mod 11 */
-	sum--;
-	sum = sum < 10 ? sum ^ '0' : 'X';
-	return (isni_state_t){.chk = (unsigned char)sum};
-}
-
 
 nmck_t
 nmck_isni(const char *str, size_t len)
 {
+/* calculate the check digit, mod 11-2 */
+	uint_fast32_t sum = 0U;
+
 	/* common cases first */
 	if (len < 16U || len > 19U) {
 		return -1;
 	}
 
-	with (isni_state_t st = calc_isni(str, len)) {
-		if (!st.s) {
+	for (size_t i = 0U, j = 0U; j < 15U && i < len - 1U; i++) {
+		uint_fast32_t c = (unsigned char)(str[i] ^ '0');
+
+		if (str[i] == ' ') {
+			continue;
+		} else if (UNLIKELY(c >= 10U)) {
 			return -1;
-		} else if (st.chk != str[len - 1U]) {
-			/* record state */
-			return st.s | 1;
 		}
+		sum += c;
+		sum *= 2U;
+		j++;
 	}
-	return 0;
+	/* sum + last digit would be 1 mod 11 */
+	sum = 1358017U/*==12 mod 11*/ - sum;
+	sum %= 11U;
+	sum ^= sum < 10U ? '0' : 'R'/*0xA^'X'*/;
+	return sum << 1U ^ ((char)sum != str[len - 1U]);
 }
 
 void
 nmpr_isni(nmck_t s, const char *str, size_t len)
 {
-	isni_state_t st = {s};
-
-	if (LIKELY(!s)) {
+	if (LIKELY(!(s & 0b1U))) {
 		fputs("ISNI, conformant with ISO 27729:2012", stdout);
 	} else if (s > 0 && len > 0) {
 		fputs("ISNI, not ISO 27729:2012 conformant, should be ", stdout);
 		fwrite(str, sizeof(*str), len - 1U, stdout);
-		fputc(st.chk, stdout);
+		fputc(s >> 1U & 0x7fU, stdout);
 	} else {
 		fputs("unknown", stdout);
 	}
