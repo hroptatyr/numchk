@@ -80,3 +80,7 @@ EPT633?	NHI, not conformant, should be EPT6335
 HR57663984214	OIB, conformant
 97342508862	IdNr, conformant	OIB, conformant
 3882291850	ISBN, conformant with ISO 2108:1992	NHS patient number, conformant
+5724	Damm (dec) secured number, check passed
+141	Luhn secured number, check passed
+2079	Verhoeff secured number, check passed
+FAE	Damm (hex) secured number, check passed

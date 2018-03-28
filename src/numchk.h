@@ -46,6 +46,17 @@
  * to capture state. */
 typedef intptr_t nmck_t;
 
+extern nmck_t nmck_luhn(const char*, size_t);
+extern void nmpr_luhn(nmck_t, const char*, size_t);
+
+extern nmck_t nmck_verhoeff(const char*, size_t);
+extern void nmpr_verhoeff(nmck_t, const char*, size_t);
+
+extern nmck_t nmck_damm10(const char*, size_t);
+extern void nmpr_damm10(nmck_t, const char*, size_t);
+extern nmck_t nmck_damm16(const char*, size_t);
+extern void nmpr_damm16(nmck_t, const char*, size_t);
+
 extern nmck_t nmck_isin(const char*, size_t);
 extern void nmpr_isin(nmck_t, const char*, size_t);
 

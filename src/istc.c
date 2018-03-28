@@ -55,8 +55,8 @@ _chex(char c)
 {
 	if (LIKELY((unsigned char)(c ^ '0') < 10)) {
 		return c ^ '0';
-	} else if ((unsigned char)(c | 0x20) - 'W' < 16){
-		return (unsigned char)(c | 0x20) - 'W';
+	} else if ((unsigned char)((c | 0x20) - 'W') < 16){
+		return (unsigned char)((c | 0x20) - 'W');
 	}
 	/* no error code */
 	return -1U;
