@@ -42,14 +42,6 @@
 #include "numchk.h"
 #include "nifty.h"
 
-typedef union {
-	nmck_t s;
-	struct {
-		unsigned char len;
-		unsigned char chk;
-	};
-} istc_state_t;
-
 static __attribute__((pure, const)) uint_fast32_t
 _chex(char c)
 {
@@ -77,101 +69,88 @@ nmck_t
 nmck_istc(const char *str, size_t len)
 {
 /* calculate the check digit, this one is right to left, mod 16-3 */
-	uint_fast32_t sum, wgt = 3U;
-	ssize_t i = len - 1U;
-	size_t j;
+	uint_fast32_t sum = 0U;
+	size_t i = 0U;
 
 	/* common istces first */
 	if (len < 13U || len > 19U) {
 		return -1;
 	}
 
-	if ((sum = _chex(str[i])) >= 16U && !ischeck(str[i])) {
-		return -1;
-	} else if (str[i] == '_') {
-		sum = 16U;
-	}
-	sum = 16U - sum;
-	i--;
-
-	i -= str[i] == '-';
-
-	/* next up 8 hex digits */
-	for (j = 0U; i >= 0U && j < 8U; j++, i--) {
+	for (; i < len - 1U; i++) {
 		uint_fast32_t c = _chex(str[i]);
 
-		if (UNLIKELY(c >= 16U)) {
+		if (str[i] == '-') {
+			break;
+		} else if (UNLIKELY(c >= 16U)) {
 			return -1;
 		}
-		sum += wgt * c;
-		wgt *= 3U;
-		wgt %= 16U;
+		sum += c;
+		sum *= 3U;
 	}
-	if (j < 8U) {
+	/* compactify interim */
+	sum %= 16U;
+
+	if (UNLIKELY(++i >= len)) {
 		return -1;
 	}
 
-	i -= str[i] == '-';
-
 	/* 4 digit year */
-	with (uint_fast32_t c = (unsigned char)str[i--] ^ '0') {
+	with (uint_fast32_t c = (unsigned char)str[i++] ^ '0') {
 		if (!c || c >= 3U) {
 			/* year 3000? */
 			return -1;
 		}
-		sum += wgt * c;
-		wgt *= 3U;
-		wgt %= 16U;
+		sum += c;
+		sum *= 3U;
 	}
-	for (j = 1U; i >= 0U && j < 4U; j++, i--) {
+	for (size_t j = 1U; j < 4U && i < len - 1U; j++, i++) {
 		uint_fast32_t c = str[i] ^ '0';
 
 		if (UNLIKELY(c >= 10U)) {
 			return -1;
 		}
-		sum += wgt * c;
-		wgt *= 3U;
-		wgt %= 16U;
+		sum += c;
+		sum *= 3U;
 	}
-	if (j < 4U) {
+	/* compactify interim */
+	sum %= 16U;
+
+	if (UNLIKELY(str[i] != '-' || ++i >= len)) {
 		return -1;
 	}
 
-	i -= str[i] == '-';
-
-	/* now variable length */
-	for (; i >= 0; i--) {
+	/* next up 8 hex digits */
+	for (size_t j = 0U; j < 8U && i < len - 1U; j++, i++) {
 		uint_fast32_t c = _chex(str[i]);
 
 		if (UNLIKELY(c >= 16U)) {
 			return -1;
 		}
-		sum += wgt * c;
-		wgt *= 3U;
-		wgt %= 16U;
+		sum += c;
+		sum *= 3U;
 	}
 
-	if ((sum %= 16U) || str[len - 1] == '_') {
-		if (str[len - 1] != '_') {
-			sum += _chex(str[len - 1]);
-			sum %= 16U;
-		}
-		return (istc_state_t){.len = 1U, .chk = (unsigned char)sum}.s;
+	if (UNLIKELY(str[i] != '-' || ++i >= len)) {
+		return -1;
 	}
-	return 0;
+
+	/* final compactification */
+	sum %= 16U;
+	sum = _hexc(sum);
+
+	return sum << 1U ^ ((char)sum != str[len - 1U]);
 }
 
 void
 nmpr_istc(nmck_t s, const char *str, size_t len)
 {
-	istc_state_t st = {s};
-
-	if (LIKELY(!s)) {
+	if (LIKELY(!(s & 0b1U))) {
 		fputs("ISTC, conformant", stdout);
 	} else if (s > 0 && len > 0) {
 		fputs("ISTC, not conformant, should be ", stdout);
 		fwrite(str, sizeof(*str), len - 1U, stdout);
-		fputc(_hexc(st.chk), stdout);
+		fputc(s >> 1U & 0x7fU, stdout);
 	} else {
 		fputs("unknown", stdout);
 	}
