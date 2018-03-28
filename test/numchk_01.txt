@@ -1,6 +1,7 @@
 M-5215-9669-6	ISMN, conformant with ISO 10957:1993
 9790521596694	GTIN13, conformant	ISBN, conformant with ISO 2108:2005	ISMN, conformant with ISO 10957:2009
 0517-0497	ISSN, conformant with ISO 3297:1975
+0517-049?	ISSN, not ISO 3297:1975 conformant, should be 0517-0497
 9770517049007	GTIN13, conformant	ISSN, conformant with ISO 3297:2007
 0000 0001 2150 090X	ISNI, conformant with ISO 27729:2012
 000000012150090X	ISNI, conformant with ISO 27729:2012
