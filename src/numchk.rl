@@ -5,23 +5,31 @@
 
 #define NNMCK	(64U)
 
-#define maybe(x)	\
+#define maybe(x, y)	\
 	candpr[ncand] = nmpr_##x; \
-	candck[ncand] = 0; \
+	candck[ncand] = y; \
 	ncand++
+#define defo(x, y)	\
+	surepr[nsure] = nmpr_##x; \
+	sureck[nsure] = y; \
+	nsure++
 
 #define c(x)	\
 	with (nmck_t y = nmck_##x(str, len)) { \
 		if (y < 0) { \
 			break; \
 		} else if (y & 0b1U) { \
-			candpr[ncand] = nmpr_##x; \
-			candck[ncand] = y; \
-			ncand++; \
+			maybe(x, y); \
 		} else { \
-			surepr[nsure] = nmpr_##x; \
-			sureck[nsure] = y; \
-			nsure++; \
+			defo(x, y); \
+		} \
+	}
+#define g(x)	\
+	with (nmck_t y = nmck_##x(str, len)) { \
+		if (y < 0) { \
+			break; \
+		} else { \
+			maybe(x, y); \
 		} \
 	}
 
@@ -90,6 +98,12 @@ static nmck_t sureck[NNMCK];
 	action oib {c(oib)}
 	action nhs {c(nhs)}
 
+	## generic checks, these will always be candidates
+	action luhn {g(luhn)}
+	action verhoeff {g(verhoeff)}
+	action damm10 {g(damm10)}
+	action damm16 {g(damm16)}
+
 	main :=
 		upper{2} digit{2} (upnum | ' '){11,42} %iban |
 		upper{2} check{2} (upnum | ' '){11,42} %iban |
@@ -141,6 +155,11 @@ static nmck_t sureck[NNMCK];
 		digit{2} " "? digit{3} " "? digit{3} " "? digit{2} (digit | check) %idnr |
 		"HR"? digit{10} (digit | check) %oib |
 		digit{9} (digit | check) %nhs |
+
+		## generic checks
+		digit{2,} %luhn %verhoeff %damm10 |
+		xdigit{2,} %damm16 |
+
 		any*;
 
 	write data;

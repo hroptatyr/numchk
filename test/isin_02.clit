@@ -1,7 +1,7 @@
 #!/usr/bin/clitoris  ## -*- shell-script -*-
 
 ## isins as found on isin.org
-$ awk '{$0 = substr($0, 1, length($0) - 1) "0"; print}' "${srcdir}/isin.xmpl" | numchk
+$ awk '{$0 = substr($0, 1, length($0) - 1) "0"; print}' "${srcdir}/isin.xmpl" | numchk | grep ISIN
 US5949181040	ISIN, not ISO 6166 conformant, should be US5949181045
 US38259P5080	ISIN, not ISO 6166 conformant, should be US38259P5089
 US0378331000	ISIN, not ISO 6166 conformant, should be US0378331005
