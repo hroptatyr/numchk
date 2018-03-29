@@ -85,3 +85,4 @@ HR57663984214	OIB, conformant
 141	Luhn secured number, check passed
 2079	Verhoeff secured number, check passed
 FAE	Damm (hex) secured number, check passed
+B000009	SEDOL, conformant
