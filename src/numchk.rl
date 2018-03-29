@@ -50,6 +50,8 @@ static nmck_t sureck[NNMCK];
 	upnum = digit | upper;
 	lonum = digit | lower;
 	check = "_" | "?";
+	vowel = "A" | "E" | "I" | "O" | "U";
+	consonant = upper - vowel;
 
 	action isin {c(isin)}
 	action figi {c(figi)}
@@ -108,11 +110,11 @@ static nmck_t sureck[NNMCK];
 		upper{2} digit{2} (upnum | ' '){11,42} %iban |
 		upper{2} check{2} (upnum | ' '){11,42} %iban |
 		upper{2} upnum{9} (digit | check) %isin |
-		"BBG" upnum{8} (digit | check) %figi |
+		"BBG" (consonant | digit){8} (digit | check) %figi |
 		xdigit{3,}'-'digit{4}'-'xdigit{8}'-'(xdigit | check) %istc |
 		xdigit{3,} digit{4} xdigit{8} (xdigit | check) %istc |
 		(digit | "*" | "@" | "#"){8} (digit | check) %cusip |
-		digit{6} (digit | check) %sedol |
+		(consonant | digit){6} (digit | check) %sedol |
 		upnum{18} (digit{2} | check{2}) %lei |
 		digit{7,17} (digit | check) %gtin |
 		/97[89]/ "-"? digit "-"? digit{4} "-"? digit{4} "-"? (digit | check) %isbn13 |
