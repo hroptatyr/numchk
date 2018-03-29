@@ -40,21 +40,22 @@
 #include "numchk.h"
 #include "nifty.h"
 
-static unsigned int
-calc_chk(const char *str, size_t len)
+
+nmck_t
+nmck_cusip(const char *str, size_t len)
 {
-/* calculate the check digit for an expanded ISIN */
-	unsigned int sum = 0U;
-	size_t i = 0U;
+	uint_fast32_t sum = 0U;
+
+	/* common cases first */
+	if (len < 9U || len > 9U) {
+		return -1;
+	}
 
 	/* use the left 8 digits */
-	for (size_t j = 0U; j < 8U && i < len; i++) {
-		unsigned int d;
+	for (size_t i = 0U; i < 8U; i++) {
+		uint_fast32_t d;
 
 		switch (str[i]) {
-		case '-':
-			/* ignore */
-			continue;
 		case '0' ... '9':
 			d = (str[i] ^ '0');
 			break;
@@ -71,61 +72,31 @@ calc_chk(const char *str, size_t len)
 			d = 38;
 			break;
 		default:
-			return 0U;
+			return -1;
 		}
 
-		if (j++ % 2U) {
-			d *= 2U;
-		}
+		/* double every other */
+		d <<= i % 2U;
 		sum += (d / 10U) + (d % 10U);
-	}
-	/* check if need to skip optional - */
-	if (LIKELY(i < len) && UNLIKELY(str[i] == '-')) {
-		i++;
 	}
 
 	/* sum can be at most 342, so check digit is */
-	return i << 8U ^ (((400U - sum) % 10U) ^ '0');
-}
+	sum = 400U - sum;
+	sum %= 10U;
+	sum ^= '0';
 
-
-nmck_t
-nmck_cusip(const char *str, size_t len)
-{
-	/* common cases first */
-	if (len < 8U || len > 11U) {
-		return -1;
-	}
-
-	with (unsigned int cc = calc_chk(str, len)) {
-		unsigned int consumed = cc >> 8U;
-		char chk = (char)(cc & 0xff);
-
-		if (!cc) {
-			return -1;
-		} else if (consumed != len - 1U) {
-			return -1;
-		} else if (chk != str[consumed]) {
-			/* record state */
-			return cc << 1U | 1U;
-		}
-	}
-	return 0;
+	return sum << 1U ^ ((char)sum != str[len - 1U]);
 }
 
 void
 nmpr_cusip(nmck_t s, const char *str, size_t UNUSED(len))
 {
-	if (LIKELY(!s)) {
+	if (LIKELY(!(s & 0b1U))) {
 		fputs("CUSIP, conformant", stdout);
-	} else if (s > 0) {
-		unsigned int st = s >> 1;
-		unsigned int consumed = (unsigned int)st >> 8U;
-		char chk = (char)(st & 0xff);
-
+	} else if (s > 0 && len > 0U) {
 		fputs("CUSIP, not conformant, should be ", stdout);
-		fwrite(str, sizeof(*str), consumed, stdout);
-		fputc(chk, stdout);
+		fwrite(str, sizeof(*str), len - 1U, stdout);
+		fputc(s >> 1U & 0x7fU, stdout);
 	} else {
 		fputs("unknown", stdout);
 	}

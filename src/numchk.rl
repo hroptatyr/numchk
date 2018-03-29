@@ -111,7 +111,7 @@ static nmck_t sureck[NNMCK];
 		"BBG" upnum{8} (digit | check) %figi |
 		xdigit{3,}'-'digit{4}'-'xdigit{8}'-'(xdigit | check) %istc |
 		xdigit{3,} digit{4} xdigit{8} (xdigit | check) %istc |
-		digit{7,10} (digit | check) %cusip |
+		(digit | "*" | "@" | "#"){8} (digit | check) %cusip |
 		digit{6} (digit | check) %sedol |
 		upnum{18} (digit{2} | check{2}) %lei |
 		digit{7,17} (digit | check) %gtin |
