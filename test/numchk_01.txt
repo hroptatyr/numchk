@@ -77,7 +77,7 @@ EPT633?	NHI, not conformant, should be EPT6335
 1234567FA	PPS No, conformant
 1234567_A	PPS No, not conformant, should be 1234567FA
 57 663 984 214	IdNr, conformant
-5766398421?	IdNr, not conformant, should be 57663984214	OIB, not conformant, should be 57663984214
+5766398421?	Italian VAT-ID, not conformant, should be 57663984219	IdNr, not conformant, should be 57663984214	OIB, not conformant, should be 57663984214
 HR57663984214	OIB, conformant
 97342508862	IdNr, conformant	OIB, conformant
 3882291850	ISBN, conformant with ISO 2108:1992	NHS patient number, conformant
@@ -86,3 +86,6 @@ HR57663984214	OIB, conformant
 2079	Verhoeff secured number, check passed
 FAE	Damm (hex) secured number, check passed
 B000009	SEDOL, conformant
+IT 12345670785	Italian VAT-ID, conformant
+IT00743110157	Italian VAT-ID, conformant
+0074311015?	Italian VAT-ID, not conformant, should be 00743110157	IdNr, not conformant, should be 00743110155	OIB, not conformant, should be 00743110155
