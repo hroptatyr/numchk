@@ -537,4 +537,54 @@ nmpr_luvatid(nmck_t s, const char *str, size_t len)
 	return;
 }
 
+nmck_t
+nmck_nlvatid(const char *str, size_t len)
+{
+	uint_fast32_t sum = 0U;
+	size_t i = 0U;
+
+	/* common cases first */
+	if (len < 12U || len > 14U) {
+		return -1;
+	}
+	if (str[0U] == 'N' && str[1U] == 'L') {
+		i += 2U;
+	}
+
+	for (size_t j = 9U; i < len - 4U; j--, i++) {
+		uint_fast32_t c = str[i] ^ '0';
+
+		if (UNLIKELY(c >= 10U)) {
+			return -1;
+		}
+		sum += j * c;
+	}
+	if (UNLIKELY(str[++i] != 'B')) {
+		return -1;
+	}
+	if (UNLIKELY((sum %= 11U) >= 10U)) {
+		/* they wouldn't hand this out, would they? */
+		return -1;
+	}
+	sum ^= '0';
+
+	return sum << 1U ^ ((char)sum != str[len - 4U]);
+}
+
+void
+nmpr_nlvatid(nmck_t s, const char *str, size_t len)
+{
+	if (LIKELY(!(s & 0b1U))) {
+		fputs("Dutch VAT-ID, conformant", stdout);
+	} else if (s > 0 && len > 3U) {
+		fputs("Dutch VAT-ID, not conformant, should be ", stdout);
+		fwrite(str, sizeof(*str), len - 4U, stdout);
+		fputc(s >> 1U & 0x7fU, stdout);
+		fwrite(str + len - 3U, sizeof(*str), 3U, stdout);
+	} else {
+		fputs("unknown", stdout);
+	}
+	return;
+}
+
 /* euvatid.c ends here */

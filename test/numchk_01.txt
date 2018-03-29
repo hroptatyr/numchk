@@ -92,3 +92,5 @@ IT00743110157	Italian VAT-ID, conformant
 LU 13669580	Luxembourgian VAT-ID, conformant
 136695??	Luxembourgian VAT-ID, not conformant, should be 13669580
 136 695 80	Luxembourgian VAT-ID, conformant
+NL123456782B12	Dutch VAT-ID, conformant
+12345678?B12	Dutch VAT-ID, not conformant, should be 123456782B12
