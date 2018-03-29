@@ -484,4 +484,57 @@ nmpr_itvatid(nmck_t s, const char *str, size_t len)
 	return;
 }
 
+nmck_t
+nmck_luvatid(const char *str, size_t len)
+{
+/* simply mod 89 */
+	uint_fast32_t sum = 0U;
+	uint_fast32_t chk[2U];
+	size_t i = 0U;
+
+	/* common cases first */
+	if (len < 8U || len > 13U) {
+		return -1;
+	}
+	if (str[0U] == 'L' && str[1U] == 'U') {
+		i += 2U;
+	}
+	i += str[i] == ' ';
+
+	/* odd number of digits in total, so start weighting at 1U */
+	for (; i < len - 2U; i++) {
+		uint_fast32_t c = str[i] ^ '0';
+
+		if (str[i] == ' ') {
+			continue;
+		} else if (UNLIKELY(c >= 10U)) {
+			return -1;
+		}
+		sum *= 10U;
+		sum += c;
+	}
+	sum %= 89U;
+	chk[0U] = sum / 10U ^ '0';
+	chk[1U] = sum % 10U ^ '0';
+
+	return (chk[0U] << 8U ^ chk[1U]) << 8U ^
+		((char)chk[0U] != str[len - 2U] || (char)chk[1U] != str[len - 1U]);
+}
+
+void
+nmpr_luvatid(nmck_t s, const char *str, size_t len)
+{
+	if (LIKELY(!(s & 0b1U))) {
+		fputs("Luxembourgian VAT-ID, conformant", stdout);
+	} else if (s > 0 && len > 1U) {
+		fputs("Luxembourgian VAT-ID, not conformant, should be ", stdout);
+		fwrite(str, sizeof(*str), len - 2U, stdout);
+		fputc(s >> 16U & 0x7fU, stdout);
+		fputc(s >> 8U & 0x7fU, stdout);
+	} else {
+		fputs("unknown", stdout);
+	}
+	return;
+}
+
 /* euvatid.c ends here */

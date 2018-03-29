@@ -83,6 +83,7 @@ static nmck_t sureck[NNMCK];
 	action grvatid {c(grvatid)}
 	action ievatid {c(ievatid)}
 	action itvatid {c(itvatid)}
+	action luvatid {c(luvatid)}
 	action bicc {c(bicc)}
 	action bic {c(bic)}
 	action wkn {c(wkn)}
@@ -142,6 +143,7 @@ static nmck_t sureck[NNMCK];
 		("IE" " "?)? digit{7} upper? (upper | check) "W"? %ievatid |
 		("IE" " "?)? digit (upper | "*" | "+") digit{5} (upper | check) "W"? %ievatid |
 		("IT" " "?)? digit{10} (digit | check) %itvatid |
+		("LU" " "?)? digit{3} " "? digit{3} " "? (digit{2} | check{2}) %luvatid |
 		upper{3} ("U" | "J" | "Z") digit{6} (digit | check) %bicc |
 		upper{6} upnum{2} upnum? (upnum{3})? %bic |
 		upnum{6} %wkn |
