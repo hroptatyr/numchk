@@ -41,12 +41,17 @@
 #include "numchk.h"
 #include "nifty.h"
 
-static nmck_t
-calc_tfn(const char *str, size_t len)
+
+nmck_t
+nmck_tfn(const char *str, size_t len)
 {
-/* calculate the check digit */
-	unsigned int sum = 0U;
+	uint_fast32_t sum = 0U;
 	size_t i, j;
+
+	/* common cases first */
+	if (len < 8U || len > 11U) {
+		return -1;
+	}
 
 	for (i = j = 0U; j < 9U && i < len; i++) {
 		static char wgt[] = {
@@ -79,19 +84,6 @@ calc_tfn(const char *str, size_t len)
 	}
 
 	return sum << 1U ^ (sum > 0);
-}
-
-
-nmck_t
-nmck_tfn(const char *str, size_t len)
-{
-
-	/* common cases first */
-	if (len < 8U || len > 11U) {
-		return -1;
-	}
-
-	return calc_tfn(str, len);
 }
 
 void
