@@ -41,15 +41,22 @@
 #include "numchk.h"
 #include "nifty.h"
 
-static char
-calc_chk(const char *str)
+
+nmck_t
+nmck_figi(const char *str, size_t len)
 {
-/* calculate the check digit for an expanded ISIN */
-	unsigned int sum = 0U;
+	uint_fast32_t sum = 0U;
+
+	if (len != 12U) {
+		return -1;
+	} else if (str[0U] != 'B' || str[1U] != 'B' || str[2U] != 'G') {
+		/* currently only BB is registered as certified provider */
+		return -1;
+	}
 
 	/* use the left 11 digits */
 	for (size_t i = 0U; i < 11U; i++) {
-		unsigned int d;
+		uint_fast32_t d;
 
 		switch (str[i]) {
 		case '0' ... '9':
@@ -62,8 +69,6 @@ calc_chk(const char *str)
 		case 'G':
 		case 'H':
 		case 'J':
-			d = 10 + (str[i] - 'A');
-			break;
 		case 'K':
 		case 'L':
 		case 'M':
@@ -73,62 +78,37 @@ calc_chk(const char *str)
 		case 'R':
 		case 'S':
 		case 'T':
-			d = 20 + (str[i] - 'K');
-			break;
 		case 'V':
 		case 'W':
 		case 'X':
 		case 'Y':
 		case 'Z':
-			d = 30 + (str[i] - 'U');
+			d = 10U + (str[i] - 'A');
 			break;
 		default:
-			return '\0';
+			return -1;
 		}
 
-		if (i % 2U) {
-			d *= 2U;
-		}
+		/* double every other */
+		d <<= (i % 2U);
 		sum += (d / 10U) + (d % 10U);
 	}
-	/* sum can be at most 665, so check digit is */
-	return (char)(((700U - sum) % 10U) ^ '0');
-}
+	sum = 700U - sum;
+	sum %= 10U;
+	sum ^= '0';
 
-
-nmck_t
-nmck_figi(const char *str, size_t len)
-{
-	if (len != 12U) {
-		return -1;
-	} else if (str[0U] != 'B' || str[1U] != 'B' || str[2U] != 'G') {
-		/* currently only BB is registered as certified provider */
-		return -1;
-	}
-	with (char chk = calc_chk(str)) {
-		if (!chk) {
-			return -1;
-		} else if (chk != str[11U]) {
-			/* record state and
-			 * submit a bid higher than a borked isin
-			 * and because bbgids are so distinctive
-			 * we can even hnad out borked ones as definite */
-			return chk << 1 | 1;
-		}
-	}
-	/* bid high */
-	return 0;
+	return sum << 1U ^ ((char)sum != str[len - 1U]);
 }
 
 void
-nmpr_figi(nmck_t st, const char *str, size_t len)
+nmpr_figi(nmck_t s, const char *str, size_t len)
 {
-	if (!st) {
+	if (!(s & 0b1U)) {
 		fputs("FIGI, conformant with http://www.omg.org/spec/FIGI/1.0", stdout);
-	} else if (st > 0 && len == 12U) {
+	} else if (s > 0 && len == 12U) {
 		fputs("FIGI, not conformant, should be ", stdout);
 		fwrite(str, sizeof(*str), 11U, stdout);
-		fputc((char)(st >> 1), stdout);
+		fputc(s >> 1U & 0x7fU, stdout);
 	} else {
 		fputs("unknown", stdout);
 	}

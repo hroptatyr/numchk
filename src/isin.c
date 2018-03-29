@@ -45,30 +45,17 @@
 /* allowed isin country codes */
 #include "isin-cc.c"
 
-static char
-calc_chk(const char *str, size_t len)
-{
-/* calculate the check digit for an expanded ISIN */
-	unsigned int sum = 0U;
-
-	for (size_t i = !(len % 2U); i < len; i += 2U) {
-		int code = (str[i] ^ '0') * 2;
-		sum += (code / 10) + (code % 10);
-	}
-	for (size_t i = (len % 2U); i < len; i += 2U) {
-		int code = (str[i] ^ '0');
-		sum += code;
-	}
-	/* sum can be at most 198, so check digit is */
-	return (char)(((200U - sum) % 10U) ^ '0');
-}
-
 
 nmck_t
 nmck_isin(const char *str, size_t len)
 {
-	char buf[24U];
+	uint_fast8_t buf[24U];
 	size_t bsz = 0U;
+	/* for the luhn check */
+	uint_fast32_t dbl[2U] = {0U, 0U};
+	uint_fast32_t one[2U] = {0U, 0U};
+	uint_fast32_t sum;
+	size_t k;
 
 	if (UNLIKELY(len != 12U)) {
 		return -1;
@@ -77,42 +64,51 @@ nmck_isin(const char *str, size_t len)
 	}
 
 	/* expand the left 11 digits */
-	for (size_t i = 0U; i < 11; i++) {
+	for (size_t i = 0U; i < 11U; i++) {
 		switch (str[i]) {
 		case '0' ... '9':
-			buf[bsz++] = str[i];
+			buf[bsz++] = (unsigned char)(str[i] ^ '0');
 			break;
 		case 'A' ... 'J':
-			buf[bsz++] = '1';
-			buf[bsz++] = (char)((str[i] - 'A') ^ '0');
+			buf[bsz++] = 1U;
+			buf[bsz++] = (unsigned char)(str[i] - 'A');
 			break;
 		case 'K' ... 'T':
-			buf[bsz++] = '2';
-			buf[bsz++] = (char)((str[i] - 'K') ^ '0');
+			buf[bsz++] = 2U;
+			buf[bsz++] = (unsigned char)(str[i] - 'K');
 			break;
 		case 'U' ... 'Z':
-			buf[bsz++] = '3';
-			buf[bsz++] = (char)((str[i] - 'U') ^ '0');
+			buf[bsz++] = 3U;
+			buf[bsz++] = (unsigned char)(str[i] - 'U');
 			break;
 		default:
 			return -1;
 		}
 	}
-	with (char chk = calc_chk(buf, bsz)) {
-		return chk << 1U ^ (chk != str[11U]);
+
+	for (size_t i = k = 0U; i < bsz; i++, k ^= 1U) {
+		uint_fast32_t c = 2U * buf[i];
+		dbl[k] += c;
+		one[k] += c >= 10U;
 	}
-	return 0;
+	/* decide now which sum was the 2-weighted one */
+	sum = dbl[k] / 2U + dbl[k ^ 1U] + one[k ^ 1U];
+	sum = 10000U - sum;
+	sum %= 10;
+	sum ^= '0';
+
+	return sum << 1U ^ ((char)sum != str[len - 1U]);
 }
 
 void
-nmpr_isin(nmck_t st, const char *str, size_t len)
+nmpr_isin(nmck_t s, const char *sr, size_t len)
 {
-	if (!(st & 0b1U)) {
+	if (!(s & 0b1U)) {
 		fputs("ISIN, conformant with ISO 6166:2013", stdout);
-	} else if (st > 0 && len == 12U) {
+	} else if (s > 0 && len == 12U) {
 		fputs("ISIN, not ISO 6166 conformant, should be ", stdout);
-		fwrite(str, sizeof(*str), 11U, stdout);
-		fputc((char)(st >> 1), stdout);
+		fwrite(sr, sizeof(*sr), 11U, stdout);
+		fputc(s >> 1 & 0x7fU, stdout);
 	} else {
 		fputs("unknown", stdout);
 	}

@@ -41,65 +41,72 @@
 #include "numchk.h"
 #include "nifty.h"
 
-static char
-calc_chk(const char *str)
-{
-/* calculate the check digit for an expanded ISIN */
-	unsigned int w[] = {1U, 3U, 1U, 7U, 3U, 9U};
-	unsigned int sum = 0U;
-
-	/* use the left 6 digits */
-	for (size_t i = 0U; i < 6U; i++) {
-		unsigned int d;
-
-		switch (str[i]) {
-		case '0' ... '9':
-			d = (str[i] ^ '0');
-			break;
-		case 'A' ... 'Z':
-			d = 10 + (str[i] - 'A');
-			break;
-		default:
-			return 0U;
-		}
-
-		sum += w[i] * d;
-	}
-
-	/* sum can be at most 840, so check digit is */
-	return (char)(((840U - sum) % 10U) ^ '0');
-}
-
 
 nmck_t
 nmck_sedol(const char *str, size_t len)
 {
+	static const uint_fast32_t w[] = {1U, 3U, 1U, 7U, 3U, 9U};
+	uint_fast32_t sum = 0U;
+
 	/* common cases first */
 	if (len != 7U) {
 		return -1;
 	}
 
-	with (char chk = calc_chk(str)) {
-		if (!chk) {
+	/* use the left 6 chars */
+	for (size_t i = 0U; i < 6U; i++) {
+		uint_fast32_t d;
+
+		switch (str[i]) {
+		case '0' ... '9':
+			d = (str[i] ^ '0');
+			break;
+		case 'B':
+		case 'C':
+		case 'D':
+		case 'F':
+		case 'G':
+		case 'H':
+		case 'J':
+		case 'K':
+		case 'L':
+		case 'M':
+		case 'N':
+		case 'P':
+		case 'Q':
+		case 'R':
+		case 'S':
+		case 'T':
+		case 'V':
+		case 'W':
+		case 'X':
+		case 'Y':
+		case 'Z':
+			d = 10U + (str[i] - 'A');
+			break;
+		default:
 			return -1;
-		} else if (chk != str[6U]) {
-			/* record state */
-			return (unsigned char)chk << 1 | 1;
 		}
+
+		sum += w[i] * d;
 	}
-	return 0;
+	/* sum can be at most 840, so check digit is */
+	sum = 840U - sum;
+	sum %= 10U;
+	sum ^= '0';
+
+	return sum << 1U ^ ((char)sum != str[len - 1U]);
 }
 
 void
-nmpr_sedol(nmck_t st, const char *str, size_t len)
+nmpr_sedol(nmck_t s, const char *str, size_t len)
 {
-	if (LIKELY(!st)) {
+	if (LIKELY(!(s & 0b1U))) {
 		fputs("SEDOL, conformant", stdout);
-	} else if (st > 0 && len == 7U) {
-		assert(len == 7U);
+	} else if (s > 0 && len > 0U) {
 		fputs("SEDOL, not conformant, should be ", stdout);
-		fwrite(str, sizeof(*str), 6U, stdout);
-		fputc((char)(st >> 1), stdout);
+		fwrite(str, sizeof(*str), len - 1U, stdout);
+		fputc(s >> 1U & 0x7fU, stdout);
 	} else {
 		fputs("unknown", stdout);
 	}
