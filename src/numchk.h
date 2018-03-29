@@ -145,6 +145,12 @@ extern nmck_t nmck_grvatid(const char*, size_t);
 extern void nmpr_grvatid(nmck_t, const char*, size_t);
 extern nmck_t nmck_ievatid(const char*, size_t);
 extern void nmpr_ievatid(nmck_t, const char*, size_t);
+extern nmck_t nmck_itvatid(const char*, size_t);
+extern void nmpr_itvatid(nmck_t, const char*, size_t);
+extern nmck_t nmck_luvatid(const char*, size_t);
+extern void nmpr_luvatid(nmck_t, const char*, size_t);
+extern nmck_t nmck_nlvatid(const char*, size_t);
+extern void nmpr_nlvatid(nmck_t, const char*, size_t);
 
 extern nmck_t nmck_bic(const char*, size_t);
 extern void nmpr_bic(nmck_t, const char*, size_t);
