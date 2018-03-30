@@ -587,4 +587,307 @@ nmpr_nlvatid(nmck_t s, const char *str, size_t len)
 	return;
 }
 
+nmck_t
+nmck_atvatid(const char *str, size_t len)
+{
+/* pretty much luhn, twist is to subtract from 96 */
+	uint_fast32_t sum = 0U;
+	size_t i = 0U;
+
+	/* common cases first */
+	if (len < 9U || len > 12U) {
+		return -1;
+	}
+	if (str[0U] == 'A' && str[1U] == 'T') {
+		i += 2U;
+	}
+	i += str[i] == ' ';
+	if (UNLIKELY(str[i++] != 'U')) {
+		return -1;
+	}
+	for (size_t k = 1U; i < len - 1U; i++, k ^= 3U) {
+		uint_fast32_t c = str[i] ^ '0';
+
+		if (UNLIKELY(c >= 10U)) {
+			return -1;
+		}
+		sum += k * c;
+		sum += k * c >= 10U;
+	}
+	sum = 96U - sum;
+	sum %= 10U;
+	sum ^= '0';
+
+	return sum << 1U ^ ((char)sum != str[len - 1U]);
+}
+
+void
+nmpr_atvatid(nmck_t s, const char *str, size_t len)
+{
+	if (LIKELY(!(s & 0b1U))) {
+		fputs("Austrian VAT-ID, conformant", stdout);
+	} else if (s > 0 && len > 0U) {
+		fputs("Austrian VAT-ID, not conformant, should be ", stdout);
+		fwrite(str, sizeof(*str), len - 1U, stdout);
+		fputc(s >> 1U & 0x7fU, stdout);
+	} else {
+		fputs("unknown", stdout);
+	}
+	return;
+}
+
+nmck_t
+nmck_plvatid(const char *str, size_t len)
+{
+	static const uint_fast32_t w[] = {6U, 5U, 7U, 2U, 3U, 4U, 5U, 6U, 7U};
+	uint_fast32_t sum = 0U;
+	size_t i = 0U;
+
+	/* common cases first */
+	if (len < 10U || len > 13U) {
+		return -1;
+	}
+	if (str[0U] == 'P' && str[1U] == 'L') {
+		i += 2U;
+	}
+	i += str[i] == ' ';
+	for (size_t j = 0U; j < 9U && i < len - 1U; i++, j++) {
+		uint_fast32_t c = str[i] ^ '0';
+
+		if (UNLIKELY(c >= 10U)) {
+			return -1;
+		}
+		sum += w[j] * c;
+	}
+	if (UNLIKELY((sum %= 11U) >= 10U)) {
+		return -1;
+	}
+	sum ^= '0';
+
+	return sum << 1U ^ ((char)sum != str[len - 1U]);
+}
+
+void
+nmpr_plvatid(nmck_t s, const char *str, size_t len)
+{
+	if (LIKELY(!(s & 0b1U))) {
+		fputs("Polish VAT-ID, conformant", stdout);
+	} else if (s > 0 && len > 0U) {
+		fputs("Polish VAT-ID, not conformant, should be ", stdout);
+		fwrite(str, sizeof(*str), len - 1U, stdout);
+		fputc(s >> 1U & 0x7fU, stdout);
+	} else {
+		fputs("unknown", stdout);
+	}
+	return;
+}
+
+nmck_t
+nmck_ptvatid(const char *str, size_t len)
+{
+	uint_fast32_t sum = 0U;
+	size_t i = 0U;
+
+	/* common cases first */
+	if (len < 9U || len > 14U) {
+		return -1;
+	}
+	if (str[0U] == 'P' && str[1U] == 'T') {
+		i += 2U;
+	}
+	i += str[i] == ' ';
+
+	/* snarf 8 digits */
+	for (size_t j = 1U; j < 9U && i < len - 1U; i++) {
+		uint_fast32_t c = str[i] ^ '0';
+
+		if (str[i] == ' ') {
+			continue;
+		} else if (UNLIKELY(c >= 10U)) {
+			return -1;
+		}
+		sum += ++j * c;
+	}
+	sum %= 11U;
+	sum %= 10U;
+	sum ^= '0';
+
+	return sum << 1U ^ ((char)sum != str[len - 1U]);
+}
+
+void
+nmpr_ptvatid(nmck_t s, const char *str, size_t len)
+{
+	if (LIKELY(!(s & 0b1U))) {
+		fputs("Portuguese VAT-ID, conformant", stdout);
+	} else if (s > 0 && len > 0U) {
+		fputs("Portuguese VAT-ID, not conformant, should be ", stdout);
+		fwrite(str, sizeof(*str), len - 1U, stdout);
+		fputc(s >> 1U & 0x7fU, stdout);
+	} else {
+		fputs("unknown", stdout);
+	}
+	return;
+}
+
+nmck_t
+nmck_sevatid(const char *str, size_t len)
+{
+/* luhn, ignore last 2 digits */
+	uint_fast32_t sum = 0U;
+	size_t i = 0U;
+
+	/* common cases first */
+	if (len < 12U || len > 15U) {
+		return -1;
+	}
+	if (str[0U] == 'S' && str[1U] == 'E') {
+		i += 2U;
+	}
+	i += str[i] == ' ';
+	/* we know it's an even number of digits, so start weighing at 2 */
+	for (size_t k = 2U; i < len - 3U; i++, k ^= 3U) {
+		uint_fast32_t c = str[i] ^ '0';
+
+		if (UNLIKELY(c >= 10U)) {
+			return -1;
+		}
+		sum += k * c;
+		sum += k * c >= 10U;
+	}
+	sum = 970U - sum;
+	sum %= 10U;
+	sum ^= '0';
+
+	return sum << 1U ^ ((char)sum != str[len - 3U]);
+}
+
+void
+nmpr_sevatid(nmck_t s, const char *str, size_t len)
+{
+	if (LIKELY(!(s & 0b1U))) {
+		fputs("Swedish VAT-ID, conformant", stdout);
+	} else if (s > 0 && len >= 3U) {
+		fputs("Swedish VAT-ID, not conformant, should be ", stdout);
+		fwrite(str, sizeof(*str), len - 3U, stdout);
+		fputc(s >> 1U & 0x7fU, stdout);
+		fputc(str[len - 2U], stdout);
+		fputc(str[len - 1U], stdout);
+	} else {
+		fputs("unknown", stdout);
+	}
+	return;
+}
+
+nmck_t
+nmck_sivatid(const char *str, size_t len)
+{
+	uint_fast32_t sum = 0U;
+	size_t i = 0U;
+
+	/* common cases first */
+	if (len < 9U || len > 14U) {
+		return -1;
+	}
+	if (str[0U] == 'S' && str[1U] == 'I') {
+		i += 2U;
+	}
+	i += str[i] == ' ';
+
+	/* snarf 7 digits */
+	for (size_t j = 2U; j < 6U && i < len - 1U; i++) {
+		uint_fast32_t c = str[i] ^ '0';
+
+		if (UNLIKELY(c >= 10U)) {
+			return -1;
+		}
+		sum += ++j * c;
+	}
+	i += str[i] == ' ';
+	for (size_t j = 6U; j < 9U && i < len - 1U; i++) {
+		uint_fast32_t c = str[i] ^ '0';
+
+		if (UNLIKELY(c >= 10U)) {
+			return -1;
+		}
+		sum += ++j * c;
+	}
+	if (UNLIKELY(!(sum %= 11U))) {
+		/* they wouldn't hand this one out */
+		return -1;
+	}
+	sum %= 10U;
+	sum ^= '0';
+
+	return sum << 1U ^ ((char)sum != str[len - 1U]);
+}
+
+void
+nmpr_sivatid(nmck_t s, const char *str, size_t len)
+{
+	if (LIKELY(!(s & 0b1U))) {
+		fputs("Slovenian VAT-ID, conformant", stdout);
+	} else if (s > 0 && len > 0U) {
+		fputs("Slovenian VAT-ID, not conformant, should be ", stdout);
+		fwrite(str, sizeof(*str), len - 1U, stdout);
+		fputc(s >> 1U & 0x7fU, stdout);
+	} else {
+		fputs("unknown", stdout);
+	}
+	return;
+}
+
+nmck_t
+nmck_esvatid(const char *str, size_t len)
+{
+/* luhn */
+	uint_fast32_t sum = 0U;
+	size_t i = 0U;
+
+	/* common cases first */
+	if (len < 9U || len > 14U) {
+		return -1;
+	}
+	if (str[0U] == 'E' && str[1U] == 'S') {
+		i += 2U;
+	}
+	i += str[i] == ' ';
+	if (UNLIKELY(str[i++] != 'A')) {
+		return -1;
+	}
+	/* we know it's an even number of digits, so start weighing at 2 */
+	for (size_t k = 2U; i < len - 1U; i++) {
+		uint_fast32_t c = str[i] ^ '0';
+
+		if (str[i] == ' ') {
+			continue;
+		} else if (UNLIKELY(c >= 10U)) {
+			return -1;
+		}
+		sum += k * c;
+		sum += k * c >= 10U;
+		k ^= 3U;
+	}
+	sum = 970U - sum;
+	sum %= 10U;
+	sum ^= '0';
+
+	return sum << 1U ^ ((char)sum != str[len - 1U]);
+}
+
+void
+nmpr_esvatid(nmck_t s, const char *str, size_t len)
+{
+	if (LIKELY(!(s & 0b1U))) {
+		fputs("Spanish VAT-ID, conformant", stdout);
+	} else if (s > 0 && len > 0U) {
+		fputs("Spanish VAT-ID, not conformant, should be ", stdout);
+		fwrite(str, sizeof(*str), len - 1U, stdout);
+		fputc(s >> 1U & 0x7fU, stdout);
+	} else {
+		fputs("unknown", stdout);
+	}
+	return;
+}
+
 /* euvatid.c ends here */
