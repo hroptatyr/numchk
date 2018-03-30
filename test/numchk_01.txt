@@ -68,7 +68,7 @@ IE1234567FE	Irish VAT-ID, conformant
 043.033.407-90	CPF, conformant
 047047000-??	CPF, not conformant, should be 047047000-38
 1659475283	NPI, conformant
-165947528?	ISBN, not ISO 2108:1992 conformant, should be 1659475287	NPI, not conformant, should be 1659475283	NHS patient number, not conformant, should be 1659475287
+165947528?	ISBN, not ISO 2108:1992 conformant, should be 1659475287	Polish VAT-ID, not conformant, should be 1659475282	NPI, not conformant, should be 1659475283	NHS patient number, not conformant, should be 1659475287
 129131672	TFN, conformant	ABA RTN, conformant
 02120002?	CUSIP, not conformant, should be 021200027	German VAT-ID, not conformant, should be 021200024	Greek VAT-ID, not conformant, should be 021200023	ABA RTN, not conformant, should be 021200025
 CGC2720	NHI, conformant
@@ -96,3 +96,5 @@ NL123456782B12	Dutch VAT-ID, conformant
 12345678?B12	Dutch VAT-ID, not conformant, should be 123456782B12
 AT U13585627	Austrian VAT-ID, conformant
 U1358562?	Austrian VAT-ID, not conformant, should be U13585627
+PL 8567346215	Polish VAT-ID, conformant
+856734621?	ISBN, not ISO 2108:1992 conformant, should be 8567346215	Polish VAT-ID, not conformant, should be 8567346215	NPI, not conformant, should be 8567346217	NHS patient number, not conformant, should be 8567346215

@@ -636,4 +636,51 @@ nmpr_atvatid(nmck_t s, const char *str, size_t len)
 	return;
 }
 
+nmck_t
+nmck_plvatid(const char *str, size_t len)
+{
+/* pretty much luhn, twist is to subtract from 96 */
+	static const uint_fast32_t w[] = {6U, 5U, 7U, 2U, 3U, 4U, 5U, 6U, 7U};
+	uint_fast32_t sum = 0U;
+	size_t i = 0U;
+
+	/* common cases first */
+	if (len < 10U || len > 13U) {
+		return -1;
+	}
+	if (str[0U] == 'P' && str[1U] == 'L') {
+		i += 2U;
+	}
+	i += str[i] == ' ';
+	for (size_t j = 0U; j < 9U && i < len - 1U; i++, j++) {
+		uint_fast32_t c = str[i] ^ '0';
+
+		if (UNLIKELY(c >= 10U)) {
+			return -1;
+		}
+		sum += w[j] * c;
+	}
+	if (UNLIKELY((sum %= 11U) >= 10U)) {
+		return -1;
+	}
+	sum ^= '0';
+
+	return sum << 1U ^ ((char)sum != str[len - 1U]);
+}
+
+void
+nmpr_plvatid(nmck_t s, const char *str, size_t len)
+{
+	if (LIKELY(!(s & 0b1U))) {
+		fputs("Polish VAT-ID, conformant", stdout);
+	} else if (s > 0 && len > 3U) {
+		fputs("Polish VAT-ID, not conformant, should be ", stdout);
+		fwrite(str, sizeof(*str), len - 1U, stdout);
+		fputc(s >> 1U & 0x7fU, stdout);
+	} else {
+		fputs("unknown", stdout);
+	}
+	return;
+}
+
 /* euvatid.c ends here */
