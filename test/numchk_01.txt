@@ -97,7 +97,11 @@ NL123456782B12	Dutch VAT-ID, conformant
 AT U13585627	Austrian VAT-ID, conformant
 U1358562?	Austrian VAT-ID, not conformant, should be U13585627
 PL 8567346215	Polish VAT-ID, conformant
+856-734-62-15	Polish VAT-ID, conformant
+856-73-46-215	Polish VAT-ID, conformant
 856734621?	ISBN, not ISO 2108:1992 conformant, should be 8567346215	Polish VAT-ID, not conformant, should be 8567346215	NPI, not conformant, should be 8567346217	NHS patient number, not conformant, should be 8567346215
+856-73-46-21_	Polish VAT-ID, not conformant, should be 856-73-46-215
+856-734-62-1_	Polish VAT-ID, not conformant, should be 856-734-62-15
 PT 136695973	Portuguese VAT-ID, conformant
 PT136 695 97?	Portuguese VAT-ID, not conformant, should be PT136 695 973
 SE 136695975523	Swedish VAT-ID, conformant
