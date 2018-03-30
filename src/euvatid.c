@@ -837,4 +837,57 @@ nmpr_sivatid(nmck_t s, const char *str, size_t len)
 	return;
 }
 
+nmck_t
+nmck_esvatid(const char *str, size_t len)
+{
+/* luhn */
+	uint_fast32_t sum = 0U;
+	size_t i = 0U;
+
+	/* common cases first */
+	if (len < 9U || len > 14U) {
+		return -1;
+	}
+	if (str[0U] == 'E' && str[1U] == 'S') {
+		i += 2U;
+	}
+	i += str[i] == ' ';
+	if (UNLIKELY(str[i++] != 'A')) {
+		return -1;
+	}
+	/* we know it's an even number of digits, so start weighing at 2 */
+	for (size_t k = 2U; i < len - 1U; i++) {
+		uint_fast32_t c = str[i] ^ '0';
+
+		if (str[i] == ' ') {
+			continue;
+		} else if (UNLIKELY(c >= 10U)) {
+			return -1;
+		}
+		sum += k * c;
+		sum += k * c >= 10U;
+		k ^= 3U;
+	}
+	sum = 970U - sum;
+	sum %= 10U;
+	sum ^= '0';
+
+	return sum << 1U ^ ((char)sum != str[len - 1U]);
+}
+
+void
+nmpr_esvatid(nmck_t s, const char *str, size_t len)
+{
+	if (LIKELY(!(s & 0b1U))) {
+		fputs("Spanish VAT-ID, conformant", stdout);
+	} else if (s > 0 && len > 0U) {
+		fputs("Spanish VAT-ID, not conformant, should be ", stdout);
+		fwrite(str, sizeof(*str), len - 1U, stdout);
+		fputc(s >> 1U & 0x7fU, stdout);
+	} else {
+		fputs("unknown", stdout);
+	}
+	return;
+}
+
 /* euvatid.c ends here */

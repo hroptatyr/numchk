@@ -90,6 +90,7 @@ static nmck_t sureck[NNMCK];
 	action ptvatid {c(ptvatid)}
 	action sevatid {c(sevatid)}
 	action sivatid {c(sivatid)}
+	action esvatid {c(esvatid)}
 	action bicc {c(bicc)}
 	action bic {c(bic)}
 	action wkn {c(wkn)}
@@ -156,6 +157,7 @@ static nmck_t sureck[NNMCK];
 		("PT" " "?)? digit{3} " "? digit{3} " "? digit{2} (digit | check) %ptvatid |
 		("SE" " "?)? digit{9} (digit | check) digit{2} %sevatid |
 		("SI" " "?)? digit{4} " "? digit{3} (digit | check) %sivatid |
+		("ES" " "?)? "A" digit{2} " "? digit{3} " "? digit{2} (digit | check) %esvatid |
 		upper{3} ("U" | "J" | "Z") digit{6} (digit | check) %bicc |
 		upper{6} upnum{2} upnum? (upnum{3})? %bic |
 		upnum{6} %wkn |
