@@ -77,6 +77,46 @@ Input from stdin is of course allowed:
     $
 
 
+Motivation
+----------
+
+The project arose as monitoring link in a daily tool chain that collects
+security master data from different sources and prepares the result for
+database insertion.  For possibly obvious reasons the integrity check
+was not to be conducted during or after the database import.  Databases
+in general aren't exactly known for its string manipulation or numerical
+capabilities.  Besides, we needed the security identifiers to be
+classified so we could extract information by ISIN, by FIGI, etc.
+
+Luckily those identifiers can all be integrity-checked, i.e. just from
+trying to verify the check digit you can distinguish ISINs from FIGIs.
+And of course there are plenty of ready-to-use libraries, snippets or
+command line tools that do the job, or are there not?
+
+Unfortunately, most (all?) of them are written in Python, Javascript or
+PHP, languages notorious for their slow string processing!  Throw in the
+phenomenon that calculating check digits is one of the first projects
+for most people, possibly right after or at least soon after Hello
+World, and you know why checking and classifying 10 million security
+identifiers is a job that takes an hour or two.  Did you know that a day
+only has 24 hours?
+
+There were two options:
+- going horizontal (NVDA and INTC probably teamed up with the check
+  digit mafia to sell you more xPU power)
+- doing things properly
+
+We chose the latter, or you would be reading another one of those
+stories about how a modern stack with a modern language can bring you
+back the speed of a hand-coded MC68000 assembler program whilst being
+10000 times more maintainable (whatever that means and assuming you're a
+Kubernetes expert already).  The upshot is: Our security identifier
+checking and classification now takes an acceptable 12 to 15 seconds.
+
+We then thought the whole tool would be more useful if it could detect
+and verify all sorts of numbers and identifiers.
+
+
 Further Reading
 ---------------
 + [Wikipedia on check digits](https://en.wikipedia.org/wiki/Check_digit)
