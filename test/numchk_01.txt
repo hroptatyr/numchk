@@ -103,3 +103,6 @@ PT136 695 97?	Portuguese VAT-ID, not conformant, should be PT136 695 973
 SE 136695975523	Swedish VAT-ID, conformant
 136695975923	GTIN12, not conformant, should be 136695975924	Swedish VAT-ID, not conformant, should be 136695975523	Titulo Eleitoral, not conformant, should be 136695975932
 136695975_23	Swedish VAT-ID, not conformant, should be 136695975523
+SI 59082437	Slovenian VAT-ID, conformant
+SI 5908 2430	Slovenian VAT-ID, not conformant, should be SI 5908 2437
+5908 243_	Slovenian VAT-ID, not conformant, should be 5908 2437

@@ -779,4 +779,62 @@ nmpr_sevatid(nmck_t s, const char *str, size_t len)
 	return;
 }
 
+nmck_t
+nmck_sivatid(const char *str, size_t len)
+{
+	uint_fast32_t sum = 0U;
+	size_t i = 0U;
+
+	/* common cases first */
+	if (len < 9U || len > 14U) {
+		return -1;
+	}
+	if (str[0U] == 'S' && str[1U] == 'I') {
+		i += 2U;
+	}
+	i += str[i] == ' ';
+
+	/* snarf 7 digits */
+	for (size_t j = 2U; j < 6U && i < len - 1U; i++) {
+		uint_fast32_t c = str[i] ^ '0';
+
+		if (UNLIKELY(c >= 10U)) {
+			return -1;
+		}
+		sum += ++j * c;
+	}
+	i += str[i] == ' ';
+	for (size_t j = 6U; j < 9U && i < len - 1U; i++) {
+		uint_fast32_t c = str[i] ^ '0';
+
+		if (UNLIKELY(c >= 10U)) {
+			return -1;
+		}
+		sum += ++j * c;
+	}
+	if (UNLIKELY(!(sum %= 11U))) {
+		/* they wouldn't hand this one out */
+		return -1;
+	}
+	sum %= 10U;
+	sum ^= '0';
+
+	return sum << 1U ^ ((char)sum != str[len - 1U]);
+}
+
+void
+nmpr_sivatid(nmck_t s, const char *str, size_t len)
+{
+	if (LIKELY(!(s & 0b1U))) {
+		fputs("Slovenian VAT-ID, conformant", stdout);
+	} else if (s > 0 && len > 0U) {
+		fputs("Slovenian VAT-ID, not conformant, should be ", stdout);
+		fwrite(str, sizeof(*str), len - 1U, stdout);
+		fputc(s >> 1U & 0x7fU, stdout);
+	} else {
+		fputs("unknown", stdout);
+	}
+	return;
+}
+
 /* euvatid.c ends here */
