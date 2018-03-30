@@ -153,7 +153,8 @@ static nmck_t sureck[NNMCK];
 		("LU" " "?)? digit{3} " "? digit{3} " "? (digit{2} | check{2}) %luvatid |
 		"NL"? digit{8} (digit | check) "B" digit{2} %nlvatid |
 		("AT" " "?)? "U" digit{7} (digit | check) %atvatid |
-		("PL" " "?)? digit{9} (digit | check) %plvatid |
+		("PL" " "?)? digit{3} "-"? digit{3} "-"? digit{2} "-"? digit (digit | check) %plvatid |
+		("PL" " "?)? digit{3} "-"? digit{2} "-"? digit{2} "-"? digit{2} (digit | check) %plvatid |
 		("PT" " "?)? digit{3} " "? digit{3} " "? digit{2} (digit | check) %ptvatid |
 		("SE" " "?)? digit{9} (digit | check) digit{2} %sevatid |
 		("SI" " "?)? digit{4} " "? digit{3} (digit | check) %sivatid |

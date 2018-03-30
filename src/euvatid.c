@@ -651,13 +651,15 @@ nmck_plvatid(const char *str, size_t len)
 		i += 2U;
 	}
 	i += str[i] == ' ';
-	for (size_t j = 0U; j < 9U && i < len - 1U; i++, j++) {
+	for (size_t j = 0U; j < 9U && i < len - 1U; i++) {
 		uint_fast32_t c = str[i] ^ '0';
 
-		if (UNLIKELY(c >= 10U)) {
+		if (str[i] == '-') {
+			continue;
+		} else if (UNLIKELY(c >= 10U)) {
 			return -1;
 		}
-		sum += w[j] * c;
+		sum += w[j++] * c;
 	}
 	if (UNLIKELY((sum %= 11U) >= 10U)) {
 		return -1;
