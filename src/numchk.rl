@@ -122,7 +122,7 @@ static nmck_t sureck[NNMCK];
 		"BBG" (consonant | digit){8} (digit | check) %figi |
 		xdigit{3,}'-'digit{4}'-'xdigit{8}'-'(xdigit | check) %istc |
 		xdigit{3,} digit{4} xdigit{8} (xdigit | check) %istc |
-		(digit | "*" | "@" | "#"){8} (digit | check) %cusip |
+		(alnum | "*" | "@" | "#"){8} (digit | check) %cusip |
 		(consonant | digit){6} (digit | check) %sedol |
 		upnum{18} (digit{2} | check{2}) %lei |
 		digit{7,17} (digit | check) %gtin |
