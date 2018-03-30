@@ -100,3 +100,6 @@ PL 8567346215	Polish VAT-ID, conformant
 856734621?	ISBN, not ISO 2108:1992 conformant, should be 8567346215	Polish VAT-ID, not conformant, should be 8567346215	NPI, not conformant, should be 8567346217	NHS patient number, not conformant, should be 8567346215
 PT 136695973	Portuguese VAT-ID, conformant
 PT136 695 97?	Portuguese VAT-ID, not conformant, should be PT136 695 973
+SE 136695975523	Swedish VAT-ID, conformant
+136695975923	GTIN12, not conformant, should be 136695975924	Swedish VAT-ID, not conformant, should be 136695975523	Titulo Eleitoral, not conformant, should be 136695975932
+136695975_23	Swedish VAT-ID, not conformant, should be 136695975523

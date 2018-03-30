@@ -157,6 +157,8 @@ extern nmck_t nmck_plvatid(const char*, size_t);
 extern void nmpr_plvatid(nmck_t, const char*, size_t);
 extern nmck_t nmck_ptvatid(const char*, size_t);
 extern void nmpr_ptvatid(nmck_t, const char*, size_t);
+extern nmck_t nmck_sevatid(const char*, size_t);
+extern void nmpr_sevatid(nmck_t, const char*, size_t);
 
 extern nmck_t nmck_bic(const char*, size_t);
 extern void nmpr_bic(nmck_t, const char*, size_t);

@@ -626,7 +626,7 @@ nmpr_atvatid(nmck_t s, const char *str, size_t len)
 {
 	if (LIKELY(!(s & 0b1U))) {
 		fputs("Austrian VAT-ID, conformant", stdout);
-	} else if (s > 0 && len > 3U) {
+	} else if (s > 0 && len > 0U) {
 		fputs("Austrian VAT-ID, not conformant, should be ", stdout);
 		fwrite(str, sizeof(*str), len - 1U, stdout);
 		fputc(s >> 1U & 0x7fU, stdout);
@@ -672,7 +672,7 @@ nmpr_plvatid(nmck_t s, const char *str, size_t len)
 {
 	if (LIKELY(!(s & 0b1U))) {
 		fputs("Polish VAT-ID, conformant", stdout);
-	} else if (s > 0 && len > 3U) {
+	} else if (s > 0 && len > 0U) {
 		fputs("Polish VAT-ID, not conformant, should be ", stdout);
 		fwrite(str, sizeof(*str), len - 1U, stdout);
 		fputc(s >> 1U & 0x7fU, stdout);
@@ -720,10 +720,59 @@ nmpr_ptvatid(nmck_t s, const char *str, size_t len)
 {
 	if (LIKELY(!(s & 0b1U))) {
 		fputs("Portuguese VAT-ID, conformant", stdout);
-	} else if (s > 0 && len > 3U) {
+	} else if (s > 0 && len > 0U) {
 		fputs("Portuguese VAT-ID, not conformant, should be ", stdout);
 		fwrite(str, sizeof(*str), len - 1U, stdout);
 		fputc(s >> 1U & 0x7fU, stdout);
+	} else {
+		fputs("unknown", stdout);
+	}
+	return;
+}
+
+nmck_t
+nmck_sevatid(const char *str, size_t len)
+{
+/* luhn, ignore last 2 digits */
+	uint_fast32_t sum = 0U;
+	size_t i = 0U;
+
+	/* common cases first */
+	if (len < 12U || len > 15U) {
+		return -1;
+	}
+	if (str[0U] == 'S' && str[1U] == 'E') {
+		i += 2U;
+	}
+	i += str[i] == ' ';
+	/* we know it's an even number of digits, so start weighing at 2 */
+	for (size_t k = 2U; i < len - 3U; i++, k ^= 3U) {
+		uint_fast32_t c = str[i] ^ '0';
+
+		if (UNLIKELY(c >= 10U)) {
+			return -1;
+		}
+		sum += k * c;
+		sum += k * c >= 10U;
+	}
+	sum = 970U - sum;
+	sum %= 10U;
+	sum ^= '0';
+
+	return sum << 1U ^ ((char)sum != str[len - 3U]);
+}
+
+void
+nmpr_sevatid(nmck_t s, const char *str, size_t len)
+{
+	if (LIKELY(!(s & 0b1U))) {
+		fputs("Swedish VAT-ID, conformant", stdout);
+	} else if (s > 0 && len >= 3U) {
+		fputs("Swedish VAT-ID, not conformant, should be ", stdout);
+		fwrite(str, sizeof(*str), len - 3U, stdout);
+		fputc(s >> 1U & 0x7fU, stdout);
+		fputc(str[len - 2U], stdout);
+		fputc(str[len - 1U], stdout);
 	} else {
 		fputs("unknown", stdout);
 	}
