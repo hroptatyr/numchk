@@ -94,3 +94,5 @@ LU 13669580	Luxembourgian VAT-ID, conformant
 136 695 80	Luxembourgian VAT-ID, conformant
 NL123456782B12	Dutch VAT-ID, conformant
 12345678?B12	Dutch VAT-ID, not conformant, should be 123456782B12
+AT U13585627	Austrian VAT-ID, conformant
+U1358562?	Austrian VAT-ID, not conformant, should be U13585627
