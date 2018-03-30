@@ -17,7 +17,9 @@ M-5215-9669-6	ISMN, conformant with ISO 10957:1993
 6948836	SEDOL, conformant
 694883?	SEDOL, not conformant, should be 6948836	IMO, not conformant, should be 6948838
 694883133	CUSIP, conformant
+17275R102	CUSIP, conformant
 69488313_	CUSIP, not conformant, should be 694883133	German VAT-ID, not conformant, should be 694883132	Greek VAT-ID, not conformant, should be 694883137	Portuguese VAT-ID, not conformant, should be 694883131	ABA RTN, not conformant, should be 694883138
+17275R100	CUSIP, not conformant, should be 17275R102
 0000-0000-D07A-0090-Q-0000-0000-X	ISAN, conformant
 0000-0000-D07A-0090-?-0000-0000-?	ISAN, not conformant, should be 0000-0000-D07A-0090-Q-0000-0000-X
 BBG00JHWPB07	FIGI, conformant with http://www.omg.org/spec/FIGI/1.0
@@ -41,7 +43,7 @@ FR__404833048	French VAT-ID, not conformant, should be FR83404833048
 TOLU4734787	BICC, conformant with ISO 6346:1995
 DEUTDEFF	BIC, conformant with ISO 9362:2009
 BSAMLKLXXXX	BIC, conformant with ISO 9362:2009
-DEUTDEFF3	FIN address, Swift conformant
+DEUTDEFF3	CUSIP, not conformant, should be DEUTDEFF7	FIN address, Swift conformant
 A0B321	WKN, conformant
 AOB321	unknown
 A0B32I	unknown
@@ -95,7 +97,7 @@ LU 13669580	Luxembourgian VAT-ID, conformant
 NL123456782B12	Dutch VAT-ID, conformant
 12345678?B12	Dutch VAT-ID, not conformant, should be 123456782B12
 AT U13585627	Austrian VAT-ID, conformant
-U1358562?	Austrian VAT-ID, not conformant, should be U13585627
+U1358562?	CUSIP, not conformant, should be U13585622	Austrian VAT-ID, not conformant, should be U13585627
 PL 8567346215	Polish VAT-ID, conformant
 856-734-62-15	Polish VAT-ID, conformant
 856-73-46-215	Polish VAT-ID, conformant
