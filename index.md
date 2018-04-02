@@ -23,7 +23,7 @@ canonicalisation are left to its competitors.
 
 Red tape
 --------
-+ dependencies: C99, POSIX, [Ragel][1]
++ dependencies: C99, POSIX
 + licensed under BSD3c
 
 
