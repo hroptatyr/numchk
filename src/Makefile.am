@@ -88,7 +88,8 @@ version.c: version.c.in $(top_builddir)/.version
 ## yuck rule
 SUFFIXES += .yuck
 SUFFIXES += .yucc
-SUFFIXES += .re
+SUFFIXES += .rl
+SUFFIXES += .rlc
 .yuck.yucc:
 	$(AM_V_GEN) PATH=$(top_builddir)/build-aux:"$${PATH}" \
 		yuck$(EXEEXT) gen -o $@ $<
