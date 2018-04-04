@@ -53,13 +53,19 @@ static nmck_t sureck[NNMCK];
 	vowel = "A" | "E" | "I" | "O" | "U";
 	consonant = upper - vowel;
 
+	action iban {c(iban)}
+	action istc {c(istc)}
+	action isan {c(isan)}
+	action ievatid {c(ievatid)}
+	action plvatid {c(plvatid)}
+
 	main :=
-		upper{2} digit{2} (upnum | ' '){11,42} %{c(iban)} |
-		upper{2} check{2} (upnum | ' '){11,42} %{c(iban)} |
+		upper{2} digit{2} (upnum | ' '){11,42} %iban |
+		upper{2} check{2} (upnum | ' '){11,42} %iban |
 		upper{2} upnum{9} (digit | check) %{c(isin)} |
 		"BBG" (consonant | digit){8} (digit | check) %{c(figi)} |
-		xdigit{3,}'-'digit{4}'-'xdigit{8}'-'(xdigit | check) %{c(istc)} |
-		xdigit{3,} digit{4} xdigit{8} (xdigit | check) %{c(istc)} |
+		xdigit{3,}'-'digit{4}'-'xdigit{8}'-'(xdigit | check) %istc |
+		xdigit{3,} digit{4} xdigit{8} (xdigit | check) %istc |
 		(alnum | "*" | "@" | "#"){8} (digit | check) %{c(cusip)} |
 		(consonant | digit){6} (digit | check) %{c(sedol)} |
 		upnum{18} (digit{2} | check{2}) %{c(lei)} |
@@ -74,8 +80,8 @@ static nmck_t sureck[NNMCK];
 		digit{2,3} " "? digit{3} " "? digit{3} %{c(tfn)} |
 		digit+ "-" digit{2} "-" (digit | check) %{c(cas)} |
 		digit{4} " "? digit{4} " "? digit{4} " "? digit{3} (digit | "X" | check) %{c(isni)} |
-		("ISAN" (" " | "-" | ":")?)? xdigit{4} "-"? xdigit{4} "-"? xdigit{4} "-"? xdigit{4} "-"? (alnum | check) %{c(isan)} |
-		("ISAN" (" " | "-" | ":")?)? xdigit{4} "-"? xdigit{4} "-"? xdigit{4} "-"? xdigit{4} "-"? (alnum | check) "-"? xdigit{4} "-"? xdigit{4} "-"? (alnum | check) %{c(isan)} |
+		("ISAN" (" " | "-" | ":")?)? xdigit{4} "-"? xdigit{4} "-"? xdigit{4} "-"? xdigit{4} "-"? (alnum | check) %isan |
+		("ISAN" (" " | "-" | ":")?)? xdigit{4} "-"? xdigit{4} "-"? xdigit{4} "-"? xdigit{4} "-"? (alnum | check) "-"? xdigit{4} "-"? xdigit{4} "-"? (alnum | check) %isan |
 		("IMO" " "?)? digit{6} (digit | check) %{c(imo)} |
 		upnum{8} (digit | "X" | check) upnum{8} %{c(vin)} |
 		upnum{2} "-"? upnum{5} "-"? upnum{10} "-"? (upnum | check) %{c(grid)} |
@@ -85,14 +91,14 @@ static nmck_t sureck[NNMCK];
 		"FI"? digit{7} (digit | check) %{c(fivatid)} |
 		("FR" " "?)? (digit{2} | check{2}) /[ ,]/? digit{3} /[ ,]/? digit{3} /[ ,]/? digit{3} %{c(frvatid)} |
 		(("GR" | "EL") " "?)? digit{8} (digit | check) %{c(grvatid)} |
-		("IE" " "?)? digit{7} upper? (upper | check) "W"? %{c(ievatid)} |
-		("IE" " "?)? digit (upper | "*" | "+") digit{5} (upper | check) "W"? %{c(ievatid)} |
+		("IE" " "?)? digit{7} upper? (upper | check) "W"? %ievatid |
+		("IE" " "?)? digit (upper | "*" | "+") digit{5} (upper | check) "W"? %ievatid |
 		("IT" " "?)? digit{10} (digit | check) %{c(itvatid)} |
 		("LU" " "?)? digit{3} " "? digit{3} " "? (digit{2} | check{2}) %{c(luvatid)} |
 		"NL"? digit{8} (digit | check) "B" digit{2} %{c(nlvatid)} |
 		("AT" " "?)? "U" digit{7} (digit | check) %{c(atvatid)} |
-		("PL" " "?)? digit{3} "-"? digit{3} "-"? digit{2} "-"? digit (digit | check) %{c(plvatid)} |
-		("PL" " "?)? digit{3} "-"? digit{2} "-"? digit{2} "-"? digit{2} (digit | check) %{c(plvatid)} |
+		("PL" " "?)? digit{3} "-"? digit{3} "-"? digit{2} "-"? digit (digit | check) %plvatid |
+		("PL" " "?)? digit{3} "-"? digit{2} "-"? digit{2} "-"? digit{2} (digit | check) %plvatid |
 		("PT" " "?)? digit{3} " "? digit{3} " "? digit{2} (digit | check) %{c(ptvatid)} |
 		("SE" " "?)? digit{9} (digit | check) digit{2} %{c(sevatid)} |
 		("SI" " "?)? digit{4} " "? digit{3} (digit | check) %{c(sivatid)} |
