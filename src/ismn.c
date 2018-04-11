@@ -54,6 +54,16 @@ ismn13p(const char *str, size_t len)
 		str[2U] == '9' && str[3U] == '0';
 }
 
+#ifdef RAGEL_BLOCK
+%%{
+	machine numchk;
+
+	ismn =
+		"9790" digit{8} (digit | check) %{c(ismn13)} |
+		"M" "-"? digit{4} "-"? digit{4} "-"? (digit | "X" | check) %{c(ismn10)} ;
+}%%
+#endif	/* RAGEL_BLOCK */
+
 
 /* ismns com in two variants, ismn10 and ismn13 */
 nmck_t

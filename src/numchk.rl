@@ -67,6 +67,7 @@ static nmck_t sureck[NNMCK];
 	include numchk "gtin.c";
 	include numchk "isbn.c";
 	include numchk "issn.c";
+	include numchk "ismn.c";
 
 	main :=
 		iban |
@@ -79,8 +80,7 @@ static nmck_t sureck[NNMCK];
 		gtin |
 		isbn |
 		issn |
-		"9790" digit{8} (digit | check) %{c(ismn13)} |
-		"M" "-"? digit{4} "-"? digit{4} "-"? (digit | "X" | check) %{c(ismn10)} |
+		ismn |
 		(digit | " "){12,22} %{c(credcard)} |
 		digit{2,3} " "? digit{3} " "? digit{3} %{c(tfn)} |
 		digit+ "-" digit{2} "-" (digit | check) %{c(cas)} |
