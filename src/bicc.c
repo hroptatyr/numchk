@@ -65,6 +65,14 @@ _calph(char x)
 	return -1;
 }
 
+#ifdef RAGEL_BLOCK
+%%{
+	machine numchk;
+
+	bicc = upper{3} ("U" | "J" | "Z") digit{6} (digit | check) %{c(bicc)} ;
+}%%
+#endif	/* RAGEL_BLOCK */
+
 
 nmck_t
 nmck_bicc(const char *str, size_t len)
