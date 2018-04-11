@@ -61,6 +61,14 @@ _b36c(char c)
 	return (char)(c + '7');
 }
 
+#ifdef RAGEL_BLOCK
+%%{
+	machine numchk;
+
+	grid = upnum{2} "-"? upnum{5} "-"? upnum{10} "-"? (upnum | check) %{c(grid)} ;
+}%%
+#endif	/* RAGEL_BLOCK */
+
 
 nmck_t
 nmck_grid(const char *str, size_t len)

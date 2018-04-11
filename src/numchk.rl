@@ -74,6 +74,7 @@ static nmck_t sureck[NNMCK];
 	include numchk "isan.c";
 	include numchk "imo.c";
 	include numchk "vin.c";
+	include numchk "grid.c";
 
 	main :=
 		iban |
@@ -94,7 +95,7 @@ static nmck_t sureck[NNMCK];
 		isan |
 		imo |
 		vin |
-		upnum{2} "-"? upnum{5} "-"? upnum{10} "-"? (upnum | check) %{c(grid)} |
+		grid |
 		("DE" " "?)? digit{3} " "? digit{3} " "? digit{2} (digit | check) %{c(devatid)} |
 		("BE" "."?)? digit{3,4} "."? digit{3} "."? digit{1} (digit{2} | check{2}) %{c(bevatid)} |
 		"DK"? digit{7} (digit | check) %{c(dkvatid)} |
