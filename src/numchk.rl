@@ -88,6 +88,7 @@ static nmck_t sureck[NNMCK];
 	include numchk "nhi.c";
 	include numchk "ppsn.c";
 	include numchk "idnr.c";
+	include numchk "oib.c";
 
 	main :=
 		iban |
@@ -125,7 +126,7 @@ static nmck_t sureck[NNMCK];
 		nhi |
 		ppsn |
 		idnr |
-		"HR"? digit{10} (digit | check) %{c(oib)} |
+		oib |
 		digit{9} (digit | check) %{c(nhs)} |
 
 		## generic checks
