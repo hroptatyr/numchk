@@ -60,11 +60,12 @@ static nmck_t sureck[NNMCK];
 
 	include numchk "iban.c";
 	include numchk "isin.c";
+	include numchk "figi.c";
 
 	main :=
 		iban |
 		isin |
-		"BBG" (consonant | digit){8} (digit | check) %{c(figi)} |
+		figi |
 		xdigit{3,}'-'digit{4}'-'xdigit{8}'-'(xdigit | check) %istc |
 		xdigit{3,} digit{4} xdigit{8} (xdigit | check) %istc |
 		(alnum | "*" | "@" | "#"){8} (digit | check) %{c(cusip)} |
