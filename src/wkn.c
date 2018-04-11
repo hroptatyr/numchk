@@ -42,6 +42,14 @@
 #include "numchk.h"
 #include "nifty.h"
 
+#ifdef RAGEL_BLOCK
+%%{
+	machine numchk;
+
+	wkn = upnum{6} %{c(wkn)} ;
+}%%
+#endif	/* RAGEL_BLOCK */
+
 
 nmck_t
 nmck_wkn(const char *str, size_t len)
