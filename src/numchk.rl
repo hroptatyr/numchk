@@ -77,6 +77,7 @@ static nmck_t sureck[NNMCK];
 	include numchk "bic.c";
 	include numchk "wkn.c";
 	include numchk "imei.c";
+	include numchk "kennitala.c";
 
 	main :=
 		iban |
@@ -103,7 +104,7 @@ static nmck_t sureck[NNMCK];
 		bic |
 		wkn |
 		imei |
-		digit{6} "-"? digit{2} (digit | check) digit %{c(kennitala)} |
+		kennitala |
 		digit{9} (digit{2} | check{2}) %{c(tckimlik)} |
 		digit{4} " "? digit{4} " "? digit{3} (digit | check) %{c(aadhaar)} |
 		digit{4} " "? digit{4} " "? digit{2} " "? (digit{2} | check{2}) %{c(titulo_eleitoral)} |
