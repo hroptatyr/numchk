@@ -53,7 +53,6 @@ static nmck_t sureck[NNMCK];
 	vowel = "A" | "E" | "I" | "O" | "U";
 	consonant = upper - vowel;
 
-	action istc {c(istc)}
 	action isan {c(isan)}
 	action ievatid {c(ievatid)}
 	action plvatid {c(plvatid)}
@@ -61,13 +60,13 @@ static nmck_t sureck[NNMCK];
 	include numchk "iban.c";
 	include numchk "isin.c";
 	include numchk "figi.c";
+	include numchk "istc.c";
 
 	main :=
 		iban |
 		isin |
 		figi |
-		xdigit{3,}'-'digit{4}'-'xdigit{8}'-'(xdigit | check) %istc |
-		xdigit{3,} digit{4} xdigit{8} (xdigit | check) %istc |
+		istc |
 		(alnum | "*" | "@" | "#"){8} (digit | check) %{c(cusip)} |
 		(consonant | digit){6} (digit | check) %{c(sedol)} |
 		upnum{18} (digit{2} | check{2}) %{c(lei)} |

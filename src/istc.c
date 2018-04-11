@@ -64,6 +64,17 @@ _hexc(char c)
 	return (char)(c + '7');
 }
 
+#ifdef RAGEL_BLOCK
+%%{
+	machine numchk;
+
+	_istc =
+		xdigit{3,}'-'digit{4}'-'xdigit{8}'-'(xdigit | check) |
+		xdigit{3,} digit{4} xdigit{8} (xdigit | check) ;
+	istc = _istc @{c(istc)} ;
+}%%
+#endif	/* RAGEL_BLOCK */
+
 
 nmck_t
 nmck_istc(const char *str, size_t len)
