@@ -57,6 +57,14 @@ static const uint_fast8_t damm[10U][10U] = {
 	[9] = {2, 5, 8, 1, 4, 3, 6, 7, 9, 0},
 };
 
+#ifdef RAGEL_BLOCK
+%%{
+	machine numchk;
+
+	iposan = ("10" | "11" | "20" | "30" | "40") digit{4} digit{5} (/[P-Y]/ | check) ("-" digit{2})? %{c(iposan)} ;
+}%%
+#endif	/* RAGEL_BLOCK */
+
 
 nmck_t
 nmck_iposan(const char *str, size_t len)
