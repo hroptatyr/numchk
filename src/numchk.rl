@@ -53,15 +53,15 @@ static nmck_t sureck[NNMCK];
 	vowel = "A" | "E" | "I" | "O" | "U";
 	consonant = upper - vowel;
 
-	action iban {c(iban)}
 	action istc {c(istc)}
 	action isan {c(isan)}
 	action ievatid {c(ievatid)}
 	action plvatid {c(plvatid)}
 
+	include numchk "iban.c";
+
 	main :=
-		upper{2} digit{2} (upnum | ' '){11,42} %iban |
-		upper{2} check{2} (upnum | ' '){11,42} %iban |
+		iban |
 		upper{2} upnum{9} (digit | check) %{c(isin)} |
 		"BBG" (consonant | digit){8} (digit | check) %{c(figi)} |
 		xdigit{3,}'-'digit{4}'-'xdigit{8}'-'(xdigit | check) %istc |

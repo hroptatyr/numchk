@@ -45,6 +45,17 @@
  * http://www.nordea.com/Our+services/Cash+Management/Products+and+services/IBAN+countries/908462.html */
 #include "iban-cc.c"
 
+#ifdef RAGEL_BLOCK
+%%{
+	machine numchk;
+
+	_iban =
+		upper{2} digit{2} (upnum | ' '){11,42} |
+		upper{2} check{2} (upnum | ' '){11,42} ;
+	iban = _iban %{c(iban)} ;
+}%%
+#endif	/* RAGEL_BLOCK */
+
 
 nmck_t
 nmck_iban(const char *str, size_t len)
