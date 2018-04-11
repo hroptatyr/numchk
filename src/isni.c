@@ -41,6 +41,14 @@
 #include "numchk.h"
 #include "nifty.h"
 
+#ifdef RAGEL_BLOCK
+%%{
+	machine numchk;
+
+	isni = digit{4} " "? digit{4} " "? digit{4} " "? digit{3} (digit | "X" | check) %{c(isni)} ;
+}%%
+#endif	/* RAGEL_BLOCK */
+
 
 nmck_t
 nmck_isni(const char *str, size_t len)

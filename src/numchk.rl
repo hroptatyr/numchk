@@ -71,6 +71,7 @@ static nmck_t sureck[NNMCK];
 	include numchk "credcard.c";
 	include numchk "tfn.c";
 	include numchk "cas.c";
+	include numchk "isni.c";
 
 	main :=
 		iban |
@@ -87,7 +88,7 @@ static nmck_t sureck[NNMCK];
 		credcard |
 		tfn |
 		cas |
-		digit{4} " "? digit{4} " "? digit{4} " "? digit{3} (digit | "X" | check) %{c(isni)} |
+		isni |
 		("ISAN" (" " | "-" | ":")?)? xdigit{4} "-"? xdigit{4} "-"? xdigit{4} "-"? xdigit{4} "-"? (alnum | check) %isan |
 		("ISAN" (" " | "-" | ":")?)? xdigit{4} "-"? xdigit{4} "-"? xdigit{4} "-"? xdigit{4} "-"? (alnum | check) "-"? xdigit{4} "-"? xdigit{4} "-"? (alnum | check) %isan |
 		("IMO" " "?)? digit{6} (digit | check) %{c(imo)} |
