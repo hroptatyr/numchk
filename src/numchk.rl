@@ -74,6 +74,7 @@ static nmck_t sureck[NNMCK];
 	include numchk "grid.c";
 	include numchk "euvatid.c";
 	include numchk "bicc.c";
+	include numchk "bic.c";
 
 	main :=
 		iban |
@@ -97,7 +98,7 @@ static nmck_t sureck[NNMCK];
 		grid |
 		euvatid |
 		bicc |
-		upper{6} upnum{2} upnum? (upnum{3})? %{c(bic)} |
+		bic |
 		upnum{6} %{c(wkn)} |
 		digit{2} "-"? digit{6} "-"? digit{6} "-"? ((digit | check) | digit{2}) %{c(imei)} |
 		digit{6} "-"? digit{2} (digit | check) digit %{c(kennitala)} |
