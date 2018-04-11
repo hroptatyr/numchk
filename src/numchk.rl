@@ -86,6 +86,7 @@ static nmck_t sureck[NNMCK];
 	include numchk "npi.c";
 	include numchk "abartn.c";
 	include numchk "nhi.c";
+	include numchk "ppsn.c";
 
 	main :=
 		iban |
@@ -121,7 +122,7 @@ static nmck_t sureck[NNMCK];
 		npi |
 		abartn |
 		nhi |
-		digit{7} (upper | check) ("/"? /[A-Z ]/)? %{c(ppsn)} |
+		ppsn |
 		digit{2} " "? digit{3} " "? digit{3} " "? digit{2} (digit | check) %{c(idnr)} |
 		"HR"? digit{10} (digit | check) %{c(oib)} |
 		digit{9} (digit | check) %{c(nhs)} |
