@@ -83,6 +83,7 @@ static nmck_t sureck[NNMCK];
 	include numchk "titulo-eleitoral.c";
 	include numchk "cpf.c";
 	include numchk "iposan.c";
+	include numchk "npi.c";
 
 	main :=
 		iban |
@@ -115,7 +116,7 @@ static nmck_t sureck[NNMCK];
 		titulo_eleitoral |
 		cpf |
 		iposan |
-		digit{9} (digit | check) %{c(npi)} |
+		npi |
 		digit{8} (digit | check) %{c(abartn)} |
 		upper{3} digit{3} (digit | check) %{c(nhi)} |
 		digit{7} (upper | check) ("/"? /[A-Z ]/)? %{c(ppsn)} |
