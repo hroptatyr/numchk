@@ -61,13 +61,14 @@ static nmck_t sureck[NNMCK];
 	include numchk "isin.c";
 	include numchk "figi.c";
 	include numchk "istc.c";
+	include numchk "cusip.c";
 
 	main :=
 		iban |
 		isin |
 		figi |
 		istc |
-		(alnum | "*" | "@" | "#"){8} (digit | check) %{c(cusip)} |
+		cusip |
 		(consonant | digit){6} (digit | check) %{c(sedol)} |
 		upnum{18} (digit{2} | check{2}) %{c(lei)} |
 		digit{7,17} (digit | check) %{c(gtin)} |

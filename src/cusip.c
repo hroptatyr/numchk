@@ -40,6 +40,14 @@
 #include "numchk.h"
 #include "nifty.h"
 
+#ifdef RAGEL_BLOCK
+%%{
+	machine numchk;
+
+	cusip = (alnum | "*" | "@" | "#"){8} (digit | check) %{c(cusip)} ;
+}%%
+#endif	/* RAGEL_BLOCK */
+
 
 nmck_t
 nmck_cusip(const char *str, size_t len)
