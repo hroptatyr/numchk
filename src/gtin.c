@@ -61,6 +61,14 @@ static const char *types[] = {
 	[SSCC] = "SSCC",
 };
 
+#ifdef RAGEL_BLOCK
+%%{
+	machine numchk;
+
+	gtin = digit{7,17} (digit | check) %{c(gtin)} ;
+}%%
+#endif	/* RAGEL_BLOCK */
+
 
 nmck_t
 nmck_gtin(const char *str, size_t len)

@@ -64,6 +64,7 @@ static nmck_t sureck[NNMCK];
 	include numchk "cusip.c";
 	include numchk "sedol.c";
 	include numchk "lei.c";
+	include numchk "gtin.c";
 
 	main :=
 		iban |
@@ -73,7 +74,7 @@ static nmck_t sureck[NNMCK];
 		cusip |
 		sedol |
 		lei |
-		digit{7,17} (digit | check) %{c(gtin)} |
+		gtin |
 		/97[89]/ "-"? digit "-"? digit{4} "-"? digit{4} "-"? (digit | check) %{c(isbn13)} |
 		digit "-"? digit{4} "-"? digit{4} "-"? (digit | "X" | check) %{c(isbn10)} |
 		digit{4} "-"? digit{3} (digit | "X" | check) %{c(issn8)} |
