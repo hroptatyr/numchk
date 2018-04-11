@@ -59,10 +59,11 @@ static nmck_t sureck[NNMCK];
 	action plvatid {c(plvatid)}
 
 	include numchk "iban.c";
+	include numchk "isin.c";
 
 	main :=
 		iban |
-		upper{2} upnum{9} (digit | check) %{c(isin)} |
+		isin |
 		"BBG" (consonant | digit){8} (digit | check) %{c(figi)} |
 		xdigit{3,}'-'digit{4}'-'xdigit{8}'-'(xdigit | check) %istc |
 		xdigit{3,} digit{4} xdigit{8} (xdigit | check) %istc |

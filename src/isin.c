@@ -45,6 +45,14 @@
 /* allowed isin country codes */
 #include "isin-cc.c"
 
+#ifdef RAGEL_BLOCK
+%%{
+	machine numchk;
+
+	isin = upper{2} upnum{9} (digit | check) %{c(isin)} ;
+}%%
+#endif	/* RAGEL_BLOCK */
+
 
 nmck_t
 nmck_isin(const char *str, size_t len)
