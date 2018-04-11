@@ -41,6 +41,14 @@
 #include "numchk.h"
 #include "nifty.h"
 
+#ifdef RAGEL_BLOCK
+%%{
+	machine numchk;
+
+	sedol = (consonant | digit){6} (digit | check) %{c(sedol)} ;
+}%%
+#endif	/* RAGEL_BLOCK */
+
 
 nmck_t
 nmck_sedol(const char *str, size_t len)
