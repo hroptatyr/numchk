@@ -53,7 +53,6 @@ static nmck_t sureck[NNMCK];
 	vowel = "A" | "E" | "I" | "O" | "U";
 	consonant = upper - vowel;
 
-	action isan {c(isan)}
 	action ievatid {c(ievatid)}
 	action plvatid {c(plvatid)}
 
@@ -72,6 +71,7 @@ static nmck_t sureck[NNMCK];
 	include numchk "tfn.c";
 	include numchk "cas.c";
 	include numchk "isni.c";
+	include numchk "isan.c";
 
 	main :=
 		iban |
@@ -89,8 +89,7 @@ static nmck_t sureck[NNMCK];
 		tfn |
 		cas |
 		isni |
-		("ISAN" (" " | "-" | ":")?)? xdigit{4} "-"? xdigit{4} "-"? xdigit{4} "-"? xdigit{4} "-"? (alnum | check) %isan |
-		("ISAN" (" " | "-" | ":")?)? xdigit{4} "-"? xdigit{4} "-"? xdigit{4} "-"? xdigit{4} "-"? (alnum | check) "-"? xdigit{4} "-"? xdigit{4} "-"? (alnum | check) %isan |
+		isan |
 		("IMO" " "?)? digit{6} (digit | check) %{c(imo)} |
 		upnum{8} (digit | "X" | check) upnum{8} %{c(vin)} |
 		upnum{2} "-"? upnum{5} "-"? upnum{10} "-"? (upnum | check) %{c(grid)} |
