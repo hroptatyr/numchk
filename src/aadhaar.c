@@ -66,6 +66,14 @@ static const uint_fast8_t perm[8U][10U] = {
 	[7] = {7, 0, 4, 6, 9, 1, 3, 2, 5, 8},
 };
 
+#ifdef RAGEL_BLOCK
+%%{
+	machine numchk;
+
+	aadhaar = digit{4} " "? digit{4} " "? digit{3} (digit | check) %{c(aadhaar)} ;
+}%%
+#endif	/* RAGEL_BLOCK */
+
 
 nmck_t
 nmck_aadhaar(const char *str, size_t len)

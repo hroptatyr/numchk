@@ -79,6 +79,7 @@ static nmck_t sureck[NNMCK];
 	include numchk "imei.c";
 	include numchk "kennitala.c";
 	include numchk "tckimlik.c";
+	include numchk "aadhaar.c";
 
 	main :=
 		iban |
@@ -107,7 +108,7 @@ static nmck_t sureck[NNMCK];
 		imei |
 		kennitala |
 		tckimlik |
-		digit{4} " "? digit{4} " "? digit{3} (digit | check) %{c(aadhaar)} |
+		aadhaar |
 		digit{4} " "? digit{4} " "? digit{2} " "? (digit{2} | check{2}) %{c(titulo_eleitoral)} |
 		digit{3} "."? digit{3} "."? digit{3} "-"? (digit{2} | check{2}) %{c(cpf)} |
 		("10" | "11" | "20" | "30" | "40") digit{4} digit{5} (/[P-Y]/ | check) ("-" digit{2})? %{c(iposan)} |
