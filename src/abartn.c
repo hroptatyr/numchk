@@ -42,6 +42,14 @@
 #include "numchk.h"
 #include "nifty.h"
 
+#ifdef RAGEL_BLOCK
+%%{
+	machine numchk;
+
+	abartn = digit{8} (digit | check) %{c(abartn)} ;
+}%%
+#endif	/* RAGEL_BLOCK */
+
 
 nmck_t
 nmck_abartn(const char *str, size_t len)

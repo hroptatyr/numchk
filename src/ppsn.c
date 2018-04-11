@@ -42,6 +42,14 @@
 #include "numchk.h"
 #include "nifty.h"
 
+#ifdef RAGEL_BLOCK
+%%{
+	machine numchk;
+
+	ppsn = digit{7} (upper | check) ("/"? /[A-Z ]/)? %{c(ppsn)} ;
+}%%
+#endif	/* RAGEL_BLOCK */
+
 
 nmck_t
 nmck_ppsn(const char *str, size_t len)

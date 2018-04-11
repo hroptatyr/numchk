@@ -42,6 +42,14 @@
 #include "numchk.h"
 #include "nifty.h"
 
+#ifdef RAGEL_BLOCK
+%%{
+	machine numchk;
+
+	npi = digit{9} (digit | check) %{c(npi)} ;
+}%%
+#endif	/* RAGEL_BLOCK */
+
 
 nmck_t
 nmck_npi(const char *str, size_t len)

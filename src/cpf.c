@@ -42,6 +42,14 @@
 #include "numchk.h"
 #include "nifty.h"
 
+#ifdef RAGEL_BLOCK
+%%{
+	machine numchk;
+
+	cpf = digit{3} "."? digit{3} "."? digit{3} "-"? (digit{2} | check{2}) %{c(cpf)} ;
+}%%
+#endif	/* RAGEL_BLOCK */
+
 
 nmck_t
 nmck_cpf(const char *str, size_t len)

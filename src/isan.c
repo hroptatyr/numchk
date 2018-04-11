@@ -64,6 +64,17 @@ _b36c(char c)
 	return (char)(c + '7');
 }
 
+#ifdef RAGEL_BLOCK
+%%{
+	machine numchk;
+
+	_isan =
+		("ISAN" (" " | "-" | ":")?)? xdigit{4} "-"? xdigit{4} "-"? xdigit{4} "-"? xdigit{4} "-"? (alnum | check) |
+		("ISAN" (" " | "-" | ":")?)? xdigit{4} "-"? xdigit{4} "-"? xdigit{4} "-"? xdigit{4} "-"? (alnum | check) "-"? xdigit{4} "-"? xdigit{4} "-"? (alnum | check) ;
+	isan = _isan %{c(isan)} ;
+}%%
+#endif	/* RAGEL_BLOCK */
+
 
 nmck_t
 nmck_isan(const char *str, size_t len)

@@ -41,6 +41,14 @@
 #include "numchk.h"
 #include "nifty.h"
 
+#ifdef RAGEL_BLOCK
+%%{
+	machine numchk;
+
+	cas = digit+ "-" digit{2} "-" (digit | check) %{c(cas)} ;
+}%%
+#endif	/* RAGEL_BLOCK */
+
 
 /* class implementation */
 nmck_t

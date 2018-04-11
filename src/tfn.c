@@ -41,6 +41,14 @@
 #include "numchk.h"
 #include "nifty.h"
 
+#ifdef RAGEL_BLOCK
+%%{
+	machine numchk;
+
+	tfn = digit{2,3} " "? digit{3} " "? digit{3} %{c(tfn)} ;
+}%%
+#endif	/* RAGEL_BLOCK */
+
 
 nmck_t
 nmck_tfn(const char *str, size_t len)

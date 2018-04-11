@@ -44,6 +44,14 @@
 /* allowed BIC country codes */
 #include "bic-cc.c"
 
+#ifdef RAGEL_BLOCK
+%%{
+	machine numchk;
+
+	bic = upper{6} upnum{2} upnum? (upnum{3})? %{c(bic)} ;
+}%%
+#endif	/* RAGEL_BLOCK */
+
 
 nmck_t
 nmck_bic(const char *str, size_t len)

@@ -41,6 +41,14 @@
 #include "numchk.h"
 #include "nifty.h"
 
+#ifdef RAGEL_BLOCK
+%%{
+	machine numchk;
+
+	figi = "BBG" (consonant | digit){8} (digit | check) %{c(figi)} ;
+}%%
+#endif	/* RAGEL_BLOCK */
+
 
 nmck_t
 nmck_figi(const char *str, size_t len)

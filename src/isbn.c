@@ -53,6 +53,17 @@ isbn13p(const char *str, size_t len)
 		(str[2U] == '8' || str[2U] == '9');
 }
 
+
+#ifdef RAGEL_BLOCK
+%%{
+	machine numchk;
+
+	isbn =
+		/97[89]/ "-"? digit "-"? digit{4} "-"? digit{4} "-"? (digit | check) %{c(isbn13)} |
+		digit "-"? digit{4} "-"? digit{4} "-"? (digit | "X" | check) %{c(isbn10)} ;
+}%%
+#endif	/* RAGEL_BLOCK */
+
 
 /* isbns com in two variants, isbn10 and isbn13 */
 nmck_t

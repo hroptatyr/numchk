@@ -42,6 +42,14 @@
 #include "numchk.h"
 #include "nifty.h"
 
+#ifdef RAGEL_BLOCK
+%%{
+	machine numchk;
+
+	imei = digit{2} "-"? digit{6} "-"? digit{6} "-"? ((digit | check) | digit{2}) %{c(imei)} ;
+}%%
+#endif	/* RAGEL_BLOCK */
+
 
 nmck_t
 nmck_imei(const char *str, size_t len)

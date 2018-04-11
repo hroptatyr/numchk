@@ -41,6 +41,14 @@
 #include "numchk.h"
 #include "nifty.h"
 
+#ifdef RAGEL_BLOCK
+%%{
+	machine numchk;
+
+	vin = upnum{8} (digit | "X" | check) upnum{8} %{c(vin)} ;
+}%%
+#endif	/* RAGEL_BLOCK */
+
 
 nmck_t
 nmck_vin(const char *str, size_t len)

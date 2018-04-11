@@ -42,6 +42,14 @@
 #include "numchk.h"
 #include "nifty.h"
 
+#ifdef RAGEL_BLOCK
+%%{
+	machine numchk;
+
+	titulo_eleitoral = digit{4} " "? digit{4} " "? digit{2} " "? (digit{2} | check{2}) %{c(titulo_eleitoral)} ;
+}%%
+#endif	/* RAGEL_BLOCK */
+
 
 nmck_t
 nmck_titulo_eleitoral(const char *str, size_t len)

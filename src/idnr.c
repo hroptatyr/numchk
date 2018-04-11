@@ -42,6 +42,14 @@
 #include "numchk.h"
 #include "nifty.h"
 
+#ifdef RAGEL_BLOCK
+%%{
+	machine numchk;
+
+	idnr = digit{2} " "? digit{3} " "? digit{3} " "? digit{2} (digit | check) %{c(idnr)} ;
+}%%
+#endif	/* RAGEL_BLOCK */
+
 
 nmck_t
 nmck_idnr(const char *str, size_t len)

@@ -89,6 +89,14 @@ static const char *issuers[] = {
 	[ISS_UATP] = "UATP",
 };
 
+#ifdef RAGEL_BLOCK
+%%{
+	machine numchk;
+
+	credcard = (digit | " "){12,22} %{c(credcard)} ;
+}%%
+#endif	/* RAGEL_BLOCK */
+
 
 /* this will always yield a non-0 result in order to track the issuer */
 nmck_t
