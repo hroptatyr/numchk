@@ -88,6 +88,7 @@ static nmck_t sureck[NNMCK];
 	include numchk "tckimlik.c";
 	include numchk "tfn.c";
 	include numchk "titulo-eleitoral.c";
+	include numchk "upn.c";
 	include numchk "vin.c";
 	include numchk "wkn.c";
 
@@ -129,6 +130,7 @@ static nmck_t sureck[NNMCK];
 		idnr |
 		oib |
 		nhs |
+		upn |
 
 		## generic checks
 		digit{2,} %{g(luhn)} %{g(verhoeff)} %{g(damm10)} |
