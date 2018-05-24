@@ -343,6 +343,12 @@ extern void nmpr_oib(nmck_t, const char*, size_t);
 extern nmck_t nmck_nhs(const char*, size_t);
 extern void nmpr_nhs(nmck_t, const char*, size_t);
 
+/**
+ * Check for unique pupil numbers, alphanumeric input.
+ * https://www.gov.uk/government/publications/unique-pupil-numbers */
+extern nmck_t nmck_upn(const char*, size_t);
+extern void nmpr_upn(nmck_t, const char*, size_t);
+
 
 /* utils */
 /**
