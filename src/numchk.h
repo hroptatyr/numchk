@@ -246,6 +246,8 @@ extern nmck_t nmck_sivatid(const char*, size_t);
 extern void nmpr_sivatid(nmck_t, const char*, size_t);
 extern nmck_t nmck_esvatid(const char*, size_t);
 extern void nmpr_esvatid(nmck_t, const char*, size_t);
+extern nmck_t nmck_ukvatid(const char*, size_t);
+extern void nmpr_ukvatid(nmck_t, const char*, size_t);
 
 /**
  * Check for SWIFT's business identifiers, alphanumeric input.

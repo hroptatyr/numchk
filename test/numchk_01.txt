@@ -107,7 +107,7 @@ PL 8567346215	Polish VAT-ID, conformant
 PT 136695973	Portuguese VAT-ID, conformant
 PT136 695 97?	Portuguese VAT-ID, not conformant, should be PT136 695 973
 SE 136695975523	Swedish VAT-ID, conformant
-136695975923	GTIN12, not conformant, should be 136695975924	Swedish VAT-ID, not conformant, should be 136695975523	Titulo Eleitoral, not conformant, should be 136695975932
+136695975923	GTIN12, not conformant, should be 136695975924	Swedish VAT-ID, not conformant, should be 136695975523	UK VAT-ID, not conformant	Titulo Eleitoral, not conformant, should be 136695975932
 136695975_23	Swedish VAT-ID, not conformant, should be 136695975523
 SI 59082437	Slovenian VAT-ID, conformant
 SI 5908 2430	Slovenian VAT-ID, not conformant, should be SI 5908 2437
@@ -117,3 +117,6 @@ A13 585 624	Spanish VAT-ID, not conformant, should be A13 585 625
 A13 585 62?	Spanish VAT-ID, not conformant, should be A13 585 625
 H801200001001	UPN, conformant
 _801200001001	UPN, not conformant, should be H801200001001
+GB 123 4567 82	UK VAT-ID, conformant
+GB 123456727	UK VAT-ID, conformant
+GB 123456700	UK VAT-ID, not conformant

@@ -72,7 +72,8 @@ isdigit(int x)
 		("PT" " "?)? digit{3} " "? digit{3} " "? digit{2} (digit | check) %{c(ptvatid)} |
 		("SE" " "?)? digit{9} (digit | check) digit{2} %{c(sevatid)} |
 		("SI" " "?)? digit{4} " "? digit{3} (digit | check) %{c(sivatid)} |
-		("ES" " "?)? "A" digit{2} " "? digit{3} " "? digit{2} (digit | check) %{c(esvatid)} ;
+		("ES" " "?)? "A" digit{2} " "? digit{3} " "? digit{2} (digit | check) %{c(esvatid)} |
+		("GB" " "?)? digit{3} " "? digit{4} " "? digit{2} (" "? digit{3})? %{c(ukvatid)} ;
 }%%
 #endif	/* RAGEL_BLOCK */
 
@@ -915,6 +916,70 @@ nmpr_esvatid(nmck_t s, const char *str, size_t len)
 		fputs("Spanish VAT-ID, not conformant, should be ", stdout);
 		fwrite(str, sizeof(*str), len - 1U, stdout);
 		fputc(s >> 1U & 0x7fU, stdout);
+	} else {
+		fputs("unknown", stdout);
+	}
+	return;
+}
+
+
+nmck_t
+nmck_ukvatid(const char *str, size_t len)
+{
+	uint_fast32_t sum = 0U;
+	size_t i1, i = 0U;
+
+	if (len < 9U) {
+		return -1;
+	}
+
+	if (str[0U] == 'G' && str[1U] == 'B') {
+		i += 2U;
+	}
+	i1 = i += str[i] == ' ';
+
+	/* we know it's an even number of digits, so start weighing at 2 */
+	for (size_t k = 8U; k >= 2U && i < len; i++) {
+		uint_fast32_t c = str[i] ^ '0';
+
+		if (str[i] == ' ') {
+			continue;
+		} else if (UNLIKELY(c >= 10U)) {
+			return -1;
+		}
+		sum += k-- * c;
+	}
+	/* last two we do manually */
+	i += i < len && str[i] == ' ';
+	if (i < len) {
+		uint_fast32_t c = str[i] ^ '0';
+
+		if (UNLIKELY(c >= 10U)) {
+			return -1;
+		}
+		sum += 10U * c;
+	}
+	i += i < len;
+	if (i < len) {
+		uint_fast32_t c = str[i] ^ '0';
+
+		if (UNLIKELY(c >= 10U)) {
+			return -1;
+		}
+		sum += c;
+	}
+	sum %= 97U;
+
+	return !(sum == 0U || str[i1] != '0' && sum == 42U);
+}
+
+void
+nmpr_ukvatid(nmck_t s, const char *UNUSED(str), size_t UNUSED(len))
+{
+	if (LIKELY(!(s & 0b1U))) {
+		fputs("UK VAT-ID, conformant", stdout);
+	} else if (s > 0) {
+		fputs("UK VAT-ID, not conformant", stdout);
 	} else {
 		fputs("unknown", stdout);
 	}
