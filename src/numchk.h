@@ -135,6 +135,12 @@ extern nmck_t nmck_credcard(const char*, size_t);
 extern void nmpr_credcard(nmck_t, const char*, size_t);
 
 /**
+ * Check for ISO 11649 conformant creditor reference, alphanumeric input.
+ * https://www.iso.org/standard/50649.html */
+extern nmck_t nmck_credref(const char*, size_t);
+extern void nmpr_credref(nmck_t, const char*, size_t);
+
+/**
  * Check for the ATO's tax file number, numeric input.
  * http://en.wikipedia.org/wiki/Tax_file_number */
 extern nmck_t nmck_tfn(const char*, size_t);
