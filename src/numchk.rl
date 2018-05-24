@@ -66,6 +66,7 @@ static nmck_t sureck[NNMCK];
 	include numchk "grid.c";
 	include numchk "gtin.c";
 	include numchk "iban.c";
+	include numchk "credref.c";
 	include numchk "idnr.c";
 	include numchk "imei.c";
 	include numchk "imo.c";
@@ -105,6 +106,7 @@ static nmck_t sureck[NNMCK];
 		issn |
 		ismn |
 		credcard |
+		credref |
 		tfn |
 		cas |
 		isni |

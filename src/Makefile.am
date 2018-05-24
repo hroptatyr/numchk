@@ -39,6 +39,7 @@ libnumchk_a_SOURCES += isbn.c
 libnumchk_a_SOURCES += issn.c
 libnumchk_a_SOURCES += ismn.c
 libnumchk_a_SOURCES += credcard.c
+libnumchk_a_SOURCES += credref.c
 libnumchk_a_SOURCES += tfn.c
 libnumchk_a_SOURCES += cas.c
 libnumchk_a_SOURCES += istc.c
