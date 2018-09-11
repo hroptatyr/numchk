@@ -95,8 +95,8 @@ static nmck_t sureck[NNMCK];
 
 	main :=
 		iban |
-		isin |
 		figi |
+		isin |
 		istc |
 		cusip |
 		sedol |
