@@ -99,7 +99,7 @@ SUFFIXES += .rlc
 
 .rl.rlc:
 	$(AM_V_GEN) PATH=$(top_builddir)/build-aux:"$${PATH}" \
-		ragel -F1 -C -o $@ $<
+		ragel -F1 -o $@ $<
 
 ## Create preprocessor output (debugging purposes only)
 .c.i:
