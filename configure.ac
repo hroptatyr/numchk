@@ -35,6 +35,14 @@ SXE_CHECK_CC([c11 c1x c99 gnu99])
 SXE_CHECK_CFLAGS
 AC_C_BIGENDIAN
 
+case $host_os in
+  darwin*)
+    AM_CONDITIONAL([DARWIN], [true])
+    ;;
+  *)
+    AM_CONDITIONAL([DARWIN], [false])
+esac
+
 ## check if yuck is globally available
 AX_CHECK_YUCK
 AX_CHECK_CLITORIS
